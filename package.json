@@ -7,6 +7,9 @@
     "@testing-library/react": "^13.4.0",
     "@testing-library/user-event": "^13.5.0",
 <<<<<<< HEAD
+    "axios": "^1.7.7",
+=======
+<<<<<<< HEAD
     "assert": "^2.1.0",
     "axios": "^1.7.7",
     "browserify-zlib": "^0.2.0",
@@ -15,6 +18,7 @@
 =======
     "axios": "^1.7.7",
 >>>>>>> 7987ce47622c75bc6fe5bd9eb01bdae421488a7d
+>>>>>>> c1307fc158bfcfa68d2c91ba971f31e5719ff17c
     "install": "^0.13.0",
     "node-polyfill-webpack-plugin": "^4.0.0",
     "process": "^0.11.10",
@@ -22,8 +26,13 @@
     "react-dom": "^18.3.1",
     "react-router-dom": "^6.26.2",
     "react-scripts": "5.0.1",
+<<<<<<< HEAD
+    "react-slick": "^0.30.2",
+    "slick-carousel": "^1.8.1",
+=======
     "stream-browserify": "^3.0.0",
     "stream-http": "^3.2.0",
+>>>>>>> c1307fc158bfcfa68d2c91ba971f31e5719ff17c
     "styled-components": "^6.1.13",
     "url": "^0.11.4",
     "util": "^0.12.5",
