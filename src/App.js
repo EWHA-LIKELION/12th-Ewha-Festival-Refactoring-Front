@@ -8,6 +8,8 @@ import MainPage from "./pages/MainPage";
 import LoginPage from "./pages/LoginPage.jsx";
 import BoothPage from "./pages/BoothPage.jsx";
 import Footer from "./components/Footer";
+import SignupPage from "./pages/SignupPage.jsx";
+import MyPage from "./pages/MyPage.jsx";
 
 function App() {
   // 뷰포트 높이 계산
@@ -24,9 +26,11 @@ function App() {
       <GlobalStyle />
       <Router>
         <Routes>
-          <Route path="/" element={<LoginPage />} />
-          <Route path="/main" element={<MainPage />} />
+          <Route path="/login" element={<LoginPage />} />
+          <Route path="/signup" element={<SignupPage />} />
+          <Route path="/" element={<MainPage />} />
           <Route path="/booth" element={<BoothPage />} />
+          <Route path="/mypage" element={<MyPage />} />
         </Routes>
       </Router>
     </>
