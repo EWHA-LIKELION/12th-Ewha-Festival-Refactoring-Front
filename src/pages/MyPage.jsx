@@ -1,18 +1,15 @@
 import React, { useState, useRef } from "react";
 import styled from "styled-components";
-import ColorHeader from "../components/ColorHeader";
 import { useNavigate } from "react-router-dom";
 import instance from "../api/axios";
 
-import loginImg from "../images/loginImg.svg";
-import PwImg from "../images/PwImg.svg";
-import kakaoLogin from "../images/kakaoLogin.svg";
+
 import bookMark from "../images/bookMark.svg";
 
 const MyPage = () => {
   return (
     <Wrapper>
-      <ColorHeader />
+      
       <Content>
         <Ment>마이페이지</Ment>
         <NameWrapper>
