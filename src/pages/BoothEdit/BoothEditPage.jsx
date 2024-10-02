@@ -191,11 +191,6 @@ const BoothDetailPage = () => {
         <TitleFontSytle>부스 운영시간</TitleFontSytle>
         <BoothTimeSetting />
       </BoothTime>
-
-      <BoothIntroduce>
-        <TitleFontSytle>부스 소개글</TitleFontSytle>
-        <textarea placeholder="부스에 대해 알리는 소개글을 작성해주세요(최대 100자)"></textarea>
-      </BoothIntroduce>
     </Wrapper>
   );
 };
