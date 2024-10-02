@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import styled from "styled-components";
 import BackArrow from "../../images/BoothDetail/arrow-left.svg";
 import EditButton from "../../images/BoothDetail/editbuttom.svg";
@@ -10,13 +10,20 @@ import BoothInfo from "./BoothInfo";
 import MenuImage from "../../components/MenuImage";
 
 const BoothDetailPage = () => {
-  const [showBoothInfo, setShowBoothInfo] = useState(true); // 초기 상태를 true로 설정하여 부스정보를 표시
-
+  const [menuDetails, setMenuDetails] = useState({});
   const [isscraped, setisccraped] = useState(false);
+
+  useEffect(() => {
+    const savedMenuDetails = localStorage.getItem("menuDetails");
+    if (savedMenuDetails) {
+      setMenuDetails(JSON.parse(savedMenuDetails));
+    }
+  }, []);
 
   const clickScrap = () => {
     setisccraped(!isscraped);
   };
+
   return (
     <Wrapper>
       <Header>
@@ -52,24 +59,15 @@ const BoothDetailPage = () => {
       </Notice>
       <MiddleWrapper>
         <div className="top">
-          <div className="boothInfo" onClick={() => setShowBoothInfo(true)}>
-            부스정보
-          </div>
-          <div className="guestBook" onClick={() => setShowBoothInfo(false)}>
-            방명록
-          </div>
+          <div className="boothInfo">부스정보</div>
+          <div className="guestBook">방명록</div>
         </div>
-        {showBoothInfo && ( // showBoothInfo가 true일 때만 Booth 컴포넌트를 렌더링
-          <Booth>
-            <BoothInfo />
-            <MenuWrapper>
-              <MenuImage />
-              <MenuImage />
-              <MenuImage />
-              <MenuImage />
-            </MenuWrapper>
-          </Booth>
-        )}
+        <Booth>
+          <BoothInfo />
+          <MenuWrapper>
+            <MenuImage menu={menuDetails} />
+          </MenuWrapper>
+        </Booth>
       </MiddleWrapper>
     </Wrapper>
   );

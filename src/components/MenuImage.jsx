@@ -4,7 +4,7 @@ import 임시메뉴이미지 from "../images/BoothDetail/임시메뉴이미지.s
 import scrapBefore from "../images/BoothDetail/scrapbefore.svg";
 import scrapAfter from "../images/BoothDetail/scrapafter.svg";
 
-const MenuImage = () => {
+const MenuImage = ({ menu }) => {
   const [isscraped, setisccraped] = useState(false);
 
   const clickScrap = () => {
@@ -12,9 +12,13 @@ const MenuImage = () => {
   };
   return (
     <Wrapper>
-      <img className="menuImage" src={임시메뉴이미지} alt="Menu" />
+      <img
+        className="menuImage"
+        src={menu.menuImage || 임시메뉴이미지}
+        alt="Menu"
+      />
       <Top>
-        <div className="menucatagory"></div>
+        <div className="menubegan">{menu.selectedDiet}</div>
         <img
           className="menuscrap"
           src={isscraped ? scrapAfter : scrapBefore}
@@ -23,8 +27,8 @@ const MenuImage = () => {
         />
       </Top>
       <Bottom>
-        <div className="menuName">메뉴명입니다</div>
-        <div className="price">4000원</div>
+        <div className="menuName">{menu.menuName}</div>
+        <div className="price">{menu.price}원</div>
       </Bottom>
     </Wrapper>
   );
@@ -41,6 +45,14 @@ const Wrapper = styled.div`
   box-shadow: 0px 0px 9px 0px rgba(255, 255, 255, 0.25) inset;
   overflow: hidden; /* 내용이 넘칠 경우 숨김 */
   position: relative; /* 내부 요소의 위치를 조정할 수 있도록 설정 */
+  .menuImage {
+    object-fit: cover;
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+  }
 `;
 
 const Top = styled.div`
@@ -52,14 +64,21 @@ const Top = styled.div`
   left: 0; /* Wrapper 좌측에 위치 */
   right: 0; /* Wrapper 우측에 위치 */
   padding: 8px; /* Padding을 추가하여 여유 공간 확보 */
-  .menucatagory {
+  .menubegan {
     width: 46px;
     height: 20px;
     border-radius: 10px;
     background: rgba(0, 241, 111, 0.4);
+    color: white;
+    font-size: 11px;
+    font-style: normal;
+    font-weight: 600;
+    text-align: center;
+    line-height: 20px;
   }
   .menuscrap {
     cursor: pointer;
+    z-index: 100;
   }
 `;
 
@@ -69,7 +88,15 @@ const Bottom = styled.div`
   left: 0; /* Wrapper 좌측에 위치 */
   right: 0; /* Wrapper 우측에 위치 */
   padding: 8px; /* Padding을 추가하여 여유 공간 확보 */
+  color: white;
   .menuName {
-    font-weight: bold; /* 메뉴명 두껍게 표시 */
+    font-size: 20px;
+    font-style: normal;
+    font-weight: 700;
+  }
+  .price {
+    font-size: 12px;
+    font-style: normal;
+    font-weight: 500;
   }
 `;

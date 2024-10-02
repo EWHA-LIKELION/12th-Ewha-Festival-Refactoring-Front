@@ -1,10 +1,13 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom"; // useNavigate 임포트
 import styled from "styled-components";
 import BackArrow from "../../images/BoothDetail/arrow-left.svg";
 import logo from "../../images/BoothEdit/logo.svg";
 import 임시부스이미지 from "../../images/BoothDetail/임시부스이미지.svg";
 import addnoticebutton from "../../images/BoothEdit/addnoticebutton.svg";
+import addMenu from "../../images/BoothEdit/addMenu.svg";
 import BoothTimeSetting from "./BoothTimeSetting";
+import MenuImage from "../../components/MenuImage";
 
 const BoothDetailPage = () => {
   const [boothImage, setBoothImage] = useState(임시부스이미지);
@@ -13,7 +16,16 @@ const BoothDetailPage = () => {
   const [selectedNotice, setSelectedNotice] = useState(null);
   const [newNoticeContent, setNewNoticeContent] = useState("");
   const [notices, setNotices] = useState([]);
-  const [isNoticeBoxVisible, setIsNoticeBoxVisible] = useState(false); // 상태 추가
+  const [isNoticeBoxVisible, setIsNoticeBoxVisible] = useState(false);
+  const [menuDetails, setMenuDetails] = useState({});
+  const navigate = useNavigate(); // useNavigate 훅 사용
+
+  useEffect(() => {
+    const savedMenuDetails = localStorage.getItem("menuDetails");
+    if (savedMenuDetails) {
+      setMenuDetails(JSON.parse(savedMenuDetails));
+    }
+  }, []);
 
   const clickScrap = () => {
     setisccraped(!isscraped);
@@ -44,7 +56,7 @@ const BoothDetailPage = () => {
 
   const handleNoticeSubmit = (event) => {
     if (event.key === "Enter" && newNoticeContent.trim() !== "") {
-      event.preventDefault(); // 기본 엔터 동작 방지
+      event.preventDefault();
       const timestamp = new Date().toLocaleTimeString([], {
         hour: "2-digit",
         minute: "2-digit",
@@ -56,13 +68,17 @@ const BoothDetailPage = () => {
         borderColor: selectedNotice === "판매" ? "#9747ff" : "#00F16F",
       };
       setNotices([...notices, notice]);
-      setNewNoticeContent(""); // 공지 내용 초기화
-      setIsNoticeBoxVisible(false); // 공지 추가 후 박스 숨기기
+      setNewNoticeContent("");
+      setIsNoticeBoxVisible(false);
     }
   };
 
   const toggleNoticeBox = () => {
-    setIsNoticeBoxVisible(!isNoticeBoxVisible); // 공지 추가 박스 보이기/숨기기
+    setIsNoticeBoxVisible(!isNoticeBoxVisible);
+  };
+
+  const goToAddMenuPage = () => {
+    navigate("/booth-edit-addmenu"); // addMenu 클릭 시 이동할 경로 설정
   };
 
   return (
@@ -105,11 +121,11 @@ const BoothDetailPage = () => {
           <img
             src={addnoticebutton}
             alt="공지사항 추가"
-            onClick={toggleNoticeBox} // 버튼 클릭 시 공지 박스 토글
+            onClick={toggleNoticeBox}
             style={{ cursor: "pointer" }}
           />
         </div>
-        {isNoticeBoxVisible && ( // NewNoticeBox 조건부 렌더링
+        {isNoticeBoxVisible && (
           <NoticeBoxWrapper>
             <NewNoticeBox>
               <div className="noticetop">
@@ -147,8 +163,7 @@ const BoothDetailPage = () => {
                 </div>
                 <div className="delete" onClick={toggleNoticeBox}>
                   취소
-                </div>{" "}
-                {/* 추가된 취소 버튼 */}
+                </div>
               </div>
               <textarea
                 value={newNoticeContent}
@@ -191,6 +206,28 @@ const BoothDetailPage = () => {
         <TitleFontSytle>부스 운영시간</TitleFontSytle>
         <BoothTimeSetting />
       </BoothTime>
+      <BoothIntroduce>
+        <TitleFontSytle>부스 소개글</TitleFontSytle>
+        <textarea placeholder="부스에 대해 알리는 소개글을 작성해주세요(최대 100자)"></textarea>
+      </BoothIntroduce>
+      <MenuWrapper>
+        <TitleFontSytle>메뉴</TitleFontSytle>
+        <MenuBox>
+          <MenuImage menu={menuDetails} />
+          <MenuImage menu={menuDetails} />
+          <MenuImage menu={menuDetails} />
+          <img src={addMenu} alt="부스이미지" onClick={goToAddMenuPage} />{" "}
+          {/* 이미지 클릭 시 페이지 이동 */}
+        </MenuBox>
+      </MenuWrapper>
+      <BoothContact>
+        <TitleFontSytle>부스 운영진 연락처</TitleFontSytle>
+        <textarea
+          placeholder="문의를 위한 부스 운영진 연락처를 남겨주세요
+예) 카카오톡 오픈채팅 링크"
+        ></textarea>
+      </BoothContact>
+      <SubmitButton>작성 완료</SubmitButton>
     </Wrapper>
   );
 };
@@ -204,7 +241,6 @@ const Wrapper = styled.div`
   display: flex;
   flex-direction: column;
   align-items: center;
-  overflow-y: auto;
 `;
 
 const Header = styled.div`
@@ -350,26 +386,80 @@ const Notice = styled.div`
     font-weight: 700;
   }
 `;
+
 const NoticeBoxWrapper = styled.div`
   width: 360px;
   max-height: 230px;
   overflow-y: scroll;
-  /* 스크롤바 스타일 */
   &::-webkit-scrollbar {
-    width: 3px; /* 스크롤바의 너비 */
+    width: 3px;
   }
 
   &::-webkit-scrollbar-thumb {
-    background-color: #bbb; /* 스크롤 핸들의 색상 */
-    border-radius: 10px; /* 스크롤 핸들의 모서리 둥글게 */
+    background-color: #bbb;
+    border-radius: 10px;
   }
 
   &::-webkit-scrollbar-thumb:hover {
-    background-color: #8d8a8a; /* 스크롤 핸들이 호버될 때 색상 */
+    background-color: #8d8a8a;
   }
 `;
+
 const BoothTime = styled.div`
+  width: 350px;
+  height: 200px;
+`;
+
+const BoothIntroduce = styled.div`
+  width: 350px;
+  textarea {
+    width: 327.914px;
+    height: 82.754px;
+    padding: 11.379px 14.482px;
+    border-radius: 15.516px;
+    border: 1.034px solid #e7e7e7;
+    font-size: 12.413px;
+    font-style: normal;
+    font-weight: 500;
+    resize: none;
+  }
+`;
+
+const MenuWrapper = styled.div`
   width: 350px;
 `;
 
-const BoothIntroduce = styled.div``;
+const MenuBox = styled.div`
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  place-items: center;
+  img {
+    cursor: pointer;
+  }
+`;
+const BoothContact = styled.div`
+  width: 350px;
+  textarea {
+    width: 327.914px;
+    height: 82.754px;
+    padding: 11.379px 14.482px;
+    border-radius: 15.516px;
+    border: 1.034px solid #e7e7e7;
+    font-size: 12.413px;
+    font-style: normal;
+    font-weight: 500;
+    resize: none;
+  }
+`;
+const SubmitButton = styled.button`
+  padding: 10px 140px;
+  border-radius: 10px;
+  border: 1px solid #03d664;
+  background: #07fb77;
+  color: var(--wh, #fff);
+  text-align: center;
+  font-family: Pretendard;
+  font-size: 16px;
+  font-weight: 700;
+  cursor: pointer;
+`;
