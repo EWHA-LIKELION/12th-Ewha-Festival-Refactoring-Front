@@ -7,6 +7,8 @@ import "./style/normalize.css";
 import MainPage from "./pages/MainPage";
 import LoginPage from "./pages/LoginPage.jsx";
 import BoothPage from "./pages/BoothPage.jsx";
+import BoothDetailPage from "./pages/BoothDetail/BoothDetailPage.jsx";
+import BoothEditPage from "./pages/BoothEdit/BoothEditPage.jsx";
 import Footer from "./components/Footer";
 
 function App() {
@@ -27,6 +29,8 @@ function App() {
           <Route path="/" element={<LoginPage />} />
           <Route path="/main" element={<MainPage />} />
           <Route path="/booth" element={<BoothPage />} />
+          <Route path="/booth-edit" element={<BoothEditPage />} />
+          <Route path="/booth-detail" element={<BoothDetailPage />} />
         </Routes>
       </Router>
     </>
