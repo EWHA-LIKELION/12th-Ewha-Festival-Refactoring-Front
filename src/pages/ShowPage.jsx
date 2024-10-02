@@ -2,15 +2,15 @@ import React, { useState } from "react";
 import styled from "styled-components";
 import Header from "../components/Header"; // Header 컴포넌트 가져오기
 import BoothItem from "../components/BoothItem"; // 분리된 BoothItem 컴포넌트 가져오기
-import { mockData } from "../components/MockDataBooth"; // mockData 가져오기
+import { mockDataShow } from "../components/MockDataShow.jsx"; // mockData 가져오기
 
-const BoothPage = () => {
+const ShowPage = () => {
   const [selectedDay, setSelectedDay] = useState("수"); // 요일 기본값
-  const [selectedType, setSelectedType] = useState("음식"); // 부스 종류 기본값
+  const [selectedType, setSelectedType] = useState("전체"); // 부스 종류 기본값
   const [isPopupOpen, setIsPopupOpen] = useState(false); // 팝업 상태 관리
   const [currentPage, setCurrentPage] = useState(1); // 현재 페이지
   const [description, setDescription] = useState(
-    "음식 부스에 대해 알 수 있어요 🍀"
+    "전체 공연에 대해 알 수 있어요 🍀"
   ); // 선택된 부스 설명
 
   const boothsPerPage = 10; // 한 페이지당 보여줄 부스 수
@@ -18,9 +18,11 @@ const BoothPage = () => {
   const [pageGroup, setPageGroup] = useState(0); // 페이지 그룹 상태
 
   // 선택한 요일과 카테고리에 맞는 부스를 필터링
-  const filteredBooths = mockData.data.filter(
+  // 선택한 요일과 카테고리에 맞는 부스를 필터링 (전체 카테고리인 경우 '밴드'와 '댄스' 모두 포함)
+  const filteredBooths = mockDataShow.data.filter(
     (booth) =>
-      booth.dayofweek.includes(selectedDay) && booth.category === selectedType
+      booth.dayofweek.includes(selectedDay) &&
+      (selectedType === "전체" || booth.category === selectedType)
   );
 
   // 전체 페이지 수 계산
@@ -41,17 +43,17 @@ const BoothPage = () => {
     setSelectedType(type);
     let descriptionMessage;
     switch (type) {
-      case "음식":
-        descriptionMessage = "음식 부스에 대해 알 수 있어요 🍀";
+      case "전체":
+        descriptionMessage = "전체 공연에 대해 알 수 있어요 🍀";
         break;
-      case "굿즈":
-        descriptionMessage = "굿즈 부스에 대해 알 수 있어요 🍀";
+      case "밴드":
+        descriptionMessage = "밴드 공연에 대해 알 수 있어요 🍀";
         break;
-      case "체험":
-        descriptionMessage = "체험 부스에 대해 알 수 있어요 🍀";
+      case "댄스":
+        descriptionMessage = "댄스 공연에 대해 알 수 있어요 🍀";
         break;
       default:
-        descriptionMessage = "부스를 선택해 주세요";
+        descriptionMessage = "공연을 선택해 주세요";
     }
     setDescription(descriptionMessage);
   };
@@ -129,7 +131,7 @@ const BoothPage = () => {
           </TypeSelection>
         </SelectionWrapper>
         {/* 검색 결과 표시 */}
-        <SearchResult>총 {filteredBooths.length}개의 부스</SearchResult>
+        <SearchResult>총 {filteredBooths.length}개의 공연</SearchResult>
         {/* 부스 목록 */}
         <BoothList>
           {currentBooths.map((booth) => (
@@ -185,25 +187,25 @@ const BoothPage = () => {
           <Popup onClick={handleClosePopup}>
             <PopupContent onClick={(e) => e.stopPropagation()}>
               {/* 내부 클릭 이벤트가 전파되지 않도록 설정 */}
-              <PopupTitle>어떤 부스로 갈까요?</PopupTitle>
+              <PopupTitle>어떤 공연을 볼까요?</PopupTitle>
               <ButtonWrapper>
                 <TypeButton
-                  onClick={() => handleTypeSelection("음식")}
-                  selected={selectedType === "음식"}
+                  onClick={() => handleTypeSelection("전체")}
+                  selected={selectedType === "전체"}
                 >
-                  음식
+                  전체
                 </TypeButton>
                 <TypeButton
-                  onClick={() => handleTypeSelection("굿즈")}
-                  selected={selectedType === "굿즈"}
+                  onClick={() => handleTypeSelection("밴드")}
+                  selected={selectedType === "밴드"}
                 >
-                  굿즈
+                  밴드
                 </TypeButton>
                 <TypeButton
-                  onClick={() => handleTypeSelection("체험")}
-                  selected={selectedType === "체험"}
+                  onClick={() => handleTypeSelection("댄스")}
+                  selected={selectedType === "댄스"}
                 >
-                  체험
+                  댄스
                 </TypeButton>
               </ButtonWrapper>
               {/* 부스 설명 */}
@@ -216,7 +218,7 @@ const BoothPage = () => {
   );
 };
 
-export default BoothPage;
+export default ShowPage;
 
 const Wrapper = styled.div`
   height: calc(var(--vh, 1vh) * 100);
