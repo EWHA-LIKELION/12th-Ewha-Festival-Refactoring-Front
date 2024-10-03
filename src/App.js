@@ -1,18 +1,17 @@
 import React, { useEffect } from "react";
-import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
+import { Route, BrowserRouter as Router, Routes } from "react-router-dom";
 
 import GlobalStyle from "./style/GlobalStyle";
 import "./style/normalize.css";
 
-import MainPage from "./pages/MainPage";
-import LoginPage from "./pages/LoginPage.jsx";
+import AdminDetailPage from "./pages/performPages/AdminViewPage.jsx";
 import BoothPage from "./pages/BoothPage.jsx";
-<<<<<<< HEAD
+import DetailPage from "./pages/performPages/DetailViewPage.jsx";
+import EditViewPage from "./pages/performPages/EditViewPage.jsx";
+import LoginPage from "./pages/LoginPage.jsx";
+import MainPage from "./pages/MainPage";
 import BoothDetailPage from "./pages/BoothDetail/BoothDetailPage.jsx";
 import BoothEditPage from "./pages/BoothEdit/BoothEditPage.jsx";
-=======
-
->>>>>>> c1307fc158bfcfa68d2c91ba971f31e5719ff17c
 import Footer from "./components/Footer";
 import SignupPage from "./pages/SignupPage.jsx";
 import MyPage from "./pages/MyPage.jsx";
@@ -43,10 +42,11 @@ function App() {
           <Route path="/signup" element={<SignupPage />} />
           <Route path="/" element={<MainPage />} />
           <Route path="/booth" element={<BoothPage />} />
-<<<<<<< HEAD
+          <Route path="/detail" element={<DetailPage />} />
+          <Route path="/detail/admin" element={<AdminDetailPage />} />
+          <Route path="/detail/admin/edit" element={<EditViewPage />} />
           <Route path="/booth-edit" element={<BoothEditPage />} />
           <Route path="/booth-detail" element={<BoothDetailPage />} />
-=======
           <Route path="/mypage" element={<MyPage />} />
           <Route path="/NoticeList" element={<NoticeListPage />} />
           <Route path="/NoticeCreate" element={<NoticeCreatePage />} />
@@ -54,7 +54,6 @@ function App() {
           <Route path="/FestivalIntro" element={<FestivalIntro />} />
           <Route path="/BarrierFree" element={<BarrierFreeInfo />} />
           <Route path="/show" element={<ShowPage />} />
->>>>>>> c1307fc158bfcfa68d2c91ba971f31e5719ff17c
         </Routes>
       </Router>
     </>
