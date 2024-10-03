@@ -21,7 +21,7 @@ import NoticeDetailPage from "./pages/TF/NoticeDetailPage.jsx";
 import FestivalIntro from "./pages/FestivalIntro.jsx";
 import BarrierFreeInfo from "./pages/BarrierFreeInfo.jsx";
 import ShowPage from "./pages/ShowPage.jsx";
-
+import FestivalSchedule from "./pages/FestivalSchedule.jsx";
 
 function App() {
   // 뷰포트 높이 계산
@@ -53,6 +53,7 @@ function App() {
           <Route path="/NoticeDetail" element={<NoticeDetailPage />} />
           <Route path="/FestivalIntro" element={<FestivalIntro />} />
           <Route path="/BarrierFree" element={<BarrierFreeInfo />} />
+          <Route path="/FestivalSchedule" element={<FestivalSchedule />} />
           <Route path="/show" element={<ShowPage />} />
         </Routes>
       </Router>
