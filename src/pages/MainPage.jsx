@@ -11,6 +11,8 @@ const MainPage = () => {
   );
 };
 
+console.log("Base URL:", process.env.REACT_APP_SERVER_PORT);
+
 export default MainPage;
 
 const Wrapper = styled.div`
