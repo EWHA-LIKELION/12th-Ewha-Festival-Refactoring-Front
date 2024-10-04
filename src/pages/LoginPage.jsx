@@ -42,8 +42,9 @@ const LoginPage = () => {
       );
       console.log(response.data);
 
-      const { username, access_token, id } = response.data.data;
+      const { username, access_token, id, refresh_token } = response.data.data;
       localStorage.setItem("accessToken", access_token);
+      localStorage.setItem("refreshToken", refresh_token);
       localStorage.setItem("username", username);
       localStorage.setItem("user_id", id);
 
@@ -52,6 +53,18 @@ const LoginPage = () => {
     } catch (error) {
       console.error(error);
       alert("로그인에 실패했습니다.");
+    }
+  };
+
+  const kakao = async () => {
+    try {
+      const response = await instance.get(
+        `${process.env.REACT_APP_SERVER_PORT}/login/kakao/`
+      );
+      console.log(response.data);
+    } catch (error) {
+      console.error(error);
+      alert("카카오 연결에 실패했습니다.");
     }
   };
 
@@ -79,7 +92,7 @@ const LoginPage = () => {
         </InputWrapper>
 
         <LoginBtn onClick={goLogin}>로그인</LoginBtn>
-        <KakaoBtn>
+        <KakaoBtn onClick={kakao}>
           <img src={kakaoLogin} alt="카카오 이미지" />
           카카오 로그인
         </KakaoBtn>
