@@ -4,7 +4,8 @@ import greenlogo from "../images/greenlogo.svg";
 import grayhamburger from "../images/grayhamburger.svg";
 import closeIcon from "../images/closeIcon.svg"; // X 버튼 이미지 추가
 import searchIcon from "../images/search.svg";
-const Header = () => {
+
+const MainHeader = () => {
   const [isModalOpen, setModalOpen] = useState(false);
   const [isClosing, setIsClosing] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
@@ -72,7 +73,7 @@ const Header = () => {
   );
 };
 
-export default Header;
+export default MainHeader;
 
 const GlobalStyle = createGlobalStyle`
   :root{
@@ -85,6 +86,7 @@ const GlobalStyle = createGlobalStyle`
 `;
 
 const Container = styled.div`
+  position: relative;
   display: flex;
   justify-content: space-between;
   padding: 40px 20px 26px;
@@ -97,7 +99,7 @@ const Hamburger = styled.img`
 `;
 
 const Modal = styled.div`
-  position: fixed;
+  position: absolute;
   top: 0;
   left: 0;
   max-width: 390px;
@@ -106,22 +108,24 @@ const Modal = styled.div`
   background-color: white;
   animation: ${({ isClosing }) => (isClosing ? "slideOut" : "slideIn")} 0.3s
     ease-in-out forwards;
+  clip-path: ${({ isClosing }) =>
+    isClosing ? "inset(0% 100% 0% 0%)" : "inset(0% 0% 0% 0%)"};
 
   @keyframes slideIn {
     from {
-      transform: translateX(-100%);
+      clip-path: inset(0% 100% 0% 0%);
     }
     to {
-      transform: translateX(0);
+      clip-path: inset(0% 0% 0% 0%);
     }
   }
 
   @keyframes slideOut {
     from {
-      transform: translateX(0);
+      clip-path: inset(0% 0% 0% 0%);
     }
     to {
-      transform: translateX(-100%);
+      clip-path: inset(0% 100% 0% 0%);
     }
   }
 `;
