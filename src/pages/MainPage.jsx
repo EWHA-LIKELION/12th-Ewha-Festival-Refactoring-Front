@@ -1,15 +1,17 @@
 import React from "react";
 import styled from "styled-components";
 import background from "../images/background.png";
-import Header from "../components/Header";
+import MainHeader from "../components/MainHeader";
 
 const MainPage = () => {
   return (
     <Wrapper>
-      <Header />
+      <MainHeader />
     </Wrapper>
   );
 };
+
+console.log("Base URL:", process.env.REACT_APP_SERVER_PORT);
 
 export default MainPage;
 
