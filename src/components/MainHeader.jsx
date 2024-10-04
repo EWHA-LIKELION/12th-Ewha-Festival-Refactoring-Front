@@ -36,39 +36,39 @@ const MainHeader = () => {
           alt="hamburger menu"
           onClick={openModal}
         />
+        {isModalOpen && (
+          <Modal isClosing={isClosing}>
+            <ModalHeader>
+              <CloseButton
+                src={closeIcon}
+                alt="close button"
+                onClick={closeModal}
+              />
+              <SearchBar>
+                <SearchInput
+                  type="text"
+                  placeholder="검색어를 입력해 주세요"
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                />
+                <SearchButton onClick={handleSearch}>
+                  <img src={searchIcon} alt="search" />
+                </SearchButton>
+              </SearchBar>
+            </ModalHeader>
+            <MenuList>
+              <li>부스 목록</li>
+              <li>공연 목록</li>
+              <li>축준위 공지</li>
+              <li>축제 일정 및 상설 부스</li>
+              <li>쓰레기통 및 그릇 반납</li>
+              <li>배리어프리</li>
+              <li>마이페이지</li>
+            </MenuList>
+          </Modal>
+        )}
         <img src={whitelogo} alt="logo" width="80px" height="20px" />
       </Container>
-      {isModalOpen && (
-        <Modal isClosing={isClosing}>
-          <ModalHeader>
-            <CloseButton
-              src={closeIcon}
-              alt="close button"
-              onClick={closeModal}
-            />
-            <SearchBar>
-              <SearchInput
-                type="text"
-                placeholder="검색어를 입력해 주세요"
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-              />
-              <SearchButton onClick={handleSearch}>
-                <img src={searchIcon} alt="search" />
-              </SearchButton>
-            </SearchBar>
-          </ModalHeader>
-          <MenuList>
-            <li>부스 목록</li>
-            <li>공연 목록</li>
-            <li>축준위 공지</li>
-            <li>축제 일정 및 상설 부스</li>
-            <li>쓰레기통 및 그릇 반납</li>
-            <li>배리어프리</li>
-            <li>마이페이지</li>
-          </MenuList>
-        </Modal>
-      )}
     </>
   );
 };
@@ -86,6 +86,7 @@ const GlobalStyle = createGlobalStyle`
 `;
 
 const Container = styled.div`
+  position: relative;
   display: flex;
   justify-content: space-between;
   padding: 40px 20px 26px;
@@ -98,7 +99,7 @@ const Hamburger = styled.img`
 `;
 
 const Modal = styled.div`
-  position: fixed;
+  position: absolute;
   top: 0;
   left: 0;
   max-width: 390px;
@@ -107,22 +108,24 @@ const Modal = styled.div`
   background-color: white;
   animation: ${({ isClosing }) => (isClosing ? "slideOut" : "slideIn")} 0.3s
     ease-in-out forwards;
+  clip-path: ${({ isClosing }) =>
+    isClosing ? "inset(0% 100% 0% 0%)" : "inset(0% 0% 0% 0%)"};
 
   @keyframes slideIn {
     from {
-      transform: translateX(-100%);
+      clip-path: inset(0% 100% 0% 0%);
     }
     to {
-      transform: translateX(0);
+      clip-path: inset(0% 0% 0% 0%);
     }
   }
 
   @keyframes slideOut {
     from {
-      transform: translateX(0);
+      clip-path: inset(0% 0% 0% 0%);
     }
     to {
-      transform: translateX(-100%);
+      clip-path: inset(0% 100% 0% 0%);
     }
   }
 `;
