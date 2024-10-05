@@ -1,9 +1,9 @@
 import React from "react";
 import styled from "styled-components";
-import background from "../images/background.png";
-import hashTag from "../images/hashTag.svg";
-import MainHeader from "../components/MainHeader";
-import MainModal from "../components/MainModal";
+import background from "../../images/background.png";
+import hashTag from "../../images/hashTag.svg";
+import MainHeader from "../../components/MainHeader";
+import MainModal from "../../components/MainModal";
 
 const MainPage = () => {
   return (
