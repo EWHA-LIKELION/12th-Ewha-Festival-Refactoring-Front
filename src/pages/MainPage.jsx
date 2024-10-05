@@ -3,6 +3,7 @@ import styled from "styled-components";
 import background from "../images/background.png";
 import hashTag from "../images/hashTag.svg";
 import MainHeader from "../components/MainHeader";
+import MainModal from "../components/MainModal";
 
 const MainPage = () => {
   return (
@@ -25,6 +26,7 @@ const MainPage = () => {
         <img src={hashTag} alt="hashTag" width={148} />
       </BeforeLoginBox>
       <NoticeBox>📣 ‘초록의 밤' 입장 공지</NoticeBox>
+      <MainModal />
     </Wrapper>
   );
 };
@@ -34,7 +36,15 @@ export default MainPage;
 const Wrapper = styled.div`
   height: calc(var(--vh, 1vh) * 100);
   background-image: url(${background});
+  overflow: scroll;
+  background-repeat: repeat-y;
   margin: 0;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+  ::-webkit-scrollbar {
+    width: 0;
+    height: 0;
+  }
 `;
 
 const Title = styled.div`
@@ -46,7 +56,7 @@ const Title = styled.div`
   font-weight: 700;
   line-height: 1.625rem;
   letter-spacing: -0.03125rem;
-  margin-top: 3rem;
+  margin-top: 2rem;
 `;
 
 const BeforeLoginBox = styled.div`
