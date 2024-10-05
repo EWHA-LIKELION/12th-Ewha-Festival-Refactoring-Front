@@ -29,7 +29,6 @@ const MainHeader = () => {
 
   return (
     <>
-      <GlobalStyle /> {/* GlobalStyle 적용 */}
       <Container>
         <Hamburger
           src={whitehamburger}
@@ -75,21 +74,12 @@ const MainHeader = () => {
 
 export default MainHeader;
 
-const GlobalStyle = createGlobalStyle`
-  :root{
-    --vh: 100%;
-    margin: 0 auto;
-    max-width: 390px;
-    box-sizing: border-box;
-    font-family: 'Pretendard';
-  }
-`;
-
 const Container = styled.div`
   position: relative;
   display: flex;
   justify-content: space-between;
   padding: 40px 20px 26px;
+  z-index: 10;
 `;
 
 const Hamburger = styled.img`
