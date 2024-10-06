@@ -24,8 +24,8 @@ const BoothItem = ({ booth }) => {
 export default BoothItem;
 
 const Booth = styled.div`
-  width: 170px;
-  height: 197px;
+  max-width: 170px;
+  max-height: 197px;
   background: linear-gradient(
       180deg,
       rgba(0, 0, 0, 0.4) 0%,

@@ -42,13 +42,22 @@ const LoginPage = () => {
       );
       console.log(response.data);
 
-      const { username, access_token, id, nickname, refresh_token } =
+      const { access_token, id, nickname, is_tf, is_admin, is_show } =
         response.data.data;
-      localStorage.setItem("accessToken", access_token);
-      localStorage.setItem("refreshToken", refresh_token);
 
+      let userType = "general";
+      if (is_tf && !is_admin && !is_show) {
+        userType = "tf";
+      } else if (is_admin && !is_tf && !is_show) {
+        userType = "admin";
+      } else if (is_show && !is_tf && !is_admin) {
+        userType = "show";
+      }
+
+      localStorage.setItem("accessToken", access_token);
       localStorage.setItem("nickname", nickname);
       localStorage.setItem("user_id", id);
+      localStorage.setItem("type", userType);
 
       navigate("/");
       console.log(response.data);
