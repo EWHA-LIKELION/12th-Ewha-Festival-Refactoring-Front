@@ -24,9 +24,9 @@ const BoothMainPage = () => {
         <img src={whitelogo} alt="logo" />
       </LogoContainer>
       <Title>
-        2024
+        "2024
         <br />
-        이화여대 대동제
+        이화여대 대동제"
       </Title>
       <MainBox>
         <P>

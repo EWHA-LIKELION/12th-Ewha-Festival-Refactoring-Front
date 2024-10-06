@@ -20,15 +20,11 @@ const Modal = () => {
     setIsOpen(!isOpen);
   };
 
-  const handleNavigate = (path) => {
-    navigate(path);
-  };
-
   return (
     <>
       {isOpen && (
         <Backdrop>
-          <ScrapbookButton onClick={() => handleNavigate("/scrap")}>
+          <ScrapbookButton onClick={() => navigate("/mypage")}>
             나의 스크랩북 열기
           </ScrapbookButton>
         </Backdrop>
@@ -47,42 +43,42 @@ const Modal = () => {
             <Item
               src={modal1}
               alt="부스 목록"
-              onClick={() => handleNavigate("/booth")}
+              onClick={() => navigate("/booth")}
             />
             <Item
               src={modal2}
               alt="공연 목록"
-              onClick={() => handleNavigate("/show")}
+              onClick={() => navigate("/show")}
             />
             <Item
               src={modal3}
               alt="축준위 공지"
-              onClick={() => handleNavigate("NoticeList")}
+              onClick={() => navigate("NoticeList")}
             />
             <Item
               src={modal4}
               alt="축제 일정 및 상세 부스"
-              onClick={() => handleNavigate("/calendar")}
+              onClick={() => navigate("/calendar")}
             />
             <Item
               src={modal5}
               alt="쓰레기통 및 그릇 반납"
-              onClick={() => handleNavigate("/trash")}
+              onClick={() => navigate("/trash")}
             />
             <Item
               src={modal6}
               alt="배리어 프리"
-              onClick={() => handleNavigate("/BarrierFree")}
+              onClick={() => navigate("/BarrierFree")}
             />
             <Item
               src={modal7}
               alt="대동제 소개"
-              onClick={() => handleNavigate("/about")}
+              onClick={() => navigate("/about")}
             />
             <Item
               src={modal8}
               alt="만든 이들"
-              onClick={() => handleNavigate("/madeby")}
+              onClick={() => navigate("/madeby")}
             />
           </Grid>
         </Content>
