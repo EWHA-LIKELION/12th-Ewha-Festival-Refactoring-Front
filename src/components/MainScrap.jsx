@@ -25,12 +25,13 @@ const MainScrap = () => {
         });
         const data = response.data.booths;
         setScrapData(data);
+        console.log(data);
       } catch (error) {
         console.error("데이터 가져오기 실패:", error);
       }
     };
     fetchData();
-  }, [selectedCategory]);
+  }, []);
 
   useEffect(() => {
     const currentIndex = categories.indexOf(selectedCategory);
@@ -39,7 +40,7 @@ const MainScrap = () => {
       const { offsetLeft: left, clientWidth: width } = currentRef;
       setHighlightStyle({ left, width });
     }
-  }, [selectedCategory, categories]);
+  }, [selectedCategory]);
 
   const handleOption = (option) => {
     setSelectedCategory(option);

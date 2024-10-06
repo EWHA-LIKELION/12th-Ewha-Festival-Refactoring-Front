@@ -53,12 +53,12 @@ const Modal = () => {
             <Item
               src={modal3}
               alt="축준위 공지"
-              onClick={() => navigate("NoticeList")}
+              onClick={() => navigate("notice-list")}
             />
             <Item
               src={modal4}
               alt="축제 일정 및 상세 부스"
-              onClick={() => navigate("/FestivalIntro")}
+              onClick={() => navigate("/schedule")}
             />
             <Item
               src={modal5}
@@ -68,7 +68,7 @@ const Modal = () => {
             <Item
               src={modal6}
               alt="배리어 프리"
-              onClick={() => navigate("/BarrierFree")}
+              onClick={() => navigate("/barrier-free")}
             />
             <Item
               src={modal7}
