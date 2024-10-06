@@ -42,11 +42,24 @@ const LoginPage = () => {
       );
       console.log(response.data);
 
-      const { username, access_token, id, refresh_token } = response.data.data;
+      const {
+        username,
+        access_token,
+        id,
+        nickname,
+        refresh_token,
+        is_tf,
+        is_admin,
+        is_show,
+      } = response.data.data;
       localStorage.setItem("accessToken", access_token);
       localStorage.setItem("refreshToken", refresh_token);
       localStorage.setItem("username", username);
+      localStorage.setItem("nickname", nickname);
       localStorage.setItem("user_id", id);
+      localStorage.setItem("is_tf", is_tf);
+      localStorage.setItem("is_admin", is_admin);
+      localStorage.setItem("is_show", is_show);
 
       navigate("/");
       console.log(response.data);

@@ -12,21 +12,7 @@ import checkGreen from "../images/checkGreen.svg";
 
 const SignupPage = () => {
   const navigate = useNavigate();
-  // const [userData, setUserData] = useState({
-  //   ID: "",
-  //   PW: "",
-  //   PWconfirm: "",
-  //   name: "",
-  // });
 
-  // const handleInput = (e) => {
-  //   setUserData({
-  //     ...userData,
-  //     [e.target.name]: e.target.value,
-  //   });
-  // };
-
-  // const { ID, PW, PWconfirm, name } = userData;
   const [ID, setID] = useState();
   const [PW, setPW] = useState();
   const [PWconfirm, setPWConfirm] = useState();
@@ -63,7 +49,7 @@ const SignupPage = () => {
 
     try {
       const response = await instance.post(
-        `${process.env.REACT_APP_SERVER_PORT}/accounts/signup`,
+        `${process.env.REACT_APP_SERVER_PORT}/accounts/signup/`,
         {
           username: ID,
           password: PW,
@@ -151,7 +137,7 @@ const SignupPage = () => {
               onChange={(e) => setPWConfirm(e.target.value)}
             />
           </InputWrapper>
-          {PWconfirm !== "" && !isSame ? (
+          {PW && PWconfirm !== "" && isSame ? (
             <img
               style={{
                 marginRight: "6px",
