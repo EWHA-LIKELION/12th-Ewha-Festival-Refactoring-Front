@@ -268,11 +268,8 @@ const Idcheck = styled.div`
   font-size: 8px;
   font-style: normal;
   font-weight: 400;
-  line-height: 100%;
-  letter-spacing: -0.5px;
-  margin: 0px;
   margin-left: 6px;
-  margin-top: 7px;
+  padding-top: 7px;
 `;
 
 const Ment = styled.div`
