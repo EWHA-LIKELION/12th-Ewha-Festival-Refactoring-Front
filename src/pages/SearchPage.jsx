@@ -1,10 +1,10 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import styled from "styled-components";
 import Header from "../components/Header"; // Header 컴포넌트 가져오기
 import BoothItem from "../components/BoothItem"; // 분리된 BoothItem 컴포넌트 가져오기
-import instance from "../api/axios";
+import { mockData } from "../components/MockDataBooth"; // mockData 가져오기
 
-const BoothPage = () => {
+const SearchPage = () => {
   const [selectedDay, setSelectedDay] = useState("수"); // 요일 기본값
   const [selectedType, setSelectedType] = useState("음식"); // 부스 종류 기본값
   const [isPopupOpen, setIsPopupOpen] = useState(false); // 팝업 상태 관리
@@ -12,33 +12,13 @@ const BoothPage = () => {
   const [description, setDescription] = useState(
     "음식 부스에 대해 알 수 있어요 🍀"
   ); // 선택된 부스 설명
-  const [boothData, setBoothData] = useState([]); // 부스 데이터를 상태로 저장
-  const [loading, setLoading] = useState(true); // 데이터 로딩 상태 관리
 
   const boothsPerPage = 10; // 한 페이지당 보여줄 부스 수
   const maxPageButtons = 5; // 한번에 보여줄 페이지 버튼의 최대 개수
   const [pageGroup, setPageGroup] = useState(0); // 페이지 그룹 상태
 
-  useEffect(() => {
-    // 백엔드에서 데이터를 받아오는 함수
-    const fetchBoothData = async () => {
-      try {
-        const response = await instance.get(
-          `/booths/main/?dayofweek=${selectedDay}&category=${selectedType}`
-        );
-        setBoothData(response.data.data); // 백엔드 데이터 설정
-        setLoading(false); // 로딩 완료
-      } catch (error) {
-        console.error("Error fetching booth data:", error);
-        setLoading(false); // 로딩 오류 시에도 완료로 설정
-      }
-    };
-
-    fetchBoothData(); // useEffect 실행 시 데이터 받아오기
-  }, [selectedDay, selectedType]); // 선택된 요일과 종류가 변경될 때마다 데이터 갱신
-
   // 선택한 요일과 카테고리에 맞는 부스를 필터링
-  const filteredBooths = boothData.filter(
+  const filteredBooths = mockData.data.filter(
     (booth) =>
       booth.dayofweek.includes(selectedDay) && booth.category === selectedType
   );
@@ -53,7 +33,6 @@ const BoothPage = () => {
     indexOfFirstBooth,
     indexOfLastBooth
   );
-
   // 페이지네이션에서 표시할 페이지 번호 그룹 계산
   const startPage = pageGroup * maxPageButtons + 1;
   const endPage = Math.min((pageGroup + 1) * maxPageButtons, totalPages);
@@ -101,10 +80,6 @@ const BoothPage = () => {
       setPageGroup(pageGroup - 1);
     }
   };
-
-  if (loading) {
-    return <div>Loading...</div>; // 데이터 로딩 중일 때 표시
-  }
 
   return (
     <>
@@ -241,7 +216,7 @@ const BoothPage = () => {
   );
 };
 
-export default BoothPage;
+export default SearchPage;
 
 const Wrapper = styled.div`
   height: calc(var(--vh, 1vh) * 100);
