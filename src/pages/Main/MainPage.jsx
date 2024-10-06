@@ -1,31 +1,60 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import styled from "styled-components";
 import background from "../../images/background.png";
 import hashTag from "../../images/hashTag.svg";
 import MainHeader from "../../components/MainHeader";
 import MainModal from "../../components/MainModal";
+import MainScrap from "../../components/MainScrap";
 
 const MainPage = () => {
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [openScrap, setOpenScrap] = useState(false);
+  const username = localStorage.getItem("username");
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+    if (token) {
+      setIsLoggedIn(true);
+    } else {
+      setIsLoggedIn(true);
+    }
+  }, []);
+
+  const handleSubTitleClick = () => {
+    if (isLoggedIn) {
+      setOpenScrap(true);
+    } else {
+      navigate("/login");
+    }
+  };
+
   return (
     <Wrapper>
       <MainHeader />
+      {openScrap && (
+        <ScrapP onClick={() => navigate("/mypage")}>스크랩북 전체보기</ScrapP>
+      )}
       <Title>
-        2024
-        <br />
-        이화여대 대동제
+        {openScrap ? `${username}님의\n스크랩북` : `2024\n이화여대 대동제`}
       </Title>
-      <BeforeLoginBox>
-        <SubTitle>로그인 하러가기</SubTitle>
-        <P>
-          로그인하면
-          <br />
-          사이트를 더 편하게
-          <br />
-          즐길 수 있어요🍀
-        </P>
-        <img src={hashTag} alt="hashTag" width={148} />
-      </BeforeLoginBox>
-      <NoticeBox>📣 ‘초록의 밤' 입장 공지</NoticeBox>
+      {openScrap ? (
+        <MainScrap />
+      ) : (
+        <MainBox>
+          <SubTitle isLoggedIn={isLoggedIn} onClick={handleSubTitleClick}>
+            {isLoggedIn ? "나의 스크랩북 열기" : "로그인 하러가기"}
+          </SubTitle>
+          <P>
+            {isLoggedIn
+              ? `${username}님\n대동제에서 잊지 못할\n추억을 만들어봐요🍀`
+              : `로그인하면\n사이트를 더 편하게\n즐길 수 있어요🍀`}
+          </P>
+          <img src={hashTag} alt="hashTag" width={148} />
+        </MainBox>
+      )}
+      {!openScrap && <NoticeBox>📣 ‘초록의 밤' 입장 공지</NoticeBox>}
       <MainModal />
     </Wrapper>
   );
@@ -56,10 +85,26 @@ const Title = styled.div`
   font-weight: 700;
   line-height: 1.625rem;
   letter-spacing: -0.03125rem;
-  margin-top: 2rem;
+  margin-top: 0.3rem;
+  white-space: pre-line;
 `;
 
-const BeforeLoginBox = styled.div`
+const ScrapP = styled.p`
+  margin: 1.3rem auto 0;
+  width: fit-content;
+  color: var(--gray02, #f2f2f2);
+  text-align: center;
+  font-family: Pretendard;
+  font-size: 0.65rem;
+  font-style: normal;
+  font-weight: 500;
+  line-height: 1.25rem;
+  letter-spacing: -0.03125rem;
+  text-decoration-line: underline;
+  cursor: pointer;
+`;
+
+const MainBox = styled.div`
   margin: 2.19rem auto 0;
   background: linear-gradient(
     158deg,
@@ -86,6 +131,7 @@ const P = styled.p`
   font-weight: 600;
   line-height: 2.0625rem;
   letter-spacing: -0.03125rem;
+  white-space: pre-line;
 `;
 
 const SubTitle = styled.div`
@@ -95,7 +141,8 @@ const SubTitle = styled.div`
   transform: translate(-50%, -50%);
   padding: 0.5rem 2rem;
   border-radius: 1.875rem;
-  background: var(--purple, #9747ff);
+  background: ${(props) =>
+    props.isLoggedIn ? "var(--green, #00F16F)" : "var(--purple, #9747ff)"};
   box-shadow: 0px 0px 4px 0px rgba(0, 0, 0, 0.1);
   justify-content: center;
   align-items: center;
