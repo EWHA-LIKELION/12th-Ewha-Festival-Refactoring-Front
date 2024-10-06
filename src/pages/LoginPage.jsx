@@ -34,7 +34,7 @@ const LoginPage = () => {
 
     try {
       const response = await instance.post(
-        `${process.env.REACT_APP_SERVER_PORT}/accounts/login`,
+        `${process.env.REACT_APP_SERVER_PORT}/accounts/login/`,
         {
           username: ID,
           password: PW,
