@@ -67,12 +67,13 @@ const LoginPage = () => {
     }
   };
 
-  const kakao = async () => {
+  const handleKakaoLogin = async () => {
     try {
       const response = await instance.get(
-        `${process.env.REACT_APP_SERVER_PORT}/login/kakao/`
+        `${process.env.REACT_APP_SERVER_PORT}/accounts/login/kakao/`
       );
       console.log(response.data);
+      window.location.href = `${process.env.REACT_APP_SERVER_PORT}/login/kakao/`;
     } catch (error) {
       console.error(error);
       alert("카카오 연결에 실패했습니다.");
@@ -105,7 +106,7 @@ const LoginPage = () => {
         </InputWrapper>
 
         <LoginBtn onClick={goLogin}>로그인</LoginBtn>
-        <KakaoBtn onClick={kakao}>
+        <KakaoBtn onClick={handleKakaoLogin}>
           <img src={kakaoLogin} alt="카카오 이미지" />
           카카오 로그인
         </KakaoBtn>

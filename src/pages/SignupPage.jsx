@@ -17,6 +17,8 @@ const SignupPage = () => {
   const [PW, setPW] = useState();
   const [PWconfirm, setPWConfirm] = useState();
   const [name, setName] = useState("");
+  const [error, setError] = useState(null);
+  const [idsame, setIdsame] = useState(false);
 
   const pwInputRef = useRef(null);
   const idInputRef = useRef(null);
@@ -47,6 +49,12 @@ const SignupPage = () => {
       return;
     }
 
+    if (idsame === false) {
+      alert("다른 아이디를 사용해주세요.");
+      idInputRef.current.focus();
+      return;
+    }
+
     try {
       const response = await instance.post(
         `${process.env.REACT_APP_SERVER_PORT}/accounts/signup/`,
@@ -60,32 +68,31 @@ const SignupPage = () => {
       navigate("/login");
     } catch (error) {
       console.error(error);
-      alert("회원가입에 실패했습니다.");
+      alert("다른 사람이 사용 중인 이름입니다.");
     }
   };
 
-  // const checkIDDuplicate = async () => {
-  //   if (!ID) {
-  //     alert("아이디를 입력해주세요.");
-  //     idInputRef.current.focus();
-  //     return;
-  //   }
+  const checkIDDuplicate = async () => {
+    if (!ID) {
+      alert("아이디를 입력해주세요.");
+      idInputRef.current.focus();
+      return;
+    }
 
-  //   try {
-  //     const response = await instance.post(
-  //       `${process.env.REACT_APP_SERVER_PORT}/accounts/check-id`,
-  //       { username: ID }
-  //     );
-  //     if (response.data.isDuplicate) {
-  //       alert("이미 사용 중인 아이디입니다.");
-  //     } else {
-  //       alert("사용 가능한 아이디입니다.");
-  //     }
-  //   } catch (error) {
-  //     console.error(error);
-  //     alert("아이디 중복 확인에 실패했습니다.");
-  //   }
-  // };
+    try {
+      const response = await instance.post(
+        `${process.env.REACT_APP_SERVER_PORT}/accounts/check-username/`,
+        { username: ID }
+      );
+      console.log(response);
+      setError("*사용 가능한 아이디입니다.");
+      setIdsame(true);
+    } catch (error) {
+      console.error(error);
+      setError("*다른 사람이 사용 중인 아이디입니다.");
+      setIdsame(false);
+    }
+  };
 
   return (
     <Wrapper>
@@ -95,22 +102,24 @@ const SignupPage = () => {
       <Content>
         <Ment>회원가입</Ment>
         <IdWrapper>
-          <InputWrapper
-            style={{
-              width: "177px",
-            }}
-          >
-            <img src={loginImg} alt="로그인 이미지" />
-            <input
-              ref={idInputRef}
-              placeholder="아이디"
-              type="text"
-              value={ID}
-              onChange={(e) => setID(e.target.value)}
-            />
-          </InputWrapper>
-          {/* <button onClick={checkIDDuplicate}>중복확인</button> */}
-          <button>중복확인</button>
+          <IdTopWrapper>
+            <InputWrapper
+              style={{
+                width: "177px",
+              }}
+            >
+              <img src={loginImg} alt="로그인 이미지" />
+              <input
+                ref={idInputRef}
+                placeholder="아이디"
+                type="text"
+                value={ID}
+                onChange={(e) => setID(e.target.value)}
+              />
+            </InputWrapper>
+            <button onClick={checkIDDuplicate}>중복확인</button>
+          </IdTopWrapper>
+          <Idcheck>{error}</Idcheck>
         </IdWrapper>
 
         <InputWrapper>
@@ -143,6 +152,7 @@ const SignupPage = () => {
             <img
               style={{
                 marginRight: "6px",
+                marginTop: "15px",
               }}
               src={checkGreen}
               alt="비밀번호 확인 이미지"
@@ -151,6 +161,7 @@ const SignupPage = () => {
             <img
               style={{
                 marginRight: "6px",
+                marginTop: "15px",
               }}
               src={check}
               alt="비밀번호 확인 이미지"
@@ -201,15 +212,15 @@ const InputWrapper = styled.div`
   color: #bbb;
   font-size: 12px;
   font-weight: 400;
-  align-content: center;
+
   display: flex;
-  align-items: center;
+
   width: 240px;
   height: 46px;
   background-color: #f5f5f5;
   border-radius: 12px;
   padding-left: 12px;
-  margin-bottom: 15px;
+  margin-top: 20px;
 
   input {
     border-style: none;
@@ -225,7 +236,8 @@ const InputWrapper = styled.div`
 
 const IdWrapper = styled.div`
   display: flex;
-  flex-direction: row;
+  flex-direction: column;
+  align-items: left;
 
   button {
     width: 58px;
@@ -241,14 +253,33 @@ const IdWrapper = styled.div`
     outline: none;
     cursor: pointer;
     margin-left: 5px;
+    margin-top: 20px;
   }
+`;
+
+const IdTopWrapper = styled.div`
+  display: flex;
+  flex-direction: row;
+`;
+
+const Idcheck = styled.div`
+  color: var(--purple, var(--purple, #9747ff));
+  font-family: Pretendard;
+  font-size: 8px;
+  font-style: normal;
+  font-weight: 400;
+  line-height: 100%;
+  letter-spacing: -0.5px;
+  margin: 0px;
+  margin-left: 6px;
+  margin-top: 7px;
 `;
 
 const Ment = styled.div`
   font-size: 24px;
   font-weight: bold;
   margin-top: 37px;
-  margin-bottom: 97px;
+  margin-bottom: 77px;
 `;
 
 const LoginBtn = styled.button`
@@ -269,4 +300,5 @@ const LoginBtn = styled.button`
 
 const PwWrapper = styled.div`
   display: flex;
+  align-items: center;
 `;
