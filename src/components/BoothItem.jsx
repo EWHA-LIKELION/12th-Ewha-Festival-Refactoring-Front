@@ -3,11 +3,12 @@ import styled from "styled-components";
 import BasicBooth from "../images/basicbooth.svg"; // 기본 부스 이미지 경로
 
 const BoothItem = ({ booth }) => {
+  const backendURL = "https://Liberewha.pythonanywhere.com";
   return (
     <Booth
       style={{
         backgroundImage: `url(${
-          booth.thumbnail ? booth.thumbnail : BasicBooth
+          booth.thumbnail ? `${backendURL}${booth.thumbnail}` : BasicBooth
         })`,
       }}
     >
