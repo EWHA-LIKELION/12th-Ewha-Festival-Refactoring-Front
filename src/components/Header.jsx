@@ -40,7 +40,9 @@ const MainHeader = () => {
       console.log("검색 결과:", response.data.booths);
 
       // 검색 결과를 받아와서 다른 페이지로 navigate
-      navigate("/search", { state: { booths: response.data.booths } });
+      navigate("/search", {
+        state: { booths: response.data.booths, searchTerm },
+      });
     } catch (error) {
       console.error("검색 오류:", error);
       navigate("/search", { state: { booths: [] } }); // 검색 결과가 없을 경우 빈 배열 전달
@@ -76,6 +78,11 @@ const MainHeader = () => {
                   placeholder="검색어를 입력해 주세요"
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
+                  onKeyPress={(e) => {
+                    if (e.key === "Enter") {
+                      handleSearch();
+                    }
+                  }}
                 />
                 <SearchButton onClick={handleSearch}>
                   <img src={searchIcon} alt="search" />

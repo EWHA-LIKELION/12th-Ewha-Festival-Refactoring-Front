@@ -23,9 +23,7 @@ const BoothPage = () => {
     // 백엔드에서 데이터를 받아오는 함수
     const fetchBoothData = async () => {
       try {
-        const response = await instance.get(
-          `/booths/main/?dayofweek=${selectedDay}&category=${selectedType}`
-        );
+        const response = await instance.get(`/booths/main/`);
         setBoothData(response.data.data); // 백엔드 데이터 설정
         setLoading(false); // 로딩 완료
       } catch (error) {

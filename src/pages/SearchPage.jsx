@@ -1,215 +1,137 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import styled from "styled-components";
-import Header from "../components/Header"; // Header 컴포넌트 가져오기
-import BoothItem from "../components/BoothItem"; // 분리된 BoothItem 컴포넌트 가져오기
-import { mockData } from "../components/MockDataBooth"; // mockData 가져오기
+import BoothItem from "../components/BoothItem"; // BoothItem 컴포넌트 불러오기
+import { useLocation, useNavigate } from "react-router-dom"; // 네비게이션으로 받은 state 접근하기
+import backIcon from "../images/backIcon.svg"; // 뒤로 가기 버튼 아이콘 추가
+import searchIcon from "../images/search.svg"; // 검색 아이콘 추가
+import instance from "../api/axios"; // API 호출을 위한 axios 인스턴스
 
 const SearchPage = () => {
-  const [selectedDay, setSelectedDay] = useState("수"); // 요일 기본값
-  const [selectedType, setSelectedType] = useState("음식"); // 부스 종류 기본값
-  const [isPopupOpen, setIsPopupOpen] = useState(false); // 팝업 상태 관리
-  const [currentPage, setCurrentPage] = useState(1); // 현재 페이지
-  const [description, setDescription] = useState(
-    "음식 부스에 대해 알 수 있어요 🍀"
-  ); // 선택된 부스 설명
+  const location = useLocation();
+  const navigate = useNavigate();
+  const [booths, setBooths] = useState([]);
+  const [selectedCategory, setSelectedCategory] = useState("전체");
+  const [searchTerm, setSearchTerm] = useState(
+    location.state?.searchTerm || ""
+  ); // 검색어 상태 초기화
 
-  const boothsPerPage = 10; // 한 페이지당 보여줄 부스 수
-  const maxPageButtons = 5; // 한번에 보여줄 페이지 버튼의 최대 개수
-  const [pageGroup, setPageGroup] = useState(0); // 페이지 그룹 상태
-
-  // 선택한 요일과 카테고리에 맞는 부스를 필터링
-  const filteredBooths = mockData.data.filter(
-    (booth) =>
-      booth.dayofweek.includes(selectedDay) && booth.category === selectedType
-  );
-
-  // 전체 페이지 수 계산
-  const totalPages = Math.ceil(filteredBooths.length / boothsPerPage);
-
-  // 페이지네이션 계산
-  const indexOfLastBooth = currentPage * boothsPerPage;
-  const indexOfFirstBooth = indexOfLastBooth - boothsPerPage;
-  const currentBooths = filteredBooths.slice(
-    indexOfFirstBooth,
-    indexOfLastBooth
-  );
-  // 페이지네이션에서 표시할 페이지 번호 그룹 계산
-  const startPage = pageGroup * maxPageButtons + 1;
-  const endPage = Math.min((pageGroup + 1) * maxPageButtons, totalPages);
-
-  const handleTypeSelection = (type) => {
-    setSelectedType(type);
-    let descriptionMessage;
-    switch (type) {
-      case "음식":
-        descriptionMessage = "음식 부스에 대해 알 수 있어요 🍀";
-        break;
-      case "굿즈":
-        descriptionMessage = "굿즈 부스에 대해 알 수 있어요 🍀";
-        break;
-      case "체험":
-        descriptionMessage = "체험 부스에 대해 알 수 있어요 🍀";
-        break;
-      default:
-        descriptionMessage = "부스를 선택해 주세요";
+  useEffect(() => {
+    // 검색 결과가 전달되면 상태에 저장
+    if (location.state && location.state.booths) {
+      setBooths(location.state.booths);
     }
-    setDescription(descriptionMessage);
+  }, [location.state]);
+
+  const handleCategoryChange = (category) => {
+    setSelectedCategory(category);
   };
 
-  const handleDaySelection = (day) => {
-    setSelectedDay(day);
-    setCurrentPage(1); // 요일이 바뀔 때 페이지 번호를 1로 초기화
-  };
+  const handleSearch = async () => {
+    console.log("검색어:", searchTerm);
 
-  // 팝업 외부 클릭 시 닫기
-  const handleClosePopup = (e) => {
-    if (e.target === e.currentTarget) {
-      setIsPopupOpen(false); // 팝업 외부 클릭 시 팝업 닫기
+    try {
+      const response = await instance.get(
+        `${process.env.REACT_APP_SERVER_PORT}/main/search`, // api 명세에 맞게 수정
+        {
+          params: {
+            q: searchTerm, // 입력된 검색어 전달
+          },
+        }
+      );
+
+      console.log("검색 결과:", response.data.booths);
+
+      // 검색 결과를 받아와서 상태 업데이트
+      setBooths(response.data.booths);
+    } catch (error) {
+      console.error("검색 오류:", error);
+      setBooths([]); // 검색 결과가 없을 경우 빈 배열 설정
     }
   };
 
-  // 화살표 클릭 시 페이지 그룹 이동
-  const handleNextPageGroup = () => {
-    if ((pageGroup + 1) * maxPageButtons < totalPages) {
-      setPageGroup(pageGroup + 1);
-    }
+  const handleBack = () => {
+    navigate(-1); // 이전 페이지로 돌아가기
   };
 
-  const handlePrevPageGroup = () => {
-    if (pageGroup > 0) {
-      setPageGroup(pageGroup - 1);
+  // 선택된 카테고리에 맞는 부스/공연 필터링
+  const filteredBooths = booths.filter((booth) => {
+    if (selectedCategory === "전체") {
+      return true; // 전체 선택 시 모든 부스를 보여줌
     }
-  };
+    return booth.type === selectedCategory;
+  });
 
   return (
     <>
-      {/* Header 컴포넌트 추가 */}
-      <Header />
+      {/* 헤더 부분 */}
+      <HeaderContainer>
+        <BackButton onClick={handleBack}>
+          <img src={backIcon} alt="뒤로 가기" />
+        </BackButton>
+        <SearchBar>
+          <SearchInput
+            type="text"
+            placeholder="검색어를 입력해 주세요"
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            onKeyPress={(e) => {
+              if (e.key === "Enter") {
+                handleSearch();
+              }
+            }}
+          />
+          <SearchButton onClick={handleSearch}>
+            <img src={searchIcon} alt="search" />
+          </SearchButton>
+        </SearchBar>
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          width="349"
+          height="2"
+          viewBox="0 0 349 2"
+          fill="none"
+        >
+          <path d="M0 1.00003L349 0.999969" stroke="black" />
+        </svg>
+      </HeaderContainer>
+
       <Wrapper>
-        {/* 요일과 부스 종류 선택 */}
-        <SelectionWrapper>
-          <DaySelection>
-            <DayButton
-              selected={selectedDay === "수"}
-              onClick={() => handleDaySelection("수")}
-            >
-              수
-            </DayButton>
-            <DayButton
-              selected={selectedDay === "목"}
-              onClick={() => handleDaySelection("목")}
-            >
-              목
-            </DayButton>
-            <DayButton
-              selected={selectedDay === "금"}
-              onClick={() => handleDaySelection("금")}
-            >
-              금
-            </DayButton>
-          </DaySelection>
-          <TypeSelection onClick={() => setIsPopupOpen(true)}>
-            {selectedType}{" "}
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              width="19"
-              height="20"
-              viewBox="0 0 19 20"
-              fill="none"
-            >
-              <path
-                d="M15.77 7.58545L10.6083 12.7471C9.99873 13.3567 9.00123 13.3567 8.39165 12.7471L3.22998 7.58545"
-                stroke="white"
-                strokeWidth="2"
-                strokeMiterlimit="10"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              />
-            </svg>
-          </TypeSelection>
-        </SelectionWrapper>
-        {/* 검색 결과 표시 */}
-        <SearchResult>총 {filteredBooths.length}개의 부스</SearchResult>
-        {/* 부스 목록 */}
-        <BoothList>
-          {currentBooths.map((booth) => (
-            <BoothItem key={booth.id} booth={booth} />
-          ))}
-        </BoothList>
-        {/* 페이지 넘버 */}
-        <Pagination>
-          {pageGroup > 0 && (
-            <ArrowButtonLeft onClick={handlePrevPageGroup}>
-              <svg
-                width="12"
-                height="14"
-                viewBox="0 0 12 14"
-                fill="none"
-                xmlns="http://www.w3.org/2000/svg"
-              >
-                <path
-                  d="M12 7.00688L12 9.92965C12 13.553 9.64853 15.0417 6.77673 13.2246L4.46529 11.7577L2.15385 10.2909C-0.717949 8.47374 -0.717949 5.50719 2.15385 3.69004L4.46529 2.22319L6.77674 0.756339C9.64853 -1.02797 12 0.449832 12 4.08413L12 7.00688Z"
-                  fill="#F2F2F2"
-                />
-              </svg>
-            </ArrowButtonLeft>
-          )}
-          {Array.from({ length: endPage - startPage + 1 }, (_, idx) => (
-            <PageButton
-              key={startPage + idx}
-              onClick={() => setCurrentPage(startPage + idx)}
-              selected={currentPage === startPage + idx}
-            >
-              {startPage + idx}
-            </PageButton>
-          ))}
-          {(pageGroup + 1) * maxPageButtons < totalPages && (
-            <ArrowButtonRight onClick={handleNextPageGroup}>
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                width="12"
-                height="14"
-                viewBox="0 0 12 14"
-                fill="none"
-              >
-                <path
-                  d="M0 6.99361V4.27962C0 0.915079 2.35147 -0.467329 5.22326 1.22002L7.53471 2.5821L9.84615 3.94418C12.7179 5.63153 12.7179 8.38618 9.84615 10.0735L7.53471 11.4356L5.22326 12.7977C2.35147 14.4545 0 13.0823 0 9.7076V6.99361Z"
-                  fill="#F2F2F2"
-                />
-              </svg>
-            </ArrowButtonRight>
-          )}
-        </Pagination>
-        {/* 부스 종류 선택 팝업 */}
-        {isPopupOpen && (
-          <Popup onClick={handleClosePopup}>
-            <PopupContent onClick={(e) => e.stopPropagation()}>
-              {/* 내부 클릭 이벤트가 전파되지 않도록 설정 */}
-              <PopupTitle>어떤 부스로 갈까요?</PopupTitle>
-              <ButtonWrapper>
-                <TypeButton
-                  onClick={() => handleTypeSelection("음식")}
-                  selected={selectedType === "음식"}
-                >
-                  음식
-                </TypeButton>
-                <TypeButton
-                  onClick={() => handleTypeSelection("굿즈")}
-                  selected={selectedType === "굿즈"}
-                >
-                  굿즈
-                </TypeButton>
-                <TypeButton
-                  onClick={() => handleTypeSelection("체험")}
-                  selected={selectedType === "체험"}
-                >
-                  체험
-                </TypeButton>
-              </ButtonWrapper>
-              {/* 부스 설명 */}
-              <Description>{description}</Description>
-            </PopupContent>
-          </Popup>
+        <CategoryBar>
+          <Category
+            selected={selectedCategory === "전체"}
+            onClick={() => handleCategoryChange("전체")}
+          >
+            전체
+          </Category>
+          <Category
+            selected={selectedCategory === "부스"}
+            onClick={() => handleCategoryChange("booth")}
+          >
+            부스
+          </Category>
+          <Category
+            selected={selectedCategory === "공연"}
+            onClick={() => handleCategoryChange("show")}
+          >
+            공연
+          </Category>
+        </CategoryBar>
+
+        {/* 검색 결과가 없을 경우 */}
+        {filteredBooths.length === 0 ? (
+          <NoResult>
+            <ExclamationMark>!</ExclamationMark>
+            <NoResultText>검색결과를 찾을 수 없어요😱</NoResultText>
+          </NoResult>
+        ) : (
+          <>
+            <SearchResult>총 {filteredBooths.length}개의 부스</SearchResult>
+            <BoothList>
+              {filteredBooths.map((booth) => (
+                <BoothItem key={booth.id} booth={booth} />
+              ))}
+            </BoothList>
+          </>
         )}
       </Wrapper>
     </>
@@ -217,6 +139,50 @@ const SearchPage = () => {
 };
 
 export default SearchPage;
+
+/* 스타일 정의 */
+
+const HeaderContainer = styled.div`
+  display: flex;
+  align-items: center;
+  padding: 10px 16px;
+  background-color: #fff;
+  border-bottom: 1px solid #eaeaea;
+  flex-direction: column; /* 검색창과 라인 정렬을 위해 column으로 설정 */
+`;
+
+const BackButton = styled.button`
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  margin-bottom: 10px; /* 위쪽에 여백 추가 */
+`;
+
+const SearchBar = styled.div`
+  display: flex;
+  align-items: center;
+  border: 1px solid #eaeaea;
+  border-radius: 8px;
+  padding: 5px 8px;
+  margin-bottom: 10px; /* SVG와의 간격을 주기 위해 추가 */
+`;
+
+const SearchInput = styled.input`
+  flex: 1;
+  border: none;
+  outline: none;
+  padding-left: 8px;
+  font-size: 14px;
+`;
+
+const SearchButton = styled.button`
+  background: none;
+  border: none;
+  cursor: pointer;
+`;
+
+// 나머지 스타일 코드는 그대로 유지합니다.
 
 const Wrapper = styled.div`
   height: calc(var(--vh, 1vh) * 100);
@@ -228,33 +194,19 @@ const Wrapper = styled.div`
   padding-right: 17px;
 `;
 
-/* 요일과 부스 종류 선택 */
-const SelectionWrapper = styled.div`
+const CategoryBar = styled.div`
   display: flex;
-  justify-content: space-between;
+  justify-content: space-around;
   width: 100%;
   margin-bottom: 16px;
 `;
 
-const DaySelection = styled.div`
+const Category = styled.button`
   display: flex;
   justify-content: center;
   align-items: center;
-  width: 129px;
-  height: 36px;
-  gap: -6px;
-  border-radius: 30px;
-  background: var(--gray04, #c1d9cc);
-  box-shadow: 0px 0px 4px 0px rgba(0, 0, 0, 0.1);
-`;
-
-const DayButton = styled.button`
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  width: 47px;
-  height: 36px;
-  gap: 10px;
+  width: 90px;
+  padding: 8px 0;
   border-radius: 30px;
   border: 1px solid ${(props) => (props.selected ? "#03d664" : "#C1D9CC")};
   background-color: ${(props) => (props.selected ? "#00f16f" : "#C1D9CC")};
@@ -264,33 +216,10 @@ const DayButton = styled.button`
   text-align: center;
   font-family: Pretendard;
   font-size: 15px;
-  font-style: normal;
   font-weight: 700;
-  line-height: 20px; /* 133.333% */
-  letter-spacing: -0.5px;
+  line-height: 20px;
 `;
 
-const TypeSelection = styled.div`
-  display: flex;
-  padding: 8px 17px;
-  justify-content: flex-end;
-  align-items: center;
-  gap: 3px;
-  border-radius: 30px;
-  border: 1px solid var(--green02, #03d664);
-  background: var(--green_01, #00f16f);
-  cursor: pointer;
-  color: var(--wh01, var(--wh, #fff));
-  text-align: center;
-  font-family: Pretendard;
-  font-size: 15px;
-  font-style: normal;
-  font-weight: 700;
-  line-height: 20px; /* 133.333% */
-  letter-spacing: -0.5px;
-`;
-
-/* 검색 결과 */
 const SearchResult = styled.div`
   width: 151px;
   height: 15px;
@@ -298,14 +227,12 @@ const SearchResult = styled.div`
   color: var(--gray05, #8e8e8e);
   font-family: Pretendard;
   font-size: 12px;
-  font-style: normal;
   font-weight: 500;
-  line-height: 20px; /* 166.667% */
+  line-height: 20px;
   letter-spacing: -0.5px;
   margin-bottom: 9px;
 `;
 
-/* 부스 목록 */
 const BoothList = styled.div`
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(170px, 170px));
@@ -315,126 +242,21 @@ const BoothList = styled.div`
   box-sizing: border-box;
 `;
 
-/* 페이지 넘버 */
-const Pagination = styled.div`
-  margin-top: 64px;
+const NoResult = styled.div`
   display: flex;
-  flex-direction: row;
-  justify-content: center;
-  padding-bottom: 300px;
-`;
-
-const PageButton = styled.button`
-  display: flex;
-  width: 38px;
-  padding: 8px 17px;
-  justify-content: center;
-  align-items: center;
-  gap: 3px;
-  margin-left: 10px;
-  border-radius: 10px;
-  background-color: ${(props) => (props.selected ? "#00F16F" : "#F7F7F7")};
-  border: 1px solid ${(props) => (props.selected ? "#03D664" : "#F2F2F2")};
-  cursor: pointer;
-
-  color: ${(props) => (props.selected ? "#FFF" : "#BBB")};
-  text-align: center;
-  font-family: Pretendard;
-  font-size: 15px;
-  font-style: normal;
-  font-weight: 700;
-  line-height: 20px;
-  letter-spacing: -0.5px;
-`;
-
-const ArrowButtonLeft = styled.button`
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  background-color: #fff;
-  border: none;
-  cursor: pointer;
-  padding: 0px;
-`;
-
-const ArrowButtonRight = styled.button`
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  background-color: #fff;
-  border: none;
-  cursor: pointer;
-  padding: 0px;
-  margin-left: 10px;
-`;
-/* 팝업 스타일 */
-const Popup = styled.div`
-  position: fixed;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  background: rgba(0, 0, 0, 0.5);
-  height: 100%;
-  display: flex;
-  justify-content: center;
-  align-items: flex-end;
-`;
-
-const PopupContent = styled.div`
-  background: var(--wh, #fff);
-  width: 100%; /* max-width 대신 width를 사용 */
-  padding: 30px 23px 248px 23px; /* padding 값은 유지 */
   flex-direction: column;
-  align-items: flex-start;
-  gap: 18px;
-  flex-shrink: 0;
-  box-sizing: border-box; /* 이 부분 추가 */
-`;
-
-const PopupTitle = styled.h2`
-  color: var(--bk01, #000);
-  font-family: Pretendard;
-  font-size: 20px;
-  font-style: normal;
-  font-weight: 600;
-  line-height: 20px; /* 100% */
-  letter-spacing: -0.5px;
-  margin: 0px;
-  margin-bottom: 18px;
-`;
-
-const ButtonWrapper = styled.div`
-  display: flex;
-  gap: 10px;
-  margin-bottom: 18px;
-`;
-
-const TypeButton = styled.button`
-  display: flex;
-  padding: 8px 17px;
-  justify-content: center;
   align-items: center;
-  gap: 3px;
-  border-radius: 30px;
-  border: 1px solid ${(props) => (props.selected ? "#03d664" : "#F2F2F2")};
-  background-color: ${(props) => (props.selected ? "#00f16f" : "#F7F7F7")};
-
-  color: ${(props) => (props.selected ? "#FFF" : "#BBB")};
-  text-align: center;
-  font-family: Pretendard;
-  font-size: 15px;
-  font-style: normal;
-  font-weight: 700;
-  line-height: 20px; /* 133.333% */
-  letter-spacing: -0.5px;
+  justify-content: center;
+  height: 60vh;
 `;
 
-const Description = styled.div`
-  color: var(--gray01, #bbb);
-  font-family: Pretendard;
-  font-size: 14px;
-  font-style: normal;
-  font-weight: 500;
-  line-height: 20px; /* 142.857% */
-  letter-spacing: -0.5px;
+const ExclamationMark = styled.div`
+  font-size: 48px;
+  color: #4caf50;
+`;
+
+const NoResultText = styled.div`
+  font-size: 18px;
+  color: #4caf50;
+  text-align: center;
 `;
