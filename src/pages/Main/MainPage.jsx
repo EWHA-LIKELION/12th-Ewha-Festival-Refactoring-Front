@@ -18,7 +18,7 @@ const MainPage = () => {
     if (token) {
       setIsLoggedIn(true);
     } else {
-      setIsLoggedIn(true);
+      setIsLoggedIn(false);
     }
   }, []);
 
