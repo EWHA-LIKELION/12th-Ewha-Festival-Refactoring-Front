@@ -2,14 +2,14 @@ import React, { useState, useRef } from "react";
 import styled from "styled-components";
 import { useNavigate } from "react-router-dom";
 import instance from "../api/axios";
-
+import Header from "../components/Header";
 
 import bookMark from "../images/bookMark.svg";
 
 const MyPage = () => {
   return (
     <Wrapper>
-      
+      <Header />
       <Content>
         <Ment>마이페이지</Ment>
         <NameWrapper>
