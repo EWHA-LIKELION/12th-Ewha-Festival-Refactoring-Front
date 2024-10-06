@@ -10,11 +10,11 @@ import MainScrap from "../../components/MainScrap";
 const MainPage = () => {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [openScrap, setOpenScrap] = useState(false);
-  const username = localStorage.getItem("username");
+  const nickname = localStorage.getItem("nickname");
   const navigate = useNavigate();
 
   useEffect(() => {
-    const token = localStorage.getItem("token");
+    const token = localStorage.getItem("accessToken");
     if (token) {
       setIsLoggedIn(true);
     } else {
@@ -37,7 +37,7 @@ const MainPage = () => {
         <ScrapP onClick={() => navigate("/mypage")}>스크랩북 전체보기</ScrapP>
       )}
       <Title>
-        {openScrap ? `${username}님의\n스크랩북` : `2024\n이화여대 대동제`}
+        {openScrap ? `${nickname}님의\n스크랩북` : `2024\n이화여대 대동제`}
       </Title>
       {openScrap ? (
         <MainScrap />
@@ -48,7 +48,7 @@ const MainPage = () => {
           </SubTitle>
           <P>
             {isLoggedIn
-              ? `${username}님\n대동제에서 잊지 못할\n추억을 만들어봐요🍀`
+              ? `${nickname}님\n대동제에서 잊지 못할\n추억을 만들어봐요🍀`
               : `로그인하면\n사이트를 더 편하게\n즐길 수 있어요🍀`}
           </P>
           <img src={hashTag} alt="hashTag" width={148} />
