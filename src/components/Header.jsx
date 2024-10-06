@@ -109,7 +109,13 @@ const MainHeader = () => {
             </MenuList>
           </Modal>
         )}
-        <img src={greenlogo} alt="logo" width="80px" height="20px" />
+        <img
+          src={greenlogo}
+          onClick={() => navigate("/")}
+          alt="logo"
+          width="80px"
+          height="20px"
+        />
       </Container>
     </>
   );
@@ -132,6 +138,10 @@ const Container = styled.div`
   display: flex;
   justify-content: space-between;
   padding: 40px 20px 26px;
+
+  img {
+    cursor: pointer;
+  }
 `;
 
 const Hamburger = styled.img`

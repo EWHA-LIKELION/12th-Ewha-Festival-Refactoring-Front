@@ -1,12 +1,12 @@
 import React, { useState, useRef } from "react";
 import styled from "styled-components";
-import Header from "../components/Header";
 import { useNavigate } from "react-router-dom";
 import instance from "../api/axios";
 
 import loginImg from "../images/loginImg.svg";
 import PwImg from "../images/PwImg.svg";
 import kakaoLogin from "../images/kakaoLogin.svg";
+import arrowLeft from "../images/arrowLeft.svg";
 
 const LoginPage = () => {
   const navigate = useNavigate();
@@ -81,7 +81,9 @@ const LoginPage = () => {
 
   return (
     <Wrapper>
-      <Header />
+      <Header>
+        <img src={arrowLeft} onClick={() => navigate("/")} />
+      </Header>
       <Content>
         <Ment>로그인</Ment>
         <InputWrapper>
@@ -150,6 +152,17 @@ const InputWrapper = styled.div`
 
   img {
     width: 17px;
+  }
+`;
+
+const Header = styled.div`
+  position: relative;
+  display: flex;
+  justify-content: space-between;
+  padding: 40px 20px 26px;
+
+  img {
+    cursor: pointer;
   }
 `;
 

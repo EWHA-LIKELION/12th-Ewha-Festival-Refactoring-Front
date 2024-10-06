@@ -1,6 +1,5 @@
 import React, { useState, useRef } from "react";
 import styled from "styled-components";
-import Header from "../components/Header";
 import { useNavigate } from "react-router-dom";
 import instance from "../api/axios";
 
@@ -9,6 +8,7 @@ import PwImg from "../images/PwImg.svg";
 import nickImg from "../images/nickImg.svg";
 import check from "../images/check.svg";
 import checkGreen from "../images/checkGreen.svg";
+import arrowLeft from "../images/arrowLeft.svg";
 
 const SignupPage = () => {
   const navigate = useNavigate();
@@ -89,7 +89,9 @@ const SignupPage = () => {
 
   return (
     <Wrapper>
-      <Header />
+      <Header>
+        <img src={arrowLeft} onClick={() => navigate("/login")} />
+      </Header>
       <Content>
         <Ment>회원가입</Ment>
         <IdWrapper>
@@ -182,6 +184,17 @@ const Content = styled.div`
   display: flex;
   flex-direction: column;
   align-items: center;
+`;
+
+const Header = styled.div`
+  position: relative;
+  display: flex;
+  justify-content: space-between;
+  padding: 40px 20px 26px;
+
+  img {
+    cursor: pointer;
+  }
 `;
 
 const InputWrapper = styled.div`

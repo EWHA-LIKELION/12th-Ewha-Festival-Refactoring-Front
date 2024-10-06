@@ -7,6 +7,17 @@ import Header from "../components/Header";
 import bookMark from "../images/bookMark.svg";
 
 const MyPage = () => {
+  const navigate = useNavigate();
+
+  const handleLogout = () => {
+    localStorage.removeItem("accessToken");
+    localStorage.removeItem("refreshToken");
+    localStorage.removeItem("user_id");
+    localStorage.removeItem("nickname");
+
+    navigate("/");
+  };
+
   return (
     <Wrapper>
       <Header />
@@ -14,7 +25,7 @@ const MyPage = () => {
         <Ment>마이페이지</Ment>
         <NameWrapper>
           <Name>이화연 님</Name>
-          <Logout>로그아웃</Logout>
+          <Logout onClick={handleLogout}>로그아웃</Logout>
         </NameWrapper>
         <EmptyWrapper>
           <img src={bookMark} alt="북마크 이미지" />
