@@ -11,13 +11,13 @@ const BoothItem = ({ booth }) => {
   const [isscraped, setisscraped] = useState(false);
   const navigate = useNavigate();
 
-  const clickScrap = () => {
+  const clickScrap = async () => {
     setisscraped(!isscraped);
     const token = localStorage.getItem("accessToken");
 
     if (token && isscraped === false) {
       try {
-        const response = instance.post(
+        const response = await instance.post(
           `${process.env.REACT_APP_SERVER_PORT}/booths/${booth.id}/scrap/`,
           {
             headers: {
@@ -32,7 +32,7 @@ const BoothItem = ({ booth }) => {
       }
     } else if (token && isscraped === true) {
       try {
-        const response = instance.delete(
+        const response = await instance.delete(
           `${process.env.REACT_APP_SERVER_PORT}/booths/${booth.id}/scrap/`,
           {
             headers: {
