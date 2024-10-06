@@ -85,12 +85,15 @@ const Title = styled.div`
   font-weight: 700;
   line-height: 1.625rem;
   letter-spacing: -0.03125rem;
-  margin-top: 0.3rem;
+  margin-top: 2rem;
   white-space: pre-line;
 `;
 
 const ScrapP = styled.p`
-  margin: 1.3rem auto 0;
+  position: fixed;
+  top: 5rem;
+  left: 50%;
+  transform: translate(-50%, -50%);
   width: fit-content;
   color: var(--gray02, #f2f2f2);
   text-align: center;
