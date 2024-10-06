@@ -5,16 +5,17 @@ import whitelogo from "../../images/whitelogo.svg";
 import boothManage from "../../images/boothManage.svg";
 
 const BoothMainPage = () => {
-  const username = localStorage.getItem("username");
+  const nickname = localStorage.getItem("nickname");
   const navigate = useNavigate();
   const handleNavigate = (path) => {
     navigate(path);
   };
+
   const handleLogout = () => {
     localStorage.removeItem("accessToken");
-    localStorage.removeItem("username");
+    localStorage.removeItem("nickname");
     localStorage.removeItem("user_id");
-
+    localStorage.removeItem("type");
     navigate("/login");
   };
 
@@ -24,13 +25,13 @@ const BoothMainPage = () => {
         <img src={whitelogo} alt="logo" />
       </LogoContainer>
       <Title>
-        "2024
+        2024
         <br />
-        이화여대 대동제"
+        이화여대 대동제
       </Title>
       <MainBox>
         <P>
-          {username} 부스관리자님
+          {nickname} 부스관리자님
           <br />
           2024 대동제를
           <br />잘 운영해주세요🍀

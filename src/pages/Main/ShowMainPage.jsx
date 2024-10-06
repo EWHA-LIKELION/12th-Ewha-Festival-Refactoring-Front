@@ -5,16 +5,16 @@ import whitelogo from "../../images/whitelogo.svg";
 import showManage from "../../images/showManage.svg";
 
 const BoothMainPage = () => {
-  const username = localStorage.getItem("username");
+  const nickname = localStorage.getItem("nickname");
   const navigate = useNavigate();
   const handleNavigate = (path) => {
     navigate(path);
   };
   const handleLogout = () => {
     localStorage.removeItem("accessToken");
-    localStorage.removeItem("username");
+    localStorage.removeItem("nickname");
     localStorage.removeItem("user_id");
-
+    localStorage.removeItem("type");
     navigate("/login");
   };
 
@@ -30,7 +30,7 @@ const BoothMainPage = () => {
       </Title>
       <MainBox>
         <P>
-          {username} 공연관리자님
+          {nickname} 공연관리자님
           <br />
           2024 대동제를
           <br />잘 운영해주세요🍀

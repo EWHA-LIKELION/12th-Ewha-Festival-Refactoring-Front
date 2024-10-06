@@ -6,16 +6,16 @@ import TFManage from "../../images/TFManage.svg";
 import TFNotice from "../../images/TFNotice.svg";
 
 const TFMainPage = () => {
-  const username = localStorage.getItem("username");
+  const nickname = localStorage.getItem("nickname");
   const navigate = useNavigate();
   const handleNavigate = (path) => {
     navigate(path);
   };
   const handleLogout = () => {
     localStorage.removeItem("accessToken");
-    localStorage.removeItem("username");
+    localStorage.removeItem("nickname");
     localStorage.removeItem("user_id");
-
+    localStorage.removeItem("type");
     navigate("/login");
   };
 
@@ -31,7 +31,7 @@ const TFMainPage = () => {
       </Title>
       <MainBox>
         <P>
-          {username} 관리자님
+          {nickname} 관리자님
           <br />
           2024 대동제를
           <br />잘 운영해주세요🍀
