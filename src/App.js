@@ -9,7 +9,8 @@ import BoothPage from "./pages/BoothPage.jsx";
 import DetailPage from "./pages/performPages/DetailViewPage.jsx";
 import EditViewPage from "./pages/performPages/EditViewPage.jsx";
 import LoginPage from "./pages/LoginPage.jsx";
-import MainPage from "./pages/MainPage";
+import MainPage from "./pages/Main/MainPage.jsx";
+import DefineType from "./pages/Main/DefineType.jsx";
 import BoothDetailPage from "./pages/BoothDetail/BoothDetailPage.jsx";
 import BoothEditPage from "./pages/BoothEdit/BoothEditPage.jsx";
 import Footer from "./components/Footer";
@@ -23,6 +24,7 @@ import BarrierFreeInfo from "./pages/BarrierFreeInfo.jsx";
 import ShowPage from "./pages/ShowPage.jsx";
 import TrashPage from "./pages/TrashPage.jsx";
 import MadeByPage from "./pages/MadeByPage.jsx";
+import SearchPage from "./pages/SearchPage.jsx";
 
 function App() {
   // 뷰포트 높이 계산
@@ -41,7 +43,7 @@ function App() {
         <Routes>
           <Route path="/login" element={<LoginPage />} />
           <Route path="/signup" element={<SignupPage />} />
-          <Route path="/" element={<MainPage />} />
+          <Route path="/" element={<DefineType />} />
           <Route path="/booth" element={<BoothPage />} />
           <Route path="/detail" element={<DetailPage />} />
           <Route path="/detail/admin" element={<AdminDetailPage />} />
@@ -57,6 +59,7 @@ function App() {
           <Route path="/show" element={<ShowPage />} />
           <Route path="/trash" element={<TrashPage />} />
           <Route path="/madeby" element={<MadeByPage />} />
+          <Route path="/search" element={<SearchPage />} />
         </Routes>
       </Router>
     </>
