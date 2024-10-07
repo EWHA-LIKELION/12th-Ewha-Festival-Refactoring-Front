@@ -296,24 +296,31 @@ const ModalContent = styled.div`
 `;
 
 const ModalButtons = styled.div`
-  margin-top: 20px;
   display: flex;
-  justify-content: space-around;
-  width: 183px;
-  height: 30px;
+  justify-content: space-between;
+  margin: 0 20px;
+  gap: 9px;
   button {
-    padding: 5px 20px;
-    font-size: 16px;
-    cursor: pointer;
+    padding: 7px 17px;
+    width: 87px;
+    height: 30px;
+    flex-shrink: 0;
     border-radius: 5px;
-    border: 1px solid var(--gray02, #f2f2f2);
-    text-align: center;
+    border: none;
+    cursor: pointer;
     font-family: Pretendard;
     font-size: 12px;
-    font-style: normal;
     font-weight: 700;
-    line-height: 20px; /* 166.667% */
+    line-height: 20px; /* 133.333% */
     letter-spacing: -0.5px;
+    &:first-child {
+      background: #f7f7f7;
+      color: #bbb;
+    }
+    &:last-child {
+      background: #00f16f;
+      color: white;
+    }
   }
 `;
 
@@ -327,20 +334,8 @@ const BottomContainer = styled.div`
 const Select = styled.div`
   display: flex;
   align-items: center;
-  div {
-    width: 16px;
-    height: 16px;
-    border-radius: 2px;
-    background: ${({ active }) =>
-      active ? "#00F16F" : "var(--gray03, #f7f7f7)"};
-    cursor: pointer;
 
-    &:hover {
-      background: #00f16f;
-    }
-  }
-  p {
-    margin-left: 13px;
+  label {
     color: var(--gray01, #bbb);
     font-family: Pretendard;
     font-size: 16px;
@@ -348,6 +343,24 @@ const Select = styled.div`
     font-weight: 400;
     line-height: 22px; /* 137.5% */
     letter-spacing: -0.5px;
+    display: flex;
+    align-items: center;
+
+    input {
+      appearance: none; /* 기본 체크박스 스타일 제거 */
+      width: 16px;
+      height: 16px;
+      border-radius: 2px;
+      background: #d9d9d9;
+      margin-right: 8px;
+      border: 1px solid #d9d9d9;
+      cursor: pointer;
+
+      &:checked {
+        background: var(--green_01, #00f16f);
+        border: 1px solid var(--green_01, #00f16f);
+      }
+    }
   }
 `;
 
