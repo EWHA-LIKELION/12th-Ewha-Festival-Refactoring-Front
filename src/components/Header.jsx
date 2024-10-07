@@ -163,6 +163,7 @@ const Modal = styled.div`
     ease-in-out forwards;
   clip-path: ${({ isClosing }) =>
     isClosing ? "inset(0% 100% 0% 0%)" : "inset(0% 0% 0% 0%)"};
+  z-index: 10; /* Add a higher z-index to the sidebar */
 
   @keyframes slideIn {
     from {
