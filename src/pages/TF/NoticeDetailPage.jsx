@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from "react";
 import styled from "styled-components";
 import Header from "../../components/Header";
-import axios from "axios";
 import { useNavigate } from "react-router-dom";
+import instance from "../../api/axios";
 
 // function NoticeDetailPage({ match }) {
 //   const { id } = match.params;

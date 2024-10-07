@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import styled from "styled-components";
 import Header from "../../components/Header";
-import axios from "axios";
+import instance from "../../api/axios";
 import searchicon from "../../images/searchicon.svg";
 import createicon from "../../images/createicon.svg";
 import { useNavigate } from "react-router-dom";

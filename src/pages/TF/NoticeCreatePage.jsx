@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import styled from "styled-components";
 import Header from "../../components/Header";
+import instance from "../../api/axios";
 
 function NoticeCreatePage({ isEdit, existingData }) {
   const [type, setType] = useState(existingData?.type || "operation");
