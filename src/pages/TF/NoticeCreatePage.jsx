@@ -7,18 +7,19 @@ function NoticeCreatePage({ isEdit, existingData }) {
   const [type, setType] = useState(existingData?.type || "operation");
   const [title, setTitle] = useState(existingData?.title || "");
   const [content, setContent] = useState(existingData?.content || "");
-  const [event, setEvent] = useState(existingData?.event || "");
+  const [event, setEvent] = useState(existingData?.event || "ewhagreenFe");
+  const [isImportant, setIsImportant] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [modalMessage, setModalMessage] = useState("");
   const [modalTitle, setModalTitle] = useState("");
 
   const eventOptions = [
-    "다시 돌아온 네가 그린 그린은 이화그린",
-    "아티스트 공연",
-    "야간 영화제",
-    "야시장",
-    "영산 줄다리기",
-    "이화인 한솥밥 배부",
+    { value: "ewhagreenFe", label: "다시 돌아온 네가 그린 그린은 이화그린" },
+    { value: "artistShow", label: "아티스트 공연" },
+    { value: "movie_fe", label: "야간 영화제" },
+    { value: "nightMarket", label: "야시장" },
+    { value: "tugOfWar", label: "영산 줄다리기" },
+    { value: "riceFe", label: "이화인 한솥밥 배부" },
   ];
 
   const openModal = (title, message) => {
@@ -35,29 +36,50 @@ function NoticeCreatePage({ isEdit, existingData }) {
     if (modalTitle === "공지 작성 완료") {
       handleSubmit();
     } else {
-      window.location.href = "/NoticeList"; // 작성 취소 시 리스트로 돌아가기
+      window.location.href = "/notice-list"; // 작성 취소 시 리스트로 돌아가기
     }
     closeModal();
   };
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
+    const token = localStorage.getItem("accessToken");
+
+    if (!token) {
+      console.error("No access token found");
+      return;
+    }
+
     const data = {
-      type,
       title,
       content,
-      event: type === "event" ? event : null,
+      notice_type: type === "event" ? "event" : "operational",
+      event_type: type === "event" ? event : null,
+      is_important: isImportant,
     };
-    const method = isEdit ? "PUT" : "POST";
-    const url = isEdit ? `/api/notices/${existingData.id}` : "/api/notices";
 
-    fetch(url, {
-      method,
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(data),
-    }).then(() => {
-      // 저장 후 리스트 페이지로 이동
-      window.location.href = "/NoticeList";
-    });
+    try {
+      if (isEdit) {
+        await instance.patch(
+          `${process.env.REACT_APP_SERVER_PORT}/notice/${existingData.id}/`,
+          data,
+          {
+            headers: { Authorization: `Bearer ${token}` },
+          }
+        );
+      } else {
+        await instance.post(
+          `${process.env.REACT_APP_SERVER_PORT}/notice/create/`,
+          data,
+          {
+            headers: { Authorization: `Bearer ${token}` },
+          }
+        );
+      }
+      window.location.href = "/notice-list";
+    } catch (error) {
+      console.error("Error submitting notice:", error);
+    }
+    console.log("Stored token:", token);
   };
 
   return (
@@ -83,8 +105,8 @@ function NoticeCreatePage({ isEdit, existingData }) {
         {type === "event" && (
           <select value={event} onChange={(e) => setEvent(e.target.value)}>
             {eventOptions.map((option) => (
-              <option key={option} value={option}>
-                {option}
+              <option key={option.value} value={option.value}>
+                {option.label}
               </option>
             ))}
           </select>
@@ -107,8 +129,14 @@ function NoticeCreatePage({ isEdit, existingData }) {
 
       <BottomContainer>
         <Select>
-          <div></div>
-          <p>중요 공지로 설정</p>
+          <label>
+            <input
+              type="checkbox"
+              checked={isImportant}
+              onChange={() => setIsImportant(!isImportant)}
+            />
+            중요 공지로 설정
+          </label>
         </Select>
         <ButtonContainer>
           <button

@@ -10,27 +10,39 @@ function NoticeListPage() {
   const [notices, setNotices] = useState([]);
   const [filteredNotices, setFilteredNotices] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
-  const [activeFilter, setActiveFilter] = useState("all"); // 기본 필터는 'all'
-
+  const [activeFilter, setActiveFilter] = useState("all");
+  const [currentPage, setCurrentPage] = useState(1); // 현재 페이지 상태 추가
+  const [totalCount, setTotalCount] = useState(0); // 전체 공지 수 상태 추가
+  const [nextPage, setNextPage] = useState(null); // 다음 페이지 URL 상태 추가
   const navigate = useNavigate();
 
   const navigateToCreate = () => {
-    navigate("/NoticeCreate");
+    navigate("/notice-create");
   };
 
   useEffect(() => {
-    // Axios를 사용해 API 호출
-    axios
-      .get("/api/notices")
-      .then((response) => {
-        setNotices(response.data);
-        setFilteredNotices(response.data); // 기본적으로 모든 공지 표시
-      })
-      .catch((error) => console.error("Error fetching notices:", error));
-  }, []);
+    const fetchNotices = async (page) => {
+      try {
+        const response = await instance.get(
+          `${process.env.REACT_APP_SERVER_PORT}/notice/list/`,
+          {
+            params: { page }, // 페이지 번호를 쿼리 파라미터로 전달
+          }
+        );
+        setNotices(response.data.results);
+        setFilteredNotices(response.data.results);
+        setTotalCount(response.data.count); // 전체 공지 수 설정
+        setNextPage(response.data.next); // 다음 페이지 URL 설정
+      } catch (error) {
+        console.error("Error fetching notices:", error);
+      }
+    };
+
+    fetchNotices(currentPage); // 현재 페이지로 공지사항 불러오기
+  }, [currentPage]); // currentPage가 변경될 때마다 호출
 
   const filterNotices = (type) => {
-    setActiveFilter(type); // 클릭한 버튼을 활성 상태로 설정
+    setActiveFilter(type);
     if (type === "all") {
       setFilteredNotices(notices);
     } else {
@@ -40,6 +52,12 @@ function NoticeListPage() {
 
   const searchNotices = (term) => {
     setFilteredNotices(notices.filter((notice) => notice.title.includes(term)));
+  };
+
+  const handleNextPage = () => {
+    if (nextPage) {
+      setCurrentPage((prevPage) => prevPage + 1); // 다음 페이지로 이동
+    }
   };
 
   return (
@@ -63,19 +81,19 @@ function NoticeListPage() {
         <Filter>
           <FilterButton
             onClick={() => filterNotices("all")}
-            active={activeFilter === "all"} // 'all' 필터가 활성 상태인지 확인
+            active={activeFilter === "all"}
           >
             전체 공지
           </FilterButton>
           <FilterButton
             onClick={() => filterNotices("operation")}
-            active={activeFilter === "operation"} // 'operation' 필터가 활성 상태인지 확인
+            active={activeFilter === "operation"}
           >
             운영 공지
           </FilterButton>
           <FilterButton
             onClick={() => filterNotices("event")}
-            active={activeFilter === "event"} // 'event' 필터가 활성 상태인지 확인
+            active={activeFilter === "event"}
           >
             행사 공지
           </FilterButton>
@@ -84,13 +102,14 @@ function NoticeListPage() {
           {filteredNotices.map((notice) => (
             <li key={notice.id}>
               <a href={`/notices/${notice.id}`}>{notice.title}</a>
+              <div>
+                <h3>(준)축제준비위원회{notice.author}</h3>
+                <h4>{notice.created_at}</h4>
+              </div>
             </li>
           ))}
         </ul>
-        <Ullist>
-          <Ilbox>[공지] 테스트 공지사항입니다1</Ilbox>
-          <Ilbox>[공지] 테스트 공지사항입니다2</Ilbox>
-        </Ullist>
+        {nextPage && <button onClick={handleNextPage}>다음 페이지</button>}
       </TopContainer>
       <Create onClick={navigateToCreate}>
         <img src={createicon} />
@@ -100,23 +119,6 @@ function NoticeListPage() {
 }
 
 export default NoticeListPage;
-
-// 임시 Ul, il 스타일 지정
-const Ullist = styled.div``;
-
-const Ilbox = styled.div`
-  width: 325px;
-  height: 47px;
-  display: flex;
-  padding: 20px;
-  flex-direction: column;
-  align-items: flex-start;
-  gap: 10px;
-  border-radius: 15px;
-  border: 1px solid var(--green02, #03d664);
-  background: var(--wh, #fff);
-  margin-bottom: 15px;
-`;
 
 const Create = styled.div`
   cursor: pointer;
@@ -135,6 +137,54 @@ const TopContainer = styled.div`
   margin-top: 60px;
   ul {
     margin: 0;
+    padding: 0;
+    li {
+      width: 325px;
+      height: 47px;
+      display: flex;
+      padding: 20px;
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 10px;
+      border-radius: 15px;
+      border: 1px solid var(--green02, #03d664);
+      background: var(--wh, #fff);
+      margin-bottom: 15px;
+
+      a {
+        color: var(--bk01, #000);
+        font-family: Pretendard;
+        font-size: 16px;
+        font-style: normal;
+        font-weight: 600;
+        line-height: 22px; /* 137.5% */
+        letter-spacing: -0.5px;
+      }
+      div {
+        display: flex;
+        align-items: center;
+        h3 {
+          color: var(--green01, var(--green_01, #00f16f));
+          font-family: Pretendard;
+          font-size: 12px;
+          font-style: normal;
+          font-weight: 400;
+          line-height: 12px; /* 100% */
+          letter-spacing: -0.5px;
+          margin: 0 10px 0 0;
+        }
+        h4 {
+          color: var(--gray05, #8e8e8e);
+          font-family: Pretendard;
+          font-size: 12px;
+          font-style: normal;
+          font-weight: 400;
+          line-height: 22px; /* 183.333% */
+          letter-spacing: -0.5px;
+          margin: 0;
+        }
+      }
+    }
   }
 `;
 
