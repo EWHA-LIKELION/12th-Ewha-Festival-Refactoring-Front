@@ -1,23 +1,42 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import { useLocation, useNavigate } from "react-router-dom";
+import instance from "../../api/axios";
 import styled from "styled-components";
 import BackArrow from "../../images/BoothDetail/arrow-left.svg";
 import logo from "../../images/BoothEdit/logo.svg";
 import 임시부스이미지 from "../../images/BoothDetail/임시부스이미지.svg";
 import addnoticebutton from "../../images/BoothEdit/addnoticebutton.svg";
+import addMenu from "../../images/BoothEdit/addMenu.svg";
 import BoothTimeSetting from "./BoothTimeSetting";
+import MenuImage from "../../components/MenuImage";
 
-const BoothDetailPage = () => {
+const BoothEditPage = () => {
+  const location = useLocation();
+  const navigate = useNavigate();
+  const boothId = location.state?.id; // BoothDetailPage에서 전달된 boothId 가져오기
+
   const [boothImage, setBoothImage] = useState(임시부스이미지);
   const [boothName, setBoothName] = useState("");
-  const [isscraped, setisccraped] = useState(false);
   const [selectedNotice, setSelectedNotice] = useState(null);
   const [newNoticeContent, setNewNoticeContent] = useState("");
   const [notices, setNotices] = useState([]);
-  const [isNoticeBoxVisible, setIsNoticeBoxVisible] = useState(false); // 상태 추가
+  const [isNoticeBoxVisible, setIsNoticeBoxVisible] = useState(false);
+  const [menuDetails, setMenuDetails] = useState({});
+  const [selectedManage, setSelectedManage] = useState("");
 
-  const clickScrap = () => {
-    setisccraped(!isscraped);
-  };
+  useEffect(() => {
+    const fetchBoothData = async () => {
+      try {
+        const response = await instance.get(`/booths/${boothId}/`);
+        setBoothName(response.data.data.name); // 부스 이름 설정
+        // 기타 부스 데이터 설정 가능
+      } catch (error) {
+        console.error("Error fetching booth data:", error);
+      }
+    };
+
+    fetchBoothData();
+  }, [boothId]);
 
   const handleImageChange = (event) => {
     const file = event.target.files[0];
@@ -44,7 +63,7 @@ const BoothDetailPage = () => {
 
   const handleNoticeSubmit = (event) => {
     if (event.key === "Enter" && newNoticeContent.trim() !== "") {
-      event.preventDefault(); // 기본 엔터 동작 방지
+      event.preventDefault();
       const timestamp = new Date().toLocaleTimeString([], {
         hour: "2-digit",
         minute: "2-digit",
@@ -56,23 +75,66 @@ const BoothDetailPage = () => {
         borderColor: selectedNotice === "판매" ? "#9747ff" : "#00F16F",
       };
       setNotices([...notices, notice]);
-      setNewNoticeContent(""); // 공지 내용 초기화
-      setIsNoticeBoxVisible(false); // 공지 추가 후 박스 숨기기
+      setNewNoticeContent("");
+      setIsNoticeBoxVisible(false);
     }
   };
 
   const toggleNoticeBox = () => {
-    setIsNoticeBoxVisible(!isNoticeBoxVisible); // 공지 추가 박스 보이기/숨기기
+    setIsNoticeBoxVisible(!isNoticeBoxVisible);
+  };
+
+  const goToAddMenuPage = () => {
+    navigate("/booth-edit-addmenu", { state: { id: boothId } });
+  };
+
+  const handleManageSelect = (manages) => {
+    setSelectedManage(manages);
+  };
+
+  const handleUpdateBooth = async () => {
+    const accessToken = localStorage.getItem("accessToken");
+    const userType = localStorage.getItem("type"); // 사용자 유형을 로컬 스토리지에서 가져오기
+
+    if (userType !== "tf") {
+      alert("권한이 없습니다."); // 권한 체크
+      return; // 권한이 없으면 함수 종료
+    }
+
+    try {
+      const response = await instance.patch(
+        `/manages/${boothId}/`, // boothId를 사용하여 요청
+        {
+          name: boothName,
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${accessToken}`, // Authorization 헤더 설정
+          },
+        }
+      );
+
+      if (response.status === 200) {
+        alert(response.data.message);
+        navigate(`/booth-detail/${boothId}`, { state: { id: boothId } }); // 수정 후 상세 페이지로 이동
+      }
+    } catch (error) {
+      if (error.response) {
+        alert(error.response.data.detail || error.response.data.message);
+      } else {
+        alert("부스 수정 중 오류가 발생했습니다.");
+      }
+    }
   };
 
   return (
     <Wrapper>
       <Header>
-        <img src={BackArrow} alt="뒤로가기" />
+        <img src={BackArrow} alt="뒤로가기" onClick={() => navigate(-1)} />
         <img src={logo} alt="로고" />
       </Header>
       <BoothImageWrapper>
-        <TitleFontSytle>대표사진</TitleFontSytle>
+        <TitleFontStyle>대표사진</TitleFontStyle>
         <BoothImage>
           <img src={boothImage} alt="부스이미지" />
           <div
@@ -91,7 +153,7 @@ const BoothDetailPage = () => {
         </BoothImage>
       </BoothImageWrapper>
       <BoothNameWrapper>
-        <TitleFontSytle>부스 이름</TitleFontSytle>
+        <TitleFontStyle>부스 이름</TitleFontStyle>
         <input
           type="text"
           value={boothName}
@@ -101,15 +163,15 @@ const BoothDetailPage = () => {
       </BoothNameWrapper>
       <NoticeWrapper>
         <div className="noticetitle">
-          <TitleFontSytle>실시간 공지사항</TitleFontSytle>
+          <TitleFontStyle>실시간 공지사항</TitleFontStyle>
           <img
             src={addnoticebutton}
             alt="공지사항 추가"
-            onClick={toggleNoticeBox} // 버튼 클릭 시 공지 박스 토글
+            onClick={toggleNoticeBox}
             style={{ cursor: "pointer" }}
           />
         </div>
-        {isNoticeBoxVisible && ( // NewNoticeBox 조건부 렌더링
+        {isNoticeBoxVisible && (
           <NoticeBoxWrapper>
             <NewNoticeBox>
               <div className="noticetop">
@@ -121,10 +183,6 @@ const BoothDetailPage = () => {
                       background:
                         selectedNotice === "판매" ? "#9747ff" : "#f0f0f0",
                       color: selectedNotice === "판매" ? "white" : "#5f5f5f",
-                      border:
-                        selectedNotice === "판매"
-                          ? "none"
-                          : "1px solid #c9c9c9",
                     }}
                   >
                     판매 공지
@@ -136,10 +194,6 @@ const BoothDetailPage = () => {
                       background:
                         selectedNotice === "운영" ? "#00F16F" : "#f0f0f0",
                       color: selectedNotice === "운영" ? "white" : "#5f5f5f",
-                      border:
-                        selectedNotice === "운영"
-                          ? "none"
-                          : "1px solid #c9c9c9",
                     }}
                   >
                     운영 공지
@@ -147,8 +201,7 @@ const BoothDetailPage = () => {
                 </div>
                 <div className="delete" onClick={toggleNoticeBox}>
                   취소
-                </div>{" "}
-                {/* 추가된 취소 버튼 */}
+                </div>
               </div>
               <textarea
                 value={newNoticeContent}
@@ -188,23 +241,52 @@ const BoothDetailPage = () => {
         </NoticeBoxWrapper>
       </NoticeWrapper>
       <BoothTime>
-        <TitleFontSytle>부스 운영시간</TitleFontSytle>
+        <TitleFontStyle>부스 운영시간</TitleFontStyle>
         <BoothTimeSetting />
       </BoothTime>
+      <BoothIntroduce>
+        <TitleFontStyle>부스 소개글</TitleFontStyle>
+        <textarea placeholder="부스에 대해 알리는 소개글을 작성해주세요(최대 100자)"></textarea>
+      </BoothIntroduce>
+      <MenuWrapper>
+        <TitleFontStyle>메뉴</TitleFontStyle>
+        <MenuBox>
+          <MenuImage menu={menuDetails} />
+          <img src={addMenu} alt="부스이미지" onClick={goToAddMenuPage} />
+        </MenuBox>
+      </MenuWrapper>
+      <BoothContact>
+        <TitleFontStyle>부스 운영진 연락처</TitleFontStyle>
+        <textarea
+          placeholder="문의를 위한 부스 운영진 연락처를 남겨주세요
+예) 카카오톡 오픈채팅 링크"
+        ></textarea>
+      </BoothContact>
+      <TitleFontStyle>판매 여부</TitleFontStyle>
+      <ManageOptions>
+        {["운영 중", "운영 종료"].map((manages) => (
+          <Option
+            key={manages}
+            onClick={() => handleManageSelect(manages)}
+            selected={selectedManage === manages}
+          >
+            {manages}
+          </Option>
+        ))}
+      </ManageOptions>
+      <SubmitButton onClick={handleUpdateBooth}>작성 완료</SubmitButton>
     </Wrapper>
   );
 };
 
-export default BoothDetailPage;
+export default BoothEditPage;
 
-// (스타일 정의는 동일하게 유지)
-
+// 스타일 컴포넌트 코드
 const Wrapper = styled.div`
   min-height: calc(var(--vh, 1vh) * 100);
   display: flex;
   flex-direction: column;
   align-items: center;
-  overflow-y: auto;
 `;
 
 const Header = styled.div`
@@ -246,13 +328,10 @@ const BoothImage = styled.div`
   }
 `;
 
-const TitleFontSytle = styled.div`
+const TitleFontStyle = styled.div`
   color: #000;
   font-size: 15px;
-  font-style: normal;
   font-weight: 700;
-  align-self: self-start;
-  justify-self: flex-start;
 `;
 
 const BoothNameWrapper = styled.div`
@@ -287,9 +366,7 @@ const NewNoticeBox = styled.div`
     background: #f0f0f0;
     width: 40px;
     color: #5f5f5f;
-    font-family: Pretendard;
     font-size: 10.769px;
-    font-style: normal;
     font-weight: 700;
     cursor: pointer;
     margin-right: 7px;
@@ -345,31 +422,106 @@ const Notice = styled.div`
     padding: 3.5px 7.179px;
     width: 40px;
     color: white;
-    font-family: Pretendard;
     font-size: 10.769px;
     font-weight: 700;
   }
 `;
+
 const NoticeBoxWrapper = styled.div`
   width: 360px;
   max-height: 230px;
   overflow-y: scroll;
-  /* 스크롤바 스타일 */
   &::-webkit-scrollbar {
-    width: 3px; /* 스크롤바의 너비 */
+    width: 3px;
   }
 
   &::-webkit-scrollbar-thumb {
-    background-color: #bbb; /* 스크롤 핸들의 색상 */
-    border-radius: 10px; /* 스크롤 핸들의 모서리 둥글게 */
+    background-color: #bbb;
+    border-radius: 10px;
   }
 
   &::-webkit-scrollbar-thumb:hover {
-    background-color: #8d8a8a; /* 스크롤 핸들이 호버될 때 색상 */
+    background-color: #8d8a8a;
   }
 `;
+
 const BoothTime = styled.div`
+  width: 350px;
+  height: 200px;
+`;
+
+const BoothIntroduce = styled.div`
+  width: 350px;
+  textarea {
+    width: 327.914px;
+    height: 82.754px;
+    padding: 11.379px 14.482px;
+    border-radius: 15.516px;
+    border: 1.034px solid #e7e7e7;
+    font-size: 12.413px;
+    font-weight: 500;
+    resize: none;
+  }
+`;
+
+const MenuWrapper = styled.div`
   width: 350px;
 `;
 
-const BoothIntroduce = styled.div``;
+const MenuBox = styled.div`
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  place-items: center;
+  img {
+    cursor: pointer;
+  }
+`;
+
+const BoothContact = styled.div`
+  width: 350px;
+  textarea {
+    width: 327.914px;
+    height: 82.754px;
+    padding: 11.379px 14.482px;
+    border-radius: 15.516px;
+    border: 1.034px solid #e7e7e7;
+    font-size: 12.413px;
+    font-weight: 500;
+    resize: none;
+  }
+`;
+
+const SubmitButton = styled.button`
+  padding: 10px 140px;
+  border-radius: 10px;
+  border: 1px solid #03d664;
+  background: #07fb77;
+  color: var(--wh, #fff);
+  text-align: center;
+  font-size: 16px;
+  font-weight: 700;
+  cursor: pointer;
+`;
+
+const ManageOptions = styled.div`
+  width: 100%;
+  margin-bottom: 20px;
+  display: flex;
+`;
+
+const Option = styled.div`
+  border: 1px solid #f2f2f2;
+  background: ${(props) =>
+    props.selected ? "var(--green_01, #00F16F)" : "#f7f7f7"};
+  border-radius: 30px;
+  padding: 7px 17px;
+  font-size: 15px;
+  margin-right: 8px;
+  color: ${(props) =>
+    props.selected ? "var(--wh, #FFF)" : "var(--gray01, #bbb)"};
+  font-weight: 700;
+  cursor: pointer;
+  &:hover {
+    background-color: #e0e0e0;
+  }
+`;
