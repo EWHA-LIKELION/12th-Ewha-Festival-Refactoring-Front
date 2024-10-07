@@ -7,7 +7,7 @@ import BasicBooth from "../images/basicbooth.svg"; // 기본 부스 이미지 �
 import scrapBefore from "../images/BoothDetail/scrapbefore.svg";
 import scrapAfter from "../images/BoothDetail/scrapafter.svg";
 
-const BoothItem = ({ booth }) => {
+const BoothItem = ({ booth, render, setRender }) => {
   const [isscraped, setisscraped] = useState(false);
   const navigate = useNavigate();
 
@@ -19,6 +19,7 @@ const BoothItem = ({ booth }) => {
       try {
         const response = await instance.post(
           `${process.env.REACT_APP_SERVER_PORT}/booths/${booth.id}/scrap/`,
+          {},
           {
             headers: {
               Authorization: `Bearer ${token}`,
@@ -27,6 +28,7 @@ const BoothItem = ({ booth }) => {
         );
         console.log(response.data);
         setisscraped(true);
+        setRender(render + 1);
       } catch (error) {
         console.error(error);
       }
@@ -42,6 +44,7 @@ const BoothItem = ({ booth }) => {
         );
         console.log(response.data);
         setisscraped(false);
+        setRender(render + 1);
       } catch (error) {
         console.error(error);
       }
