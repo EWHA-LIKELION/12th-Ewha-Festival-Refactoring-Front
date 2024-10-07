@@ -84,12 +84,7 @@ export default BoothItem;
 const Booth = styled.div`
   max-width: 170px;
   max-height: 197px;
-  background: linear-gradient(
-      180deg,
-      rgba(0, 0, 0, 0.4) 0%,
-      rgba(0, 0, 0, 0) 161.62%
-    ),
-    url(<path-to-image>) lightgray 50% / cover no-repeat;
+  background: url(<path-to-image>) lightgray 50% / cover no-repeat;
   background-size: cover;
   background-position: center;
   border-radius: 20px;
@@ -102,6 +97,28 @@ const Booth = styled.div`
   overflow: hidden;
   position: relative;
   z-index: 1;
+
+  /* 그라디언트를 ::before로 적용 */
+  &::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(
+      180deg,
+      rgba(0, 0, 0, 0.4) 0%,
+      rgba(0, 0, 0, 0) 161.62%
+    );
+    border-radius: 20px;
+    z-index: 2; /* 이미지 위에 그라디언트를 표시 */
+  }
+
+  /* 이 안의 내용이 그라디언트와 이미지 위에 올라오게 */
+  & > * {
+    z-index: 3;
+  }
 `;
 
 const BoothInfo = styled.div`

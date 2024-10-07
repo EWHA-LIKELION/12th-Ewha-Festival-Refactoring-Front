@@ -153,7 +153,7 @@ const SearchPage = () => {
             </CategoryBar>
 
             {/* 검색 결과 표시 */}
-            <BoothList>
+            <BoothList hasItems={filteredBooths.length > 0}>
               {filteredBooths.map((booth) => (
                 <BoothItem key={booth.id} booth={booth} />
               ))}
@@ -220,7 +220,8 @@ const BoothList = styled.div`
   box-sizing: border-box;
   grid-auto-rows: 197px; /* 높이도 설정 */
   margin-top: 17px;
-  margin-bottom: 33px;
+  margin-bottom: ${(props) =>
+    props.hasItems ? "33px" : "0px"}; /* 조건부 margin-bottom */
 `;
 
 const HeaderContainer = styled.div`
@@ -287,6 +288,7 @@ const SearchButton = styled.button`
 
 const CategoryBar = styled.div`
   display: flex;
+  margin-bottom: 0px;
 `;
 
 /* 카테고리 버튼에 $selected prop 추가 */
@@ -332,11 +334,13 @@ const NoResult = styled.div`
   justify-content: center;
   align-items: center;
   flex-direction: column;
+  margin-top: 203px;
 `;
 
 const NoticeList = styled.ul`
   list-style: none;
   padding: 0;
+  margin-top: 0px;
 `;
 
 const NoticeItem = styled.li`
