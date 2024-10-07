@@ -106,48 +106,53 @@ const SearchPage = () => {
             </svg>
           </Search>
         </HeaderContainer>
-        <SearchResult>
-          총{" "}
-          {filteredBooths.length +
-            (selectedCategory === "전체"
-              ? notices.length
-              : filteredNotices.length)}
-          개의 검색결과
-        </SearchResult>
-        <CategoryBar>
-          <Category
-            $selected={selectedCategory === "전체"}
-            onClick={() => handleCategoryChange("전체")}
-          >
-            전체
-          </Category>
-          <Category
-            $selected={selectedCategory === "booth"}
-            onClick={() => handleCategoryChange("booth")}
-          >
-            부스
-          </Category>
-          <Category
-            $selected={selectedCategory === "show"}
-            onClick={() => handleCategoryChange("show")}
-          >
-            공연
-          </Category>
-          <Category
-            $selected={selectedCategory === "notice"}
-            onClick={() => handleCategoryChange("notice")}
-          >
-            공지사항
-          </Category>
-        </CategoryBar>
 
-        {/* 검색 결과가 없을 경우 */}
-        {filteredBooths.length === 0 && filteredNotices.length === 0 ? (
+        {/* 전체 카테고리에서 검색 결과가 없을 때 */}
+        {selectedCategory === "전체" &&
+        filteredBooths.length === 0 &&
+        notices.length === 0 ? (
           <NoResult>
             <img src={noresultIcon} alt="결과 없음" />
           </NoResult>
         ) : (
           <>
+            {/* 검색 결과가 있을 때만 검색 결과 표시 및 카테고리 바 렌더링 */}
+            <SearchResult>
+              총{" "}
+              {filteredBooths.length +
+                (selectedCategory === "전체"
+                  ? notices.length
+                  : filteredNotices.length)}
+              개의 검색결과
+            </SearchResult>
+            <CategoryBar>
+              <Category
+                $selected={selectedCategory === "전체"}
+                onClick={() => handleCategoryChange("전체")}
+              >
+                전체
+              </Category>
+              <Category
+                $selected={selectedCategory === "booth"}
+                onClick={() => handleCategoryChange("booth")}
+              >
+                부스
+              </Category>
+              <Category
+                $selected={selectedCategory === "show"}
+                onClick={() => handleCategoryChange("show")}
+              >
+                공연
+              </Category>
+              <Category
+                $selected={selectedCategory === "notice"}
+                onClick={() => handleCategoryChange("notice")}
+              >
+                공지사항
+              </Category>
+            </CategoryBar>
+
+            {/* 검색 결과 표시 */}
             <BoothList>
               {filteredBooths.map((booth) => (
                 <BoothItem key={booth.id} booth={booth} />
