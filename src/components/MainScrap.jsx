@@ -6,7 +6,11 @@ import moreScrap from "../images/moreScrap.svg";
 import instance from "../api/axios.js";
 
 const MainScrap = () => {
-  const [scrapData, setScrapData] = useState([]);
+  const [scrapData, setScrapData] = useState({
+    booths: [],
+    menus: [],
+    shows: [],
+  });
   const [selectedCategory, setSelectedCategory] = useState("부스");
   const categories = ["부스", "메뉴", "공연"];
   const optionRefs = useRef([]);
@@ -23,9 +27,9 @@ const MainScrap = () => {
             Authorization: `Bearer ${token}`,
           },
         });
-        const data = response.data.booths;
-        setScrapData(data);
-        console.log(data);
+        const { booths, menus, shows } = response.data;
+        setScrapData({ booths, menus, shows });
+        console.log(response.data);
       } catch (error) {
         console.error("데이터 가져오기 실패:", error);
       }
@@ -46,12 +50,14 @@ const MainScrap = () => {
     setSelectedCategory(option);
   };
 
-  const filteredData = scrapData.filter((item) => {
-    if (selectedCategory === "부스" && item.type === "booth") return true;
-    if (selectedCategory === "메뉴" && item.type === "menu") return true;
-    if (selectedCategory === "공연" && item.type === "show") return true;
-    return false;
-  });
+  const filteredData =
+    scrapData[
+      selectedCategory === "부스"
+        ? "booths"
+        : selectedCategory === "메뉴"
+        ? "menus"
+        : "shows"
+    ];
 
   return (
     <Wrapper>
