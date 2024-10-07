@@ -82,12 +82,14 @@ const BoothItem = ({ booth }) => {
 export default BoothItem;
 
 const Booth = styled.div`
-  width: 170px;
-  height: 197px;
-  background: ${(props) =>
-    props.isOpened
-      ? "linear-gradient(180deg, rgba(0, 0, 0, 0.4) 0%, rgba(0, 0, 0, 0) 161.62%)"
-      : "rgba(0, 255, 0, 0.3)"};
+  max-width: 170px;
+  max-height: 197px;
+  background: linear-gradient(
+      180deg,
+      rgba(0, 0, 0, 0.4) 0%,
+      rgba(0, 0, 0, 0) 161.62%
+    ),
+    url(<path-to-image>) lightgray 50% / cover no-repeat;
   background-size: cover;
   background-position: center;
   border-radius: 20px;
