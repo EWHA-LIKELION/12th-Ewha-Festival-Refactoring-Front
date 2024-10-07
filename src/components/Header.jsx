@@ -32,23 +32,24 @@ const MainHeader = () => {
 
     try {
       const response = await instance.get(
-        `${process.env.REACT_APP_SERVER_PORT}/main/search`, // api 명세에 맞게 수정
+        `${process.env.REACT_APP_SERVER_PORT}/main/search`,
         {
           params: {
-            q: searchTerm, // 입력된 검색어 전달
+            q: searchTerm,
           },
         }
       );
 
-      console.log("검색 결과:", response.data.booths);
-
-      // 검색 결과를 받아와서 다른 페이지로 navigate
+      // 부스와 공지사항을 둘 다 상태에 넘겨서 페이지 이동
       navigate("/search", {
-        state: { booths: response.data.booths, searchTerm },
+        state: {
+          booths: response.data.booths,
+          notices: response.data.notices,
+          searchTerm,
+        },
       });
     } catch (error) {
-      console.error("검색 오류:", error);
-      navigate("/search", { state: { booths: [] } }); // 검색 결과가 없을 경우 빈 배열 전달
+      navigate("/search", { state: { booths: [], notices: [] } }); // 부스와 공지사항 모두 빈 배열로 전달
     }
   };
 
