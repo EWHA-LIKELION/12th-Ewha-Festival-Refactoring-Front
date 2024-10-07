@@ -11,6 +11,7 @@ const SearchPage = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const [booths, setBooths] = useState([]);
+  const [notices, setNotices] = useState([]); // 공지사항 상태 추가
   const [selectedCategory, setSelectedCategory] = useState("전체");
   const [searchTerm, setSearchTerm] = useState(
     location.state?.searchTerm || ""
@@ -20,6 +21,9 @@ const SearchPage = () => {
     // 검색 결과가 전달되면 상태에 저장
     if (location.state && location.state.booths) {
       setBooths(location.state.booths);
+    }
+    if (location.state && location.state.notices) {
+      setNotices(location.state.notices); // 공지사항 데이터 저장
     }
   }, [location.state]);
 
@@ -44,9 +48,11 @@ const SearchPage = () => {
 
       // 검색 결과를 받아와서 상태 업데이트
       setBooths(response.data.booths);
+      setNotices(response.data.notices); // 공지사항도 업데이트
     } catch (error) {
       console.error("검색 오류:", error);
       setBooths([]); // 검색 결과가 없을 경우 빈 배열 설정
+      setNotices([]); // 공지사항도 빈 배열 설정
     }
   };
 
@@ -54,13 +60,15 @@ const SearchPage = () => {
     navigate(-1); // 이전 페이지로 돌아가기
   };
 
-  // 선택된 카테고리에 맞는 부스/공연 필터링
+  // 선택된 카테고리에 맞는 부스/공연/공지사항 필터링
   const filteredBooths = booths.filter((booth) => {
     if (selectedCategory === "전체") {
       return true; // 전체 선택 시 모든 부스를 보여줌
     }
     return booth.type === selectedCategory;
   });
+
+  const filteredNotices = selectedCategory === "notice" ? notices : [];
 
   return (
     <>
@@ -98,7 +106,14 @@ const SearchPage = () => {
             </svg>
           </Search>
         </HeaderContainer>
-        <SearchResult>총 {filteredBooths.length}개의 검색결과</SearchResult>
+        <SearchResult>
+          총{" "}
+          {filteredBooths.length +
+            (selectedCategory === "전체"
+              ? notices.length
+              : filteredNotices.length)}
+          개의 검색결과
+        </SearchResult>
         <CategoryBar>
           <Category
             $selected={selectedCategory === "전체"}
@@ -118,10 +133,16 @@ const SearchPage = () => {
           >
             공연
           </Category>
+          <Category
+            $selected={selectedCategory === "notice"}
+            onClick={() => handleCategoryChange("notice")}
+          >
+            공지사항
+          </Category>
         </CategoryBar>
 
         {/* 검색 결과가 없을 경우 */}
-        {filteredBooths.length === 0 ? (
+        {filteredBooths.length === 0 && filteredNotices.length === 0 ? (
           <NoResult>
             <img src={noresultIcon} alt="결과 없음" />
           </NoResult>
@@ -132,7 +153,41 @@ const SearchPage = () => {
                 <BoothItem key={booth.id} booth={booth} />
               ))}
             </BoothList>
+
+            {/* 공지사항은 전체 카테고리일 때만 아래에 표시 */}
+            {selectedCategory === "전체" && notices.length > 0 && (
+              <>
+                <NoticeList>
+                  {notices.map((notice) => (
+                    <NoticeItem key={notice.id}>
+                      <NoticeName>
+                        <a href={`/notices/${notice.id}`}>{notice.name}</a>
+                      </NoticeName>
+                      <NoticeWrapper>
+                        <NoticeAuthor>(준)축제준비위원회</NoticeAuthor>
+                        <NoticeDate>{notice.created_at}</NoticeDate>
+                      </NoticeWrapper>
+                    </NoticeItem>
+                  ))}
+                </NoticeList>
+              </>
+            )}
           </>
+        )}
+
+        {/* 공지사항 카테고리를 선택했을 때만 공지사항만 표시 */}
+        {selectedCategory === "notice" && (
+          <NoticeList>
+            {filteredNotices.map((notice) => (
+              <NoticeItem key={notice.id}>
+                <a href={`/notices/${notice.id}`}>{notice.name}</a>
+                <NoticeWrapper>
+                  <NoticeAuthor>(준)축제준비위원회</NoticeAuthor>
+                  <NoticeDate>{notice.created_at}</NoticeDate>
+                </NoticeWrapper>
+              </NoticeItem>
+            ))}
+          </NoticeList>
         )}
       </Wrapper>
     </>
@@ -149,9 +204,7 @@ const Wrapper = styled.div`
   max-width: 390px;
   display: flex;
   flex-direction: column;
-  padding-top: 27px;
-  padding-left: 20px;
-  padding-right: 20px;
+  padding: 27px 20px 301px 20px;
 `;
 
 /* BoothList를 ShowPage 스타일과 동일하게 수정 */
@@ -164,6 +217,7 @@ const BoothList = styled.div`
   box-sizing: border-box;
   grid-auto-rows: 197px; /* 높이도 설정 */
   margin-top: 17px;
+  margin-bottom: 33px;
 `;
 
 const HeaderContainer = styled.div`
@@ -239,7 +293,7 @@ const Category = styled.button`
   justify-content: center;
   align-items: center;
   gap: 10px;
-  width: 60px;
+  padding: 7px 17px;
   height: 34px;
   border-radius: 30px;
   border: 1px solid ${(props) => (props.$selected ? "#03d664" : "#F2F2F2")};
@@ -275,4 +329,76 @@ const NoResult = styled.div`
   justify-content: center;
   align-items: center;
   flex-direction: column;
+`;
+
+const NoticeList = styled.ul`
+  list-style: none;
+  padding: 0;
+`;
+
+const NoticeItem = styled.li`
+  display: flex;
+  padding: 20px;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 10px;
+  border-radius: 15px;
+  border: 1px solid var(--gray04, #c1d9cc);
+  background: var(--wh, #fff);
+
+  color: var(--bk01, #000);
+  font-family: Pretendard;
+  font-size: 16px;
+  font-style: normal;
+  font-weight: 600;
+  line-height: 22px; /* 137.5% */
+  letter-spacing: -0.5px;
+
+  margin-bottom: 15px;
+`;
+
+const NoticeName = styled.div`
+  color: var(--bk01, #000);
+  font-family: Pretendard;
+  font-size: 16px;
+  font-style: normal;
+  font-weight: 600;
+  line-height: 22px; /* 137.5% */
+  letter-spacing: -0.5px;
+`;
+
+const NoticeWrapper = styled.div`
+  display: flex;
+  flex-direction: row;
+`;
+
+const NoticeAuthor = styled.div`
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  width: 87px;
+  height: 15px;
+  color: var(--green01, var(--green_01, #00f16f));
+  font-family: Pretendard;
+  font-size: 12px;
+  font-style: normal;
+  font-weight: 400;
+  line-height: 12px; /* 100% */
+  letter-spacing: -0.5px;
+`;
+
+const NoticeDate = styled.div`
+  margin-left: 10px;
+  display: flex;
+  width: 228px;
+  height: 15px;
+  flex-direction: column;
+  justify-content: center;
+  color: var(--gray05, #8e8e8e);
+  font-family: Pretendard;
+  font-size: 12px;
+  font-style: normal;
+  font-weight: 400;
+  line-height: 22px; /* 183.333% */
+  letter-spacing: -0.5px;
 `;
