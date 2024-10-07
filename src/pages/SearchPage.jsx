@@ -160,9 +160,7 @@ const SearchPage = () => {
                 <NoticeList>
                   {notices.map((notice) => (
                     <NoticeItem key={notice.id}>
-                      <NoticeName>
-                        <a href={`/notices/${notice.id}`}>{notice.name}</a>
-                      </NoticeName>
+                      <a href={`/notice-detail/${notice.id}`}>{notice.name}</a>
                       <NoticeWrapper>
                         <NoticeAuthor>(준)축제준비위원회</NoticeAuthor>
                         <NoticeDate>{notice.created_at}</NoticeDate>
@@ -180,7 +178,7 @@ const SearchPage = () => {
           <NoticeList>
             {filteredNotices.map((notice) => (
               <NoticeItem key={notice.id}>
-                <a href={`/notices/${notice.id}`}>{notice.name}</a>
+                <a href={`/notice-detail/${notice.id}`}>{notice.name}</a>
                 <NoticeWrapper>
                   <NoticeAuthor>(준)축제준비위원회</NoticeAuthor>
                   <NoticeDate>{notice.created_at}</NoticeDate>
@@ -355,16 +353,17 @@ const NoticeItem = styled.li`
   letter-spacing: -0.5px;
 
   margin-bottom: 15px;
-`;
 
-const NoticeName = styled.div`
-  color: var(--bk01, #000);
-  font-family: Pretendard;
-  font-size: 16px;
-  font-style: normal;
-  font-weight: 600;
-  line-height: 22px; /* 137.5% */
-  letter-spacing: -0.5px;
+  a {
+    color: var(--bk01, #000);
+    font-family: Pretendard;
+    font-size: 16px;
+    font-style: normal;
+    font-weight: 600;
+    line-height: 22px; /* 137.5% */
+    letter-spacing: -0.5px;
+    text-decoration-line: none;
+  }
 `;
 
 const NoticeWrapper = styled.div`
