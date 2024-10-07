@@ -111,7 +111,7 @@ const MainHeader = () => {
                 축제 일정 및 상설 부스
               </li>
               <li onClick={() => goToPage("/trash")}>쓰레기통 및 그릇 반납</li>
-              <li onClick={() => goToPage("/BarrierFree")}>배리어프리</li>
+              <li onClick={() => goToPage("/barrier-free")}>배리어프리</li>
               <li onClick={() => goToPage("/mypage")}>마이페이지</li>
             </MenuList>
           </Modal>
