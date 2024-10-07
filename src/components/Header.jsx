@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import styled, { createGlobalStyle } from "styled-components";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import greenlogo from "../images/greenlogo.svg";
 import grayhamburger from "../images/grayhamburger.svg";
 import closeIcon from "../images/closeIcon.svg"; // X 버튼 이미지 추가
@@ -11,6 +11,9 @@ const MainHeader = () => {
   const [isModalOpen, setModalOpen] = useState(false);
   const [isClosing, setIsClosing] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
+
+  const location = useLocation(); // 현재 페이지의 경로를 가져옴
+  const navigate = useNavigate();
 
   const openModal = () => {
     setModalOpen(true);
@@ -49,10 +52,12 @@ const MainHeader = () => {
     }
   };
 
-  const navigate = useNavigate();
-
   const goToPage = (url) => {
-    navigate(url);
+    if (location.pathname === url) {
+      closeModal(); // 현재 페이지를 클릭했을 때 모달 닫기
+    } else {
+      navigate(url);
+    }
   };
 
   return (
