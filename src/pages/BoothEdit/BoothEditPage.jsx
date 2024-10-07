@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom"; // useNavigate 임포트
+import instance from "../../api/axios";
 import styled from "styled-components";
 import BackArrow from "../../images/BoothDetail/arrow-left.svg";
 import logo from "../../images/BoothEdit/logo.svg";
@@ -11,6 +12,7 @@ import MenuImage from "../../components/MenuImage";
 
 const BoothDetailPage = () => {
   const [boothImage, setBoothImage] = useState(임시부스이미지);
+  const [boothId, setBoothId] = useState(""); // 부스 ID 상태 추가
   const [boothName, setBoothName] = useState("");
   const [isscraped, setisccraped] = useState(false);
   const [selectedNotice, setSelectedNotice] = useState(null);
@@ -18,6 +20,7 @@ const BoothDetailPage = () => {
   const [notices, setNotices] = useState([]);
   const [isNoticeBoxVisible, setIsNoticeBoxVisible] = useState(false);
   const [menuDetails, setMenuDetails] = useState({});
+  const [selectedManage, setSelectedManage] = useState("");
   const navigate = useNavigate(); // useNavigate 훅 사용
 
   useEffect(() => {
@@ -79,6 +82,38 @@ const BoothDetailPage = () => {
 
   const goToAddMenuPage = () => {
     navigate("/booth-edit-addmenu"); // addMenu 클릭 시 이동할 경로 설정
+  };
+
+  const handleManageSelect = (manages) => {
+    setSelectedManage(manages);
+  };
+
+  // 부스 수정 요청 처리 함수 추가
+  const handleUpdateBooth = async () => {
+    try {
+      const response = await instance.patch(
+        `${process.env.REACT_APP_SERVER_PORT}/manages/${boothId}/`, // 부스 ID를 URL에 포함
+        {
+          name: boothName, // 수정할 부스 이름
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("accessToken")}`, // 액세스 토큰 포함
+          },
+        }
+      );
+
+      if (response.status === 200) {
+        console.log("부스 수정 성공:", response.data.message);
+        // 추가적인 성공 처리 로직 (예: 사용자에게 알림 표시 등)
+      }
+    } catch (error) {
+      if (error.response) {
+        console.error("서버 응답 오류:", error.response.data);
+      } else {
+        console.error("서버에 연결할 수 없음:", error.message);
+      }
+    }
   };
 
   return (
@@ -227,7 +262,20 @@ const BoothDetailPage = () => {
 예) 카카오톡 오픈채팅 링크"
         ></textarea>
       </BoothContact>
-      <SubmitButton>작성 완료</SubmitButton>
+      <TitleFontSytle>판매 여부</TitleFontSytle>
+      <ManageOptions>
+        {["운영 중", "운영 종료"].map((manages) => (
+          <Option
+            key={manages}
+            onClick={() => handleManageSelect(manages)}
+            selected={selectedManage === manages}
+          >
+            {manages}
+          </Option>
+        ))}
+      </ManageOptions>
+      <SubmitButton onClick={handleUpdateBooth}>작성 완료</SubmitButton>{" "}
+      {/* 부스 수정 버튼 */}
     </Wrapper>
   );
 };
@@ -462,4 +510,26 @@ const SubmitButton = styled.button`
   font-size: 16px;
   font-weight: 700;
   cursor: pointer;
+`;
+const ManageOptions = styled.div`
+  width: 100%;
+  margin-bottom: 20px;
+  display: flex;
+`;
+const Option = styled.div`
+  border: 1px solid #f2f2f2;
+  background: ${(props) =>
+    props.selected ? "var(--green_01, #00F16F)" : "#f7f7f7"};
+  border-radius: 30px;
+  padding: 7px 17px;
+  font-size: 15px;
+  margin-right: 8px;
+  color: ${(props) =>
+    props.selected ? "var(--wh, #FFF)" : "var(--gray01, #bbb)"};
+  font-family: Pretendard;
+  font-weight: 700;
+  cursor: pointer;
+  &:hover {
+    background-color: #e0e0e0;
+  }
 `;
