@@ -201,8 +201,6 @@ const SearchPage = () => {
 
 export default SearchPage;
 
-/* 스타일 정의 */
-
 const Wrapper = styled.div`
   height: calc(var(--vh, 1vh) * 100);
   margin: 0 auto;
@@ -212,15 +210,14 @@ const Wrapper = styled.div`
   padding: 27px 20px 301px 20px;
 `;
 
-/* BoothList를 ShowPage 스타일과 동일하게 수정 */
 const BoothList = styled.div`
   display: grid;
-  grid-template-columns: repeat(2, 1fr); // 두 개씩 배치되도록 수정
+  grid-template-columns: repeat(2, 1fr);
   gap: 16px;
   justify-content: center;
   width: 100%;
   box-sizing: border-box;
-  grid-auto-rows: 197px; /* 높이도 설정 */
+  grid-auto-rows: 197px;
   margin-top: 17px;
   margin-bottom: ${(props) =>
     props.hasItems ? "33px" : "0px"}; /* 조건부 margin-bottom */
@@ -263,7 +260,7 @@ const SearchInput = styled.input`
   font-size: 15px;
   font-style: normal;
   font-weight: 600;
-  line-height: 20px; /* 133.333% */
+  line-height: 20px;
   letter-spacing: -0.5px;
   border: none;
 
@@ -277,7 +274,7 @@ const SearchInput = styled.input`
     font-size: 15px;
     font-style: normal;
     font-weight: 600;
-    line-height: 20px; /* 133.333% */
+    line-height: 20px;
     letter-spacing: -0.5px;
   }
 `;
@@ -313,7 +310,7 @@ const Category = styled.button`
   font-size: 15px;
   font-style: normal;
   font-weight: 700;
-  line-height: 20px; /* 133.333% */
+  line-height: 20px;
   letter-spacing: -0.5px;
   margin-right: 10px;
 `;
@@ -360,7 +357,7 @@ const NoticeItem = styled.li`
   font-size: 16px;
   font-style: normal;
   font-weight: 600;
-  line-height: 22px; /* 137.5% */
+  line-height: 22px;
   letter-spacing: -0.5px;
 
   margin-bottom: 15px;
@@ -371,7 +368,7 @@ const NoticeItem = styled.li`
     font-size: 16px;
     font-style: normal;
     font-weight: 600;
-    line-height: 22px; /* 137.5% */
+    line-height: 22px;
     letter-spacing: -0.5px;
     text-decoration-line: none;
   }
@@ -393,7 +390,7 @@ const NoticeAuthor = styled.div`
   font-size: 12px;
   font-style: normal;
   font-weight: 400;
-  line-height: 12px; /* 100% */
+  line-height: 12px;
   letter-spacing: -0.5px;
 `;
 
@@ -409,6 +406,6 @@ const NoticeDate = styled.div`
   font-size: 12px;
   font-style: normal;
   font-weight: 400;
-  line-height: 22px; /* 183.333% */
+  line-height: 22px;
   letter-spacing: -0.5px;
 `;

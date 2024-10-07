@@ -289,7 +289,7 @@ const DayButton = styled.button`
   font-size: 15px;
   font-style: normal;
   font-weight: 700;
-  line-height: 20px; /* 133.333% */
+  line-height: 20px;
   letter-spacing: -0.5px;
 `;
 
@@ -309,7 +309,7 @@ const TypeSelection = styled.div`
   font-size: 15px;
   font-style: normal;
   font-weight: 700;
-  line-height: 20px; /* 133.333% */
+  line-height: 20px;
   letter-spacing: -0.5px;
 `;
 
@@ -323,7 +323,7 @@ const SearchResult = styled.div`
   font-size: 12px;
   font-style: normal;
   font-weight: 500;
-  line-height: 20px; /* 166.667% */
+  line-height: 20px;
   letter-spacing: -0.5px;
   margin-bottom: 9px;
 `;
@@ -399,6 +399,8 @@ const Popup = styled.div`
   right: 0;
   background: rgba(0, 0, 0, 0.5);
   height: 100%;
+  max-width: 390px;
+  margin: 0 auto;
   display: flex;
   justify-content: center;
   align-items: flex-end;
@@ -407,13 +409,13 @@ const Popup = styled.div`
 
 const PopupContent = styled.div`
   background: var(--wh, #fff);
-  width: 100%; /* max-width 대신 width를 사용 */
-  padding: 30px 23px 248px 23px; /* padding 값은 유지 */
+  width: 100%;
+  padding: 30px 23px 248px 23px;
   flex-direction: column;
   align-items: flex-start;
   gap: 18px;
   flex-shrink: 0;
-  box-sizing: border-box; /* 이 부분 추가 */
+  box-sizing: border-box;
 `;
 
 const PopupTitle = styled.h2`
@@ -422,7 +424,7 @@ const PopupTitle = styled.h2`
   font-size: 20px;
   font-style: normal;
   font-weight: 600;
-  line-height: 20px; /* 100% */
+  line-height: 20px;
   letter-spacing: -0.5px;
   margin: 0px;
   margin-bottom: 18px;
@@ -450,7 +452,7 @@ const TypeButton = styled.button`
   font-size: 15px;
   font-style: normal;
   font-weight: 700;
-  line-height: 20px; /* 133.333% */
+  line-height: 20px;
   letter-spacing: -0.5px;
 `;
 
@@ -460,6 +462,6 @@ const Description = styled.div`
   font-size: 14px;
   font-style: normal;
   font-weight: 500;
-  line-height: 20px; /* 142.857% */
+  line-height: 20px;
   letter-spacing: -0.5px;
 `;
