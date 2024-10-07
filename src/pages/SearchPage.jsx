@@ -240,6 +240,7 @@ const BoothList = styled.div`
   justify-content: center;
   width: 100%;
   box-sizing: border-box;
+  grid-auto-rows: 197px; /* 높이도 설정 */
 `;
 
 const NoResult = styled.div`
