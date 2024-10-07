@@ -6,6 +6,7 @@ import backIcon from "../images/backIcon.svg"; // 뒤로 가기 버튼 아이콘
 import searchIcon from "../images/search.svg";
 import noresultIcon from "../images/noResult.png"; // 검색 아이콘 추가
 import instance from "../api/axios"; // API 호출을 위한 axios 인스턴스
+import Footer from "../components/Footer";
 
 const SearchPage = () => {
   const location = useLocation();
@@ -193,6 +194,7 @@ const SearchPage = () => {
           </NoticeList>
         )}
       </Wrapper>
+      <Footer />
     </>
   );
 };
