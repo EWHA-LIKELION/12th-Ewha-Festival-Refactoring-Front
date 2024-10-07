@@ -11,6 +11,7 @@ import modal5 from "../images/modal5.svg";
 import modal6 from "../images/modal6.svg";
 import modal7 from "../images/modal7.svg";
 import modal8 from "../images/modal8.svg";
+import Footer from "./Footer";
 
 const Modal = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -82,6 +83,7 @@ const Modal = () => {
             />
           </Grid>
         </Content>
+        <Footer />
       </Sheet>
     </>
   );
