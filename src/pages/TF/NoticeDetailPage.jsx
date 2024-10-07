@@ -30,7 +30,7 @@ const NoticeDetailPage = () => {
   const deleteNotice = () => {
     const accessToken = localStorage.getItem("access_token"); // 로컬 스토리지에서 토큰 가져오기
     instance
-      .delete(`${process.env.REACT_APP_SERVER_PORT}/notice/${pk}/`, {
+      .delete(`${process.env.REACT_APP_SERVER_PORT}/notice/list/${pk}/`, {
         headers: {
           Authorization: `Bearer ${accessToken}`, // Authorization 헤더 설정
         },

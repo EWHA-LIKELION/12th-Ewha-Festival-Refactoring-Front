@@ -4,7 +4,7 @@ import Header from "../../components/Header";
 import instance from "../../api/axios";
 import { useNavigate, useParams, useLocation } from "react-router-dom";
 
-function NoticeCreatePage() {
+function NoticeCreatePage({ notice }) {
   const navigate = useNavigate();
   const location = useLocation();
   const noticeToEdit = location.state?.noticeToEdit || null;
@@ -22,6 +22,7 @@ function NoticeCreatePage() {
   const [modalMessage, setModalMessage] = useState("");
   const [modalTitle, setModalTitle] = useState("");
 
+  // console.log("Notice object:", notice); // notice 값 확인
   // 공지 수정 모드일 경우 초기값 설정
   useEffect(() => {
     if (noticeToEdit) {
@@ -63,7 +64,7 @@ function NoticeCreatePage() {
   };
 
   const handleSubmit = async () => {
-    const token = localStorage.getItem("access_token");
+    const token = localStorage.getItem("accessToken");
 
     if (!token) {
       console.error("No access token found");
@@ -78,12 +79,17 @@ function NoticeCreatePage() {
       is_important: isImportant,
     };
 
+    const data_edit = {
+      title,
+      content,
+    };
+
     try {
       if (isEdit) {
         // 수정 요청
         await instance.patch(
-          `${process.env.REACT_APP_SERVER_PORT}/notice/${noticeToEdit.id}/`,
-          data,
+          `${process.env.REACT_APP_SERVER_PORT}/notice/list/${noticeToEdit.id}/`,
+          data_edit,
           {
             headers: {
               Authorization: `Bearer ${token}`,
