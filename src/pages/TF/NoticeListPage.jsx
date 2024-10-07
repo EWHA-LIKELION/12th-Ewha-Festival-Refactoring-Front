@@ -1,8 +1,7 @@
 import React, { useState, useEffect } from "react";
 import styled from "styled-components";
-import background from "../../images/background.png";
 import Header from "../../components/Header";
-import axios from "axios";
+import instance from "../../api/axios";
 import searchicon from "../../images/searchicon.svg";
 import createicon from "../../images/createicon.svg";
 import { useNavigate } from "react-router-dom";
@@ -11,27 +10,37 @@ function NoticeListPage() {
   const [notices, setNotices] = useState([]);
   const [filteredNotices, setFilteredNotices] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
-  const [activeFilter, setActiveFilter] = useState("all"); // 기본 필터는 'all'
-
+  const [activeFilter, setActiveFilter] = useState("all");
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalCount, setTotalCount] = useState(0);
+  const [nextPage, setNextPage] = useState(null);
   const navigate = useNavigate();
 
   const navigateToCreate = () => {
-    navigate("/NoticeCreate");
+    navigate("/notice-create");
   };
 
   useEffect(() => {
-    // Axios를 사용해 API 호출
-    axios
-      .get("/api/notices")
-      .then((response) => {
-        setNotices(response.data);
-        setFilteredNotices(response.data); // 기본적으로 모든 공지 표시
-      })
-      .catch((error) => console.error("Error fetching notices:", error));
-  }, []);
+    const fetchNotices = async (page, type) => {
+      try {
+        const url = type
+          ? `${process.env.REACT_APP_SERVER_PORT}/notice/list/?type=${type}&page=${page}`
+          : `${process.env.REACT_APP_SERVER_PORT}/notice/list/?page=${page}`;
+        const response = await instance.get(url);
+        setNotices(response.data.results);
+        setFilteredNotices(response.data.results);
+        setTotalCount(response.data.count);
+        setNextPage(response.data.next);
+      } catch (error) {
+        console.error("Error fetching notices:", error);
+      }
+    };
+
+    fetchNotices(currentPage, activeFilter === "all" ? null : activeFilter); // 필터에 따라 공지 사항 불러오기
+  }, [currentPage, activeFilter]); // currentPage와 activeFilter가 변경될 때마다 호출
 
   const filterNotices = (type) => {
-    setActiveFilter(type); // 클릭한 버튼을 활성 상태로 설정
+    setActiveFilter(type);
     if (type === "all") {
       setFilteredNotices(notices);
     } else {
@@ -43,9 +52,15 @@ function NoticeListPage() {
     setFilteredNotices(notices.filter((notice) => notice.title.includes(term)));
   };
 
+  const handleNextPage = () => {
+    if (nextPage) {
+      setCurrentPage((prevPage) => prevPage + 1);
+    }
+  };
+
   return (
     <Wrapper>
-      <Header style={{ color: "#3cb44b" }} />
+      <Header />
       <TopContainer>
         <Title>공지 사항</Title>
         <SearchBar>
@@ -64,34 +79,42 @@ function NoticeListPage() {
         <Filter>
           <FilterButton
             onClick={() => filterNotices("all")}
-            active={activeFilter === "all"} // 'all' 필터가 활성 상태인지 확인
+            active={activeFilter === "all"}
           >
             전체 공지
           </FilterButton>
           <FilterButton
-            onClick={() => filterNotices("operation")}
-            active={activeFilter === "operation"} // 'operation' 필터가 활성 상태인지 확인
+            onClick={() => filterNotices("operational")}
+            active={activeFilter === "operational"}
           >
             운영 공지
           </FilterButton>
           <FilterButton
             onClick={() => filterNotices("event")}
-            active={activeFilter === "event"} // 'event' 필터가 활성 상태인지 확인
+            active={activeFilter === "event"}
           >
             행사 공지
           </FilterButton>
         </Filter>
         <ul>
-          {filteredNotices.map((notice) => (
-            <li key={notice.id}>
-              <a href={`/notices/${notice.id}`}>{notice.title}</a>
-            </li>
-          ))}
+          {filteredNotices.map((notice) => {
+            const createdAtDate = new Date(notice.created_at);
+            const formattedDate = createdAtDate.toISOString().split("T")[0]; // 'YYYY-MM-DD' 형식으로 변환
+
+            return (
+              <li key={notice.id}>
+                <a href={`/notice-detail/${notice.id}`}>{notice.title}</a>{" "}
+                {/* notice.pk를 notice.id로 수정 */}
+                <div>
+                  <h3>(준)축제준비위원회 {notice.author}</h3>
+                  <h4>{formattedDate}</h4>
+                </div>
+              </li>
+            );
+          })}
         </ul>
-        <Ullist>
-          <Ilbox>[공지] 테스트 공지사항입니다1</Ilbox>
-          <Ilbox>[공지] 테스트 공지사항입니다2</Ilbox>
-        </Ullist>
+
+        {nextPage && <button onClick={handleNextPage}>다음 페이지</button>}
       </TopContainer>
       <Create onClick={navigateToCreate}>
         <img src={createicon} />
@@ -101,23 +124,6 @@ function NoticeListPage() {
 }
 
 export default NoticeListPage;
-
-// 임시 Ul, il 스타일 지정
-const Ullist = styled.div``;
-
-const Ilbox = styled.div`
-  width: 325px;
-  height: 47px;
-  display: flex;
-  padding: 20px;
-  flex-direction: column;
-  align-items: flex-start;
-  gap: 10px;
-  border-radius: 15px;
-  border: 1px solid var(--green02, #03d664);
-  background: var(--wh, #fff);
-  margin-bottom: 15px;
-`;
 
 const Create = styled.div`
   cursor: pointer;
@@ -136,6 +142,55 @@ const TopContainer = styled.div`
   margin-top: 60px;
   ul {
     margin: 0;
+    padding: 0;
+    li {
+      width: 325px;
+      height: 47px;
+      display: flex;
+      padding: 20px;
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 10px;
+      border-radius: 15px;
+      border: 1px solid var(--green02, #03d664);
+      background: var(--wh, #fff);
+      margin-bottom: 15px;
+
+      a {
+        color: var(--bk01, #000);
+        font-family: Pretendard;
+        font-size: 16px;
+        font-style: normal;
+        font-weight: 600;
+        line-height: 22px; /* 137.5% */
+        letter-spacing: -0.5px;
+        text-decoration-line: none;
+      }
+      div {
+        display: flex;
+        align-items: center;
+        h3 {
+          color: var(--green01, var(--green_01, #00f16f));
+          font-family: Pretendard;
+          font-size: 12px;
+          font-style: normal;
+          font-weight: 400;
+          line-height: 12px; /* 100% */
+          letter-spacing: -0.5px;
+          margin: 0 10px 0 0;
+        }
+        h4 {
+          color: var(--gray05, #8e8e8e);
+          font-family: Pretendard;
+          font-size: 12px;
+          font-style: normal;
+          font-weight: 400;
+          line-height: 22px; /* 183.333% */
+          letter-spacing: -0.5px;
+          margin: 0;
+        }
+      }
+    }
   }
 `;
 
@@ -207,6 +262,5 @@ const FilterButton = styled.button`
 
 const Wrapper = styled.div`
   height: calc(var(--vh, 1vh) * 100);
-  background-image: url(${background});
   margin: 0;
 `;

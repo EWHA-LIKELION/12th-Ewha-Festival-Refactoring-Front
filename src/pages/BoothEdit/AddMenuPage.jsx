@@ -1,14 +1,22 @@
 import React, { useState } from "react";
+import { useLocation, useNavigate } from "react-router-dom";
 import styled from "styled-components";
 import BackArrow from "../../images/BoothDetail/arrow-left.svg";
 import 임시메뉴이미지 from "../../images/BoothDetail/임시메뉴이미지.svg";
+import instance from "../../api/axios"; // axios 인스턴스 임포트
 
-const AddMenuPage = () => {
+const AddMenuPage = ({ accessToken }) => {
+  const location = useLocation();
+  const navigate = useNavigate();
+  const boothId = location.state?.id;
+  const isEditMode = location.state?.isEditMode; // 수정 모드인지 확인
+
   const [menuImage, setMenuImage] = useState(임시메뉴이미지);
   const [menuName, setMenuName] = useState("");
   const [price, setPrice] = useState("");
-  const [selectedDiet, setSelectedDiet] = useState("");
-  const [selectedSales, setSelectedSales] = useState("");
+  const [isVegan, setIsVegan] = useState(false);
+  const [isSoldOut, setIsSoldOut] = useState(false);
+  const [menuId, setMenuId] = useState(location.state?.menuId || null); // 메뉴 ID
 
   const handleImageChange = (event) => {
     const file = event.target.files[0];
@@ -21,24 +29,44 @@ const AddMenuPage = () => {
     }
   };
 
-  const handleDietSelect = (diet) => {
-    setSelectedDiet(diet);
-  };
+  const handleSubmit = async () => {
+    const accessToken = localStorage.getItem("accessToken");
+    const formData = new FormData();
+    formData.append("menu", menuName);
+    formData.append("img", menuImage); // FormData는 Blob 형태의 이미지를 필요로 함
+    formData.append("price", price);
+    formData.append("is_vegan", isVegan);
+    formData.append("is_soldout", isSoldOut);
 
-  const handleSalesSelect = (sales) => {
-    setSelectedSales(sales);
-  };
+    try {
+      let response;
+      if (isEditMode) {
+        // 수정 모드인 경우 PATCH 요청
+        response = await instance.patch(
+          `/manages/${boothId}/menus/${menuId}/`,
+          formData
+        );
+      } else {
+        // 신규 추가인 경우 POST 요청
+        response = await instance.post(`/manages/${boothId}/menus/`, formData, {
+          headers: {
+            Authorization: `Bearer ${accessToken}`, // 적절한 토큰을 포함
+          },
+        });
+      }
 
-  const handleSubmit = () => {
-    const menuDetails = {
-      menuImage,
-      menuName,
-      price,
-      selectedDiet,
-      selectedSales,
-    };
-    localStorage.setItem("menuDetails", JSON.stringify(menuDetails));
-    alert("메뉴가 저장되었습니다.");
+      if (response.status === 200 || response.status === 201) {
+        // 성공적으로 메뉴 추가 또는 수정 시 처리
+        alert(response.data.message);
+        navigate("/some-route"); // 성공 시 리다이렉션할 경로
+      }
+    } catch (error) {
+      if (error.response) {
+        alert(error.response.data.message); // 에러 메시지 표시
+      } else {
+        alert("서버에 문제가 발생했습니다."); // 일반적인 에러 처리
+      }
+    }
   };
 
   return (
@@ -79,11 +107,11 @@ const AddMenuPage = () => {
       />
       <TitleFontSytle>비건 여부</TitleFontSytle>
       <Options>
-        {["논비건", "페스코", "비건", "해당없음"].map((diet) => (
+        {["논비건", "비건", "페스코", "해당없음"].map((diet) => (
           <Option
             key={diet}
-            onClick={() => handleDietSelect(diet)}
-            selected={selectedDiet === diet}
+            onClick={() => setIsVegan(diet === "비건")}
+            selected={isVegan && diet === "비건"}
           >
             {diet}
           </Option>
@@ -94,8 +122,8 @@ const AddMenuPage = () => {
         {["판매 중", "판매 종료"].map((sales) => (
           <SalesOption
             key={sales}
-            onClick={() => handleSalesSelect(sales)}
-            selected={selectedSales === sales}
+            onClick={() => setIsSoldOut(sales === "판매 종료")}
+            selected={isSoldOut && sales === "판매 종료"}
           >
             {sales}
           </SalesOption>
@@ -107,6 +135,8 @@ const AddMenuPage = () => {
 };
 
 export default AddMenuPage;
+
+// 스타일 컴포넌트들 생략
 
 const Wrapper = styled.div`
   min-height: calc(var(--vh, 1vh) * 100);

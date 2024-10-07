@@ -1,10 +1,12 @@
 import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom"; // useNavigate 훅 사용
 import styled from "styled-components";
 import Header from "../components/Header"; // Header 컴포넌트 가져오기
 import BoothItem from "../components/BoothItem"; // 분리된 BoothItem 컴포넌트 가져오기
 import instance from "../api/axios";
 
 const BoothPage = () => {
+  const navigate = useNavigate(); // useNavigate 훅 사용
   const [selectedDay, setSelectedDay] = useState("수"); // 요일 기본값
   const [selectedType, setSelectedType] = useState("음식"); // 부스 종류 기본값
   const [isPopupOpen, setIsPopupOpen] = useState(false); // 팝업 상태 관리
@@ -156,7 +158,13 @@ const BoothPage = () => {
         {/* 부스 목록 */}
         <BoothList>
           {currentBooths.map((booth) => (
-            <BoothItem key={booth.id} booth={booth} />
+            <BoothItem
+              key={booth.id}
+              booth={booth}
+              onClick={() =>
+                navigate("/booth-detail", { state: { id: booth.id } })
+              } // 부스 아이디만 전달
+            />
           ))}
         </BoothList>
         {/* 페이지 넘버 */}
@@ -207,7 +215,6 @@ const BoothPage = () => {
         {isPopupOpen && (
           <Popup onClick={handleClosePopup}>
             <PopupContent onClick={(e) => e.stopPropagation()}>
-              {/* 내부 클릭 이벤트가 전파되지 않도록 설정 */}
               <PopupTitle>어떤 부스로 갈까요?</PopupTitle>
               <ButtonWrapper>
                 <TypeButton
@@ -229,7 +236,6 @@ const BoothPage = () => {
                   체험
                 </TypeButton>
               </ButtonWrapper>
-              {/* 부스 설명 */}
               <Description>{description}</Description>
             </PopupContent>
           </Popup>

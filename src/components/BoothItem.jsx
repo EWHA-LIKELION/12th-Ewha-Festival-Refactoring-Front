@@ -7,7 +7,7 @@ import BasicBooth from "../images/basicbooth.svg"; // 기본 부스 이미지 �
 import scrapBefore from "../images/BoothDetail/scrapbefore.svg";
 import scrapAfter from "../images/BoothDetail/scrapafter.svg";
 
-const BoothItem = ({ booth }) => {
+const BoothItem = ({ booth, onClick }) => {
   const [isscraped, setisscraped] = useState(false);
   const navigate = useNavigate();
 
@@ -53,7 +53,8 @@ const BoothItem = ({ booth }) => {
 
   return (
     <Booth
-      isOpened={booth.is_opened} // Pass the is_opened value as a prop
+      isOpened={booth.is_opened}
+      onClick={onClick} // 추가: BoothItem 클릭 시 onClick 호출
       style={{
         backgroundImage: `url(${
           booth.thumbnail
@@ -68,8 +69,7 @@ const BoothItem = ({ booth }) => {
           alt="Scrap"
           onClick={clickScrap}
         />
-        {!booth.is_opened && <ClosedLabel>운영 종료</ClosedLabel>}{" "}
-        {/* Display the closed label when booth is closed */}
+        {!booth.is_opened && <ClosedLabel>운영 종료</ClosedLabel>}
         <BoothName>{booth.name}</BoothName>
         <BoothLocation>
           {booth.booth_place} · {booth.category}
@@ -84,12 +84,7 @@ export default BoothItem;
 const Booth = styled.div`
   max-width: 170px;
   max-height: 197px;
-  background: linear-gradient(
-      180deg,
-      rgba(0, 0, 0, 0.4) 0%,
-      rgba(0, 0, 0, 0) 161.62%
-    ),
-    url(<path-to-image>) lightgray 50% / cover no-repeat;
+  background: url(<path-to-image>) lightgray 50% / cover no-repeat;
   background-size: cover;
   background-position: center;
   border-radius: 20px;
@@ -102,6 +97,29 @@ const Booth = styled.div`
   overflow: hidden;
   position: relative;
   z-index: 1;
+  cursor: pointer;
+
+  /* 그라디언트를 ::before로 적용 */
+  &::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(
+      180deg,
+      rgba(0, 0, 0, 0.4) 0%,
+      rgba(0, 0, 0, 0) 161.62%
+    );
+    border-radius: 20px;
+    z-index: 2; /* 이미지 위에 그라디언트를 표시 */
+  }
+
+  /* 이 안의 내용이 그라디언트와 이미지 위에 올라오게 */
+  & > * {
+    z-index: 3;
+  }
 `;
 
 const BoothInfo = styled.div`
