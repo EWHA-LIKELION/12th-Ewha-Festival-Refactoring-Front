@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import styled from "styled-components";
 import Header from "../components/Header"; // Header 컴포넌트 가져오기
 import BoothItem from "../components/BoothItem"; // 분리된 BoothItem 컴포넌트 가져오기
@@ -18,6 +18,18 @@ const ShowPage = () => {
   const boothsPerPage = 10; // 한 페이지당 보여줄 부스 수
   const maxPageButtons = 5; // 한번에 보여줄 페이지 버튼의 최대 개수
   const [pageGroup, setPageGroup] = useState(0); // 페이지 그룹 상태
+
+  const [highlightStyle, setHighlightStyle] = useState({});
+  const dayRefs = useRef([]); // 요일 버튼의 ref 저장
+
+  useEffect(() => {
+    const currentIndex = ["수", "목", "금"].indexOf(selectedDay);
+    const currentRef = dayRefs.current[currentIndex];
+    if (currentRef) {
+      const { offsetLeft: left, clientWidth: width } = currentRef;
+      setHighlightStyle({ left, width });
+    }
+  }, [selectedDay]);
 
   useEffect(() => {
     // 백엔드에서 데이터를 받아오는 함수
@@ -101,10 +113,6 @@ const ShowPage = () => {
     }
   };
 
-  if (loading) {
-    return <div>Loading...</div>; // 데이터 로딩 중일 때 표시
-  }
-
   return (
     <>
       {/* Header 컴포넌트 추가 */}
@@ -113,24 +121,17 @@ const ShowPage = () => {
         {/* 요일과 부스 종류 선택 */}
         <SelectionWrapper>
           <DaySelection>
-            <DayButton
-              selected={selectedDay === "수"}
-              onClick={() => handleDaySelection("수")}
-            >
-              수
-            </DayButton>
-            <DayButton
-              selected={selectedDay === "목"}
-              onClick={() => handleDaySelection("목")}
-            >
-              목
-            </DayButton>
-            <DayButton
-              selected={selectedDay === "금"}
-              onClick={() => handleDaySelection("금")}
-            >
-              금
-            </DayButton>
+            <Highlighter style={highlightStyle} />
+            {["수", "목", "금"].map((day, index) => (
+              <DayButton
+                key={day}
+                ref={(el) => (dayRefs.current[index] = el)}
+                selected={selectedDay === day}
+                onClick={() => handleDaySelection(day)}
+              >
+                {day}
+              </DayButton>
+            ))}
           </DaySelection>
           <TypeSelection onClick={() => setIsPopupOpen(true)}>
             {selectedType}{" "}
@@ -261,6 +262,7 @@ const SelectionWrapper = styled.div`
 `;
 
 const DaySelection = styled.div`
+  position: relative;
   display: flex;
   justify-content: center;
   align-items: center;
@@ -272,16 +274,31 @@ const DaySelection = styled.div`
   box-shadow: 0px 0px 4px 0px rgba(0, 0, 0, 0.1);
 `;
 
+const Highlighter = styled.div`
+  position: absolute;
+  bottom: 0;
+  width: 47px;
+  height: 35px;
+  background-color: #00f16f;
+  border: 1px solid #03d664;
+  border-radius: 30px;
+  transition: left 0.3s ease, width 0.3s ease;
+  z-index: 0;
+`;
+
 const DayButton = styled.button`
+  position: relative;
+  z-index: 1;
   display: flex;
   justify-content: center;
   align-items: center;
   width: 47px;
   height: 36px;
-  gap: 10px;
   border-radius: 30px;
-  border: 1px solid ${(props) => (props.selected ? "#03d664" : "#C1D9CC")};
-  background-color: ${(props) => (props.selected ? "#00f16f" : "#C1D9CC")};
+  border: 1px solid
+    ${(props) => (props.selected ? "transparent" : "transparent")};
+  background-color: ${(props) =>
+    props.selected ? "transparent" : "transparent"};
   cursor: pointer;
 
   color: var(--wh01, var(--wh, #fff));
@@ -290,7 +307,7 @@ const DayButton = styled.button`
   font-size: 15px;
   font-style: normal;
   font-weight: 700;
-  line-height: 20px; /* 133.333% */
+  line-height: 20px;
   letter-spacing: -0.5px;
 `;
 
@@ -310,7 +327,7 @@ const TypeSelection = styled.div`
   font-size: 15px;
   font-style: normal;
   font-weight: 700;
-  line-height: 20px; /* 133.333% */
+  line-height: 20px;
   letter-spacing: -0.5px;
 `;
 
@@ -324,7 +341,7 @@ const SearchResult = styled.div`
   font-size: 12px;
   font-style: normal;
   font-weight: 500;
-  line-height: 20px; /* 166.667% */
+  line-height: 20px;
   letter-spacing: -0.5px;
   margin-bottom: 9px;
 `;
@@ -392,6 +409,7 @@ const ArrowButtonRight = styled.button`
   padding: 0px;
   margin-left: 10px;
 `;
+
 /* 팝업 스타일 */
 const Popup = styled.div`
   position: fixed;
@@ -400,6 +418,8 @@ const Popup = styled.div`
   right: 0;
   background: rgba(0, 0, 0, 0.5);
   height: 100%;
+  max-width: 390px;
+  margin: 0 auto;
   display: flex;
   justify-content: center;
   align-items: flex-end;
@@ -408,13 +428,13 @@ const Popup = styled.div`
 
 const PopupContent = styled.div`
   background: var(--wh, #fff);
-  width: 100%; /* max-width 대신 width를 사용 */
-  padding: 30px 23px 248px 23px; /* padding 값은 유지 */
+  width: 100%;
+  padding: 30px 23px 248px 23px;
   flex-direction: column;
   align-items: flex-start;
   gap: 18px;
   flex-shrink: 0;
-  box-sizing: border-box; /* 이 부분 추가 */
+  box-sizing: border-box;
 `;
 
 const PopupTitle = styled.h2`
@@ -423,7 +443,7 @@ const PopupTitle = styled.h2`
   font-size: 20px;
   font-style: normal;
   font-weight: 600;
-  line-height: 20px; /* 100% */
+  line-height: 20px;
   letter-spacing: -0.5px;
   margin: 0px;
   margin-bottom: 18px;
@@ -451,7 +471,7 @@ const TypeButton = styled.button`
   font-size: 15px;
   font-style: normal;
   font-weight: 700;
-  line-height: 20px; /* 133.333% */
+  line-height: 20px;
   letter-spacing: -0.5px;
 `;
 
@@ -461,6 +481,6 @@ const Description = styled.div`
   font-size: 14px;
   font-style: normal;
   font-weight: 500;
-  line-height: 20px; /* 142.857% */
+  line-height: 20px;
   letter-spacing: -0.5px;
 `;
