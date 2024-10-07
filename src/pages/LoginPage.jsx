@@ -1,12 +1,12 @@
 import React, { useState, useRef } from "react";
 import styled from "styled-components";
-import Header from "../components/Header";
 import { useNavigate } from "react-router-dom";
 import instance from "../api/axios";
 
 import loginImg from "../images/loginImg.svg";
 import PwImg from "../images/PwImg.svg";
 import kakaoLogin from "../images/kakaoLogin.svg";
+import arrowLeft from "../images/arrowLeft.svg";
 
 const LoginPage = () => {
   const navigate = useNavigate();
@@ -34,7 +34,7 @@ const LoginPage = () => {
 
     try {
       const response = await instance.post(
-        `${process.env.REACT_APP_SERVER_PORT}/accounts/login`,
+        `${process.env.REACT_APP_SERVER_PORT}/accounts/login/`,
         {
           username: ID,
           password: PW,
@@ -42,10 +42,22 @@ const LoginPage = () => {
       );
       console.log(response.data);
 
-      const { username, access_token, id } = response.data.data;
+      const { access_token, id, nickname, is_tf, is_admin, is_show } =
+        response.data.data;
+
+      let userType = "general";
+      if (is_tf && !is_admin && !is_show) {
+        userType = "tf";
+      } else if (is_admin && !is_tf && !is_show) {
+        userType = "admin";
+      } else if (is_show && !is_tf && !is_admin) {
+        userType = "show";
+      }
+
       localStorage.setItem("accessToken", access_token);
-      localStorage.setItem("username", username);
+      localStorage.setItem("nickname", nickname);
       localStorage.setItem("user_id", id);
+      localStorage.setItem("type", userType);
 
       navigate("/");
       console.log(response.data);
@@ -55,9 +67,23 @@ const LoginPage = () => {
     }
   };
 
+  const kakao = async () => {
+    try {
+      const response = await instance.get(
+        `${process.env.REACT_APP_SERVER_PORT}/login/kakao/`
+      );
+      console.log(response.data);
+    } catch (error) {
+      console.error(error);
+      alert("카카오 연결에 실패했습니다.");
+    }
+  };
+
   return (
     <Wrapper>
-      <Header />
+      <Header>
+        <img src={arrowLeft} onClick={() => navigate("/")} />
+      </Header>
       <Content>
         <Ment>로그인</Ment>
         <InputWrapper>
@@ -79,7 +105,7 @@ const LoginPage = () => {
         </InputWrapper>
 
         <LoginBtn onClick={goLogin}>로그인</LoginBtn>
-        <KakaoBtn>
+        <KakaoBtn onClick={kakao}>
           <img src={kakaoLogin} alt="카카오 이미지" />
           카카오 로그인
         </KakaoBtn>
@@ -126,6 +152,17 @@ const InputWrapper = styled.div`
 
   img {
     width: 17px;
+  }
+`;
+
+const Header = styled.div`
+  position: relative;
+  display: flex;
+  justify-content: space-between;
+  padding: 40px 20px 26px;
+
+  img {
+    cursor: pointer;
   }
 `;
 

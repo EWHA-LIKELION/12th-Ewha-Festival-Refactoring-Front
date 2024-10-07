@@ -1,17 +1,73 @@
-import React from "react";
+import React, { useState } from "react";
+import instance from "../api/axios.js";
+import { useNavigate } from "react-router-dom";
+
 import styled from "styled-components";
 import BasicBooth from "../images/basicbooth.svg"; // 기본 부스 이미지 경로
+import scrapBefore from "../images/BoothDetail/scrapbefore.svg";
+import scrapAfter from "../images/BoothDetail/scrapafter.svg";
 
 const BoothItem = ({ booth }) => {
+  const [isscraped, setisscraped] = useState(false);
+  const navigate = useNavigate();
+
+  const clickScrap = async () => {
+    setisscraped(!isscraped);
+    const token = localStorage.getItem("accessToken");
+
+    if (token && isscraped === false) {
+      try {
+        const response = await instance.post(
+          `${process.env.REACT_APP_SERVER_PORT}/booths/${booth.id}/scrap/`,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
+        console.log(response.data);
+        setisscraped(true);
+      } catch (error) {
+        console.error(error);
+      }
+    } else if (token && isscraped === true) {
+      try {
+        const response = await instance.delete(
+          `${process.env.REACT_APP_SERVER_PORT}/booths/${booth.id}/scrap/`,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
+        console.log(response.data);
+        setisscraped(false);
+      } catch (error) {
+        console.error(error);
+      }
+    } else {
+      alert("로그인을 해야 스크랩이 가능해요.");
+      navigate("/login");
+    }
+  };
+
   return (
     <Booth
       style={{
         backgroundImage: `url(${
-          booth.thumbnail ? booth.thumbnail : BasicBooth
+          booth.thumbnail
+            ? `${process.env.REACT_APP_SERVER_PORT}${booth.thumbnail}`
+            : BasicBooth
         })`,
       }}
     >
       <BoothInfo>
+        <img
+          src={isscraped ? scrapAfter : scrapBefore}
+          alt="Scrap"
+          onClick={clickScrap}
+        />
+
         <BoothName>{booth.name}</BoothName>
         <BoothLocation>
           {booth.booth_place} · {booth.category}
@@ -42,9 +98,17 @@ const Booth = styled.div`
   flex-direction: column;
   justify-content: flex-end;
   overflow: hidden; /* 자식 요소가 부모를 넘어서지 않도록 설정 */
+  position: relative; //이거 스크랩을 위해 추가됨
 `;
 
-const BoothInfo = styled.div``;
+const BoothInfo = styled.div`
+  img {
+    position: absolute;
+    top: 17px;
+    left: 130px;
+    cursor: pointer;
+  }
+`;
 
 const BoothName = styled.div`
   color: var(--wh01, var(--wh, #fff));
