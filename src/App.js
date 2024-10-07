@@ -63,7 +63,6 @@ function App() {
           <Route path="/notice-list" element={<NoticeListPage />} />
           <Route path="/notice-create" element={<NoticeCreatePage />} />
           <Route path="/notice-detail/:pk" element={<NoticeDetailPage />} />
-          <Route path="/notice-edit/:pk" element={<NoticeEditPage />} />
           <Route path="/about" element={<FestivalIntro />} />
           <Route path="/barrier-free" element={<BarrierFreeInfo />} />
           <Route path="/trash" element={<TrashPage />} />
