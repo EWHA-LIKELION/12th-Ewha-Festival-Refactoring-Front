@@ -60,7 +60,7 @@ function NoticeListPage() {
 
   return (
     <Wrapper>
-      <Header style={{ color: "#3cb44b" }} />
+      <Header />
       <TopContainer>
         <Title>공지 사항</Title>
         <SearchBar>
