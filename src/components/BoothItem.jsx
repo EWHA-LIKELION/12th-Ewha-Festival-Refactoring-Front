@@ -119,9 +119,8 @@ const BoothName = styled.div`
   font-size: 20px;
   font-style: normal;
   font-weight: 700;
-  line-height: 20px;
+  line-height: 20px; /* 100% */
   letter-spacing: -0.3px;
-  margin-bottom: 4px;
 `;
 
 const BoothLocation = styled.div`
@@ -130,19 +129,32 @@ const BoothLocation = styled.div`
   font-size: 12px;
   font-style: normal;
   font-weight: 500;
-  line-height: 20px;
+  line-height: 20px; /* 166.667% */
   letter-spacing: -0.5px;
 `;
 
 const ClosedLabel = styled.div`
   position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: var(--green05, rgba(0, 241, 111, 0.4));
+  color: white;
   font-size: 18px;
   font-weight: bold;
-  color: white;
-  background-color: rgba(0, 0, 0, 0.5);
-  padding: 5px 10px;
-  border-radius: 10px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  border-radius: 20px; /* Booth의 border-radius와 동일하게 설정 */
+  z-index: 2; /* 다른 요소들보다 앞에 오도록 z-index를 높임 */
+
+  color: var(--wh01, var(--wh, #fff));
+  text-align: center;
+  font-family: Pretendard;
+  font-size: 24px;
+  font-style: normal;
+  font-weight: 800;
+  line-height: 20px; /* 83.333% */
+  letter-spacing: -0.3px;
 `;
