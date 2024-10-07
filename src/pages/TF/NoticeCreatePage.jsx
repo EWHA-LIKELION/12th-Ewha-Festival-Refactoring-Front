@@ -1,17 +1,38 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import styled from "styled-components";
 import Header from "../../components/Header";
 import instance from "../../api/axios";
+import { useNavigate, useParams, useLocation } from "react-router-dom";
 
-function NoticeCreatePage({ isEdit, existingData }) {
-  const [type, setType] = useState(existingData?.type || "operation");
-  const [title, setTitle] = useState(existingData?.title || "");
-  const [content, setContent] = useState(existingData?.content || "");
-  const [event, setEvent] = useState(existingData?.event || "ewhagreenFe");
+function NoticeCreatePage() {
+  const navigate = useNavigate();
+  const location = useLocation();
+  const noticeToEdit = location.state?.noticeToEdit || null;
+
+  const [isEdit, setIsEdit] = useState(false);
+  const { pk } = useParams();
+
+  // 기존 데이터 또는 기본값으로 초기 상태 설정
+  const [type, setType] = useState("operation");
+  const [title, setTitle] = useState("");
+  const [content, setContent] = useState("");
+  const [event, setEvent] = useState("ewhagreenFe");
   const [isImportant, setIsImportant] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [modalMessage, setModalMessage] = useState("");
   const [modalTitle, setModalTitle] = useState("");
+
+  // 공지 수정 모드일 경우 초기값 설정
+  useEffect(() => {
+    if (noticeToEdit) {
+      setIsEdit(true);
+      setTitle(noticeToEdit.title);
+      setContent(noticeToEdit.content);
+      setType(noticeToEdit.notice_type === "event" ? "event" : "operation");
+      setEvent(noticeToEdit.event_type || "ewhagreenFe");
+      setIsImportant(noticeToEdit.is_important);
+    }
+  }, [noticeToEdit]);
 
   const eventOptions = [
     { value: "ewhagreenFe", label: "다시 돌아온 네가 그린 그린은 이화그린" },
@@ -33,16 +54,16 @@ function NoticeCreatePage({ isEdit, existingData }) {
   };
 
   const confirmAction = () => {
-    if (modalTitle === "공지 작성 완료") {
+    if (modalTitle === (isEdit ? "공지 수정 완료" : "공지 작성 완료")) {
       handleSubmit();
     } else {
-      window.location.href = "/notice-list"; // 작성 취소 시 리스트로 돌아가기
+      navigate("/notice-list"); // 작성 취소 시 리스트로 돌아가기
     }
     closeModal();
   };
 
   const handleSubmit = async () => {
-    const token = localStorage.getItem("accessToken");
+    const token = localStorage.getItem("access_token");
 
     if (!token) {
       console.error("No access token found");
@@ -59,34 +80,40 @@ function NoticeCreatePage({ isEdit, existingData }) {
 
     try {
       if (isEdit) {
+        // 수정 요청
         await instance.patch(
-          `${process.env.REACT_APP_SERVER_PORT}/notice/${existingData.id}/`,
+          `${process.env.REACT_APP_SERVER_PORT}/notice/${noticeToEdit.id}/`,
           data,
           {
-            headers: { Authorization: `Bearer ${token}` },
+            headers: {
+              Authorization: `Bearer ${token}`,
+              "Content-Type": "application/json",
+            },
           }
         );
       } else {
+        // 작성 요청
         await instance.post(
           `${process.env.REACT_APP_SERVER_PORT}/notice/create/`,
           data,
           {
-            headers: { Authorization: `Bearer ${token}` },
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
           }
         );
       }
-      window.location.href = "/notice-list";
+      navigate("/notice-list");
     } catch (error) {
       console.error("Error submitting notice:", error);
     }
-    console.log("Stored token:", token);
   };
 
   return (
     <Wrapper>
       <Header />
       <Container>
-        <Title>공지 작성하기</Title>
+        <Title>{isEdit ? "공지 수정하기" : "공지 작성하기"}</Title>
         <NoticeType>
           <TypeButton
             active={type === "operation"}
@@ -142,9 +169,11 @@ function NoticeCreatePage({ isEdit, existingData }) {
           <button
             onClick={() =>
               openModal(
-                "공지 작성 취소",
+                isEdit ? "공지 수정 취소" : "공지 작성 취소",
                 <>
-                  공지 작성을 취소하시겠습니까?
+                  {isEdit
+                    ? "공지 수정을 취소하시겠습니까?"
+                    : "공지 작성을 취소하시겠습니까?"}
                   <p>작성된 내용은 저장되지 않습니다.</p>
                 </>
               )
@@ -154,7 +183,12 @@ function NoticeCreatePage({ isEdit, existingData }) {
           </button>
           <button
             onClick={() =>
-              openModal("공지 작성 완료", "공지 작성을 완료하시겠습니까?")
+              openModal(
+                isEdit ? "공지 수정 완료" : "공지 작성 완료",
+                isEdit
+                  ? "공지 수정을 완료하시겠습니까?"
+                  : "공지 작성을 완료하시겠습니까?"
+              )
             }
           >
             완료

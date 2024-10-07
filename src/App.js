@@ -54,7 +54,6 @@ function App() {
           <Route path="/search" element={<SearchPage />} />
           <Route path="/detail/admin" element={<AdminDetailPage />} />
           <Route path="/detail/admin/edit" element={<EditViewPage />} />
-          <Route path="/booth-edit" element={<BoothEditPage />} />
           <Route path="/booth-detail" element={<BoothDetailPage />} />
 
           {/* 공연 */}
@@ -63,7 +62,8 @@ function App() {
           {/* 공지 */}
           <Route path="/notice-list" element={<NoticeListPage />} />
           <Route path="/notice-create" element={<NoticeCreatePage />} />
-          <Route path="/notice-detail" element={<NoticeDetailPage />} />
+          <Route path="/notice-detail/:pk" element={<NoticeDetailPage />} />
+          <Route path="/notice-edit/:pk" element={<NoticeEditPage />} />
           <Route path="/about" element={<FestivalIntro />} />
           <Route path="/barrier-free" element={<BarrierFreeInfo />} />
           <Route path="/trash" element={<TrashPage />} />

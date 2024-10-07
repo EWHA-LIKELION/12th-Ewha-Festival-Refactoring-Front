@@ -11,9 +11,9 @@ function NoticeListPage() {
   const [filteredNotices, setFilteredNotices] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [activeFilter, setActiveFilter] = useState("all");
-  const [currentPage, setCurrentPage] = useState(1); // 현재 페이지 상태 추가
-  const [totalCount, setTotalCount] = useState(0); // 전체 공지 수 상태 추가
-  const [nextPage, setNextPage] = useState(null); // 다음 페이지 URL 상태 추가
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalCount, setTotalCount] = useState(0);
+  const [nextPage, setNextPage] = useState(null);
   const navigate = useNavigate();
 
   const navigateToCreate = () => {
@@ -21,25 +21,23 @@ function NoticeListPage() {
   };
 
   useEffect(() => {
-    const fetchNotices = async (page) => {
+    const fetchNotices = async (page, type) => {
       try {
-        const response = await instance.get(
-          `${process.env.REACT_APP_SERVER_PORT}/notice/list/`,
-          {
-            params: { page }, // 페이지 번호를 쿼리 파라미터로 전달
-          }
-        );
+        const url = type
+          ? `${process.env.REACT_APP_SERVER_PORT}/notice/list/?type=${type}&page=${page}`
+          : `${process.env.REACT_APP_SERVER_PORT}/notice/list/?page=${page}`;
+        const response = await instance.get(url);
         setNotices(response.data.results);
         setFilteredNotices(response.data.results);
-        setTotalCount(response.data.count); // 전체 공지 수 설정
-        setNextPage(response.data.next); // 다음 페이지 URL 설정
+        setTotalCount(response.data.count);
+        setNextPage(response.data.next);
       } catch (error) {
         console.error("Error fetching notices:", error);
       }
     };
 
-    fetchNotices(currentPage); // 현재 페이지로 공지사항 불러오기
-  }, [currentPage]); // currentPage가 변경될 때마다 호출
+    fetchNotices(currentPage, activeFilter === "all" ? null : activeFilter); // 필터에 따라 공지 사항 불러오기
+  }, [currentPage, activeFilter]); // currentPage와 activeFilter가 변경될 때마다 호출
 
   const filterNotices = (type) => {
     setActiveFilter(type);
@@ -56,7 +54,7 @@ function NoticeListPage() {
 
   const handleNextPage = () => {
     if (nextPage) {
-      setCurrentPage((prevPage) => prevPage + 1); // 다음 페이지로 이동
+      setCurrentPage((prevPage) => prevPage + 1);
     }
   };
 
@@ -86,8 +84,8 @@ function NoticeListPage() {
             전체 공지
           </FilterButton>
           <FilterButton
-            onClick={() => filterNotices("operation")}
-            active={activeFilter === "operation"}
+            onClick={() => filterNotices("operational")}
+            active={activeFilter === "operational"}
           >
             운영 공지
           </FilterButton>
@@ -99,16 +97,23 @@ function NoticeListPage() {
           </FilterButton>
         </Filter>
         <ul>
-          {filteredNotices.map((notice) => (
-            <li key={notice.id}>
-              <a href={`/notices/${notice.id}`}>{notice.title}</a>
-              <div>
-                <h3>(준)축제준비위원회{notice.author}</h3>
-                <h4>{notice.created_at}</h4>
-              </div>
-            </li>
-          ))}
+          {filteredNotices.map((notice) => {
+            const createdAtDate = new Date(notice.created_at);
+            const formattedDate = createdAtDate.toISOString().split("T")[0]; // 'YYYY-MM-DD' 형식으로 변환
+
+            return (
+              <li key={notice.id}>
+                <a href={`/notice-detail/${notice.id}`}>{notice.title}</a>{" "}
+                {/* notice.pk를 notice.id로 수정 */}
+                <div>
+                  <h3>(준)축제준비위원회 {notice.author}</h3>
+                  <h4>{formattedDate}</h4>
+                </div>
+              </li>
+            );
+          })}
         </ul>
+
         {nextPage && <button onClick={handleNextPage}>다음 페이지</button>}
       </TopContainer>
       <Create onClick={navigateToCreate}>
@@ -159,6 +164,7 @@ const TopContainer = styled.div`
         font-weight: 600;
         line-height: 22px; /* 137.5% */
         letter-spacing: -0.5px;
+        text-decoration-line: none;
       }
       div {
         display: flex;

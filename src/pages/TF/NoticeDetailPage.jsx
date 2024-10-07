@@ -1,51 +1,20 @@
 import React, { useState, useEffect } from "react";
 import styled from "styled-components";
 import Header from "../../components/Header";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import instance from "../../api/axios";
 
-// function NoticeDetailPage({ match }) {
-//   const { id } = match.params;
-//   const [notice, setNotice] = useState(null);
-
-//   useEffect(() => {
-//     fetch(`/api/notices/${id}`)
-//       .then((response) => response.json())
-//       .then((data) => setNotice(data));
-//   }, [id]);
-
-//   const deleteNotice = () => {
-//     fetch(`/api/notices/${id}`, { method: "DELETE" }).then(() => {
-//       // 공지 삭제 후, 리스트 페이지로 이동
-//       window.location.href = "/NoticeList";
-//     });
-//   };
-
-//   return (
-//     <Wrapper>
-//       <Header style={{ color: "#3cb44b" }} />
-//       notice && (
-//       <div>
-//         <h1>{notice.title}</h1>
-//         <p>{notice.content}</p>
-//         <div>
-//           <button onClick={deleteNotice}>삭제</button>
-//           <a href={`/notices/edit/${id}`}>수정</a>
-//         </div>
-//       </div>
-//       )
-//     </Wrapper>
-//   );
-// }
-
-function NoticeDetailPage() {
+const NoticeDetailPage = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [modalMessage, setModalMessage] = useState("");
   const [modalTitle, setModalTitle] = useState("");
+  const [noticeData, setNoticeData] = useState(null); // 공지사항 상태 추가
+  const { pk } = useParams(); // URL에서 pk 값을 가져옴
 
   const navigate = useNavigate();
-  const navToCreate = () => {
-    navigate("/NoticeCreate");
+
+  const handleEdit = () => {
+    navigate("/notice-create", { state: { noticeToEdit: noticeData } });
   };
 
   const openModal = (title, message) => {
@@ -59,30 +28,55 @@ function NoticeDetailPage() {
   };
 
   const deleteNotice = () => {
-    fetch(`/api/notices/`, { method: "DELETE" }).then(() => {
-      // 공지 삭제 후, 리스트 페이지로 이동
-      window.location.href = "/NoticeList";
-      closeModal();
-    });
+    const accessToken = localStorage.getItem("access_token"); // 로컬 스토리지에서 토큰 가져오기
+    instance
+      .delete(`${process.env.REACT_APP_SERVER_PORT}/notice/${pk}/`, {
+        headers: {
+          Authorization: `Bearer ${accessToken}`, // Authorization 헤더 설정
+        },
+      })
+      .then(() => {
+        // 공지 삭제 후, 리스트 페이지로 이동
+        navigate("/notice-list");
+        closeModal();
+      })
+      .catch((error) => {
+        console.error("공지사항 삭제 중 오류가 발생했습니다:", error);
+      });
   };
+
+  // 공지사항 상세 정보 가져오기
+  useEffect(() => {
+    const fetchNoticeDetail = async () => {
+      try {
+        const response = await instance.get(
+          `${process.env.REACT_APP_SERVER_PORT}/notice/list/${pk}/`
+        );
+        setNoticeData(response.data); // 공지사항 데이터를 상태에 저장
+      } catch (error) {
+        console.error("공지사항을 불러오는 중 오류가 발생했습니다:", error);
+      }
+    };
+
+    fetchNoticeDetail();
+  }, [pk]);
 
   return (
     <Wrapper>
       <Header />
       <Container>
         <Title>공지사항</Title>
-        <div>
-          <h3>
-            [공지] 공공지사항입니다
-            <div>행사 공지</div>
-          </h3>
-          <p>
-            국군은 국가의 안전보장과 국토방위의 신성한 의무를 수행함을 사명으로
-            하며, 그 정치적 중립성은 준수된다. 공무원의 직무상 불법행위로 손해를
-            받은 국민은 법률이 정하는 바에 의하여 국가 또는 공공단체에 정당한
-            배상을 청구할 수 있다.
-          </p>
-        </div>
+        {noticeData ? (
+          <div>
+            <h3>
+              {noticeData.title} {noticeData.category}
+              <div>{noticeData.type}</div>
+            </h3>
+            <p>{noticeData.content}</p>
+          </div>
+        ) : (
+          <p>로딩 중...</p>
+        )}
       </Container>
       <ButtonContainer>
         <button
@@ -98,7 +92,7 @@ function NoticeDetailPage() {
         >
           삭제
         </button>
-        <button onClick={navToCreate}>수정</button>
+        <button onClick={handleEdit}>수정</button>
       </ButtonContainer>
 
       {isModalOpen && (
@@ -125,7 +119,7 @@ function NoticeDetailPage() {
       )}
     </Wrapper>
   );
-}
+};
 
 export default NoticeDetailPage;
 
@@ -287,38 +281,33 @@ const ModalContent = styled.div`
     font-size: 14px;
     font-style: normal;
     font-weight: 500;
-    line-height: normal;
-    p {
-      color: #928d8d;
-      text-align: center;
-      font-family: Pretendard;
-      font-size: 10px;
-      font-style: normal;
-      font-weight: 400;
-      line-height: normal;
-      margin: 6px 0 6px 0;
-    }
+    line-height: 20px; /* 142.857% */
+    letter-spacing: -0.5px;
+    padding: 0 20px;
   }
 `;
 
 const ModalButtons = styled.div`
-  margin-top: 20px;
   display: flex;
-  justify-content: space-around;
-  width: 183px;
-  height: 30px;
+  justify-content: space-between;
+  margin: 0 20px;
   button {
-    padding: 5px 20px;
-    font-size: 16px;
+    padding: 7px 17px;
+    border-radius: 30px;
+    border: none;
     cursor: pointer;
-    border-radius: 5px;
-    border: 1px solid var(--gray02, #f2f2f2);
-    text-align: center;
     font-family: Pretendard;
-    font-size: 12px;
-    font-style: normal;
+    font-size: 15px;
     font-weight: 700;
-    line-height: 20px; /* 166.667% */
+    line-height: 20px; /* 133.333% */
     letter-spacing: -0.5px;
+    &:first-child {
+      background: #f7f7f7;
+      color: #bbb;
+    }
+    &:last-child {
+      background: #00f16f;
+      color: white;
+    }
   }
 `;
