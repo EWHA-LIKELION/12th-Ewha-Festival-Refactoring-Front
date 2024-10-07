@@ -101,10 +101,6 @@ const ShowPage = () => {
     }
   };
 
-  if (loading) {
-    return <div>Loading...</div>; // 데이터 로딩 중일 때 표시
-  }
-
   return (
     <>
       {/* Header 컴포넌트 추가 */}
