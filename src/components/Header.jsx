@@ -101,9 +101,11 @@ const MainHeader = () => {
             <MenuList>
               <li onClick={() => goToPage("/booth")}>부스 목록</li>
               <li onClick={() => goToPage("/show")}>공연 목록</li>
-              <li onClick={() => goToPage("/NoticeList")}>축준위 공지</li>
-              <li onClick={() => goToPage("/")}>축제 일정 및 상설 부스</li>
-              <li onClick={() => goToPage("/")}>쓰레기통 및 그릇 반납</li>
+              <li onClick={() => goToPage("/notice-list")}>축준위 공지</li>
+              <li onClick={() => goToPage("/festival-schedule")}>
+                축제 일정 및 상설 부스
+              </li>
+              <li onClick={() => goToPage("/trash")}>쓰레기통 및 그릇 반납</li>
               <li onClick={() => goToPage("/BarrierFree")}>배리어프리</li>
               <li onClick={() => goToPage("/mypage")}>마이페이지</li>
             </MenuList>
