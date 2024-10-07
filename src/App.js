@@ -24,6 +24,7 @@ import ShowPage from "./pages/ShowPage.jsx";
 import TrashPage from "./pages/TrashPage.jsx";
 import MadeByPage from "./pages/MadeByPage.jsx";
 import SearchPage from "./pages/SearchPage.jsx";
+import FestivalSchedule from "./pages/FestivalSchedule.jsx";
 
 function App() {
   // 뷰포트 높이 계산
@@ -53,7 +54,6 @@ function App() {
           <Route path="/search" element={<SearchPage />} />
           <Route path="/detail/admin" element={<AdminDetailPage />} />
           <Route path="/detail/admin/edit" element={<EditViewPage />} />
-          <Route path="/booth-edit" element={<BoothEditPage />} />
           <Route path="/booth-detail" element={<BoothDetailPage />} />
 
           {/* 공연 */}
@@ -62,11 +62,13 @@ function App() {
           {/* 공지 */}
           <Route path="/notice-list" element={<NoticeListPage />} />
           <Route path="/notice-create" element={<NoticeCreatePage />} />
-          <Route path="/notice-detail" element={<NoticeDetailPage />} />
+          <Route path="/notice-detail/:pk" element={<NoticeDetailPage />} />
+          <Route path="/notice-edit/:pk" element={<NoticeEditPage />} />
           <Route path="/about" element={<FestivalIntro />} />
           <Route path="/barrier-free" element={<BarrierFreeInfo />} />
           <Route path="/trash" element={<TrashPage />} />
           <Route path="/madeby" element={<MadeByPage />} />
+          <Route path="/festival-schedule" element={<FestivalSchedule />} />
 
           {/* 마이페이지 */}
           <Route path="/mypage" element={<MyPage />} />

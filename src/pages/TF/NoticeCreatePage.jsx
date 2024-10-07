@@ -1,58 +1,128 @@
 import React, { useState, useEffect } from "react";
 import styled from "styled-components";
-import background from "../../images/background.png";
 import Header from "../../components/Header";
-import axios from "axios";
+import instance from "../../api/axios";
+import { useNavigate, useParams, useLocation } from "react-router-dom";
 
-function NoticeCreatePage({ isEdit, existingData }) {
-  const [type, setType] = useState(existingData?.type || "operation"); // 기본으로 '운영 공지'가 선택됨
-  const [title, setTitle] = useState(existingData?.title || "");
-  const [content, setContent] = useState(existingData?.content || "");
-  const [event, setEvent] = useState(existingData?.event || "");
+function NoticeCreatePage() {
+  const navigate = useNavigate();
+  const location = useLocation();
+  const noticeToEdit = location.state?.noticeToEdit || null;
+
+  const [isEdit, setIsEdit] = useState(false);
+  const { pk } = useParams();
+
+  // 기존 데이터 또는 기본값으로 초기 상태 설정
+  const [type, setType] = useState("operation");
+  const [title, setTitle] = useState("");
+  const [content, setContent] = useState("");
+  const [event, setEvent] = useState("ewhagreenFe");
+  const [isImportant, setIsImportant] = useState(false);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [modalMessage, setModalMessage] = useState("");
+  const [modalTitle, setModalTitle] = useState("");
+
+  // 공지 수정 모드일 경우 초기값 설정
+  useEffect(() => {
+    if (noticeToEdit) {
+      setIsEdit(true);
+      setTitle(noticeToEdit.title);
+      setContent(noticeToEdit.content);
+      setType(noticeToEdit.notice_type === "event" ? "event" : "operation");
+      setEvent(noticeToEdit.event_type || "ewhagreenFe");
+      setIsImportant(noticeToEdit.is_important);
+    }
+  }, [noticeToEdit]);
 
   const eventOptions = [
-    "다시 돌아온 네가 그린 그린은 이화그린",
-    "아티스트 공연",
-    "야간 영화제",
-    "야시장",
-    "영산 줄다리기",
-    "이화인 한솥밥 배부",
+    { value: "ewhagreenFe", label: "다시 돌아온 네가 그린 그린은 이화그린" },
+    { value: "artistShow", label: "아티스트 공연" },
+    { value: "movie_fe", label: "야간 영화제" },
+    { value: "nightMarket", label: "야시장" },
+    { value: "tugOfWar", label: "영산 줄다리기" },
+    { value: "riceFe", label: "이화인 한솥밥 배부" },
   ];
 
-  const handleSubmit = () => {
+  const openModal = (title, message) => {
+    setModalTitle(title);
+    setModalMessage(message);
+    setIsModalOpen(true);
+  };
+
+  const closeModal = () => {
+    setIsModalOpen(false);
+  };
+
+  const confirmAction = () => {
+    if (modalTitle === (isEdit ? "공지 수정 완료" : "공지 작성 완료")) {
+      handleSubmit();
+    } else {
+      navigate("/notice-list"); // 작성 취소 시 리스트로 돌아가기
+    }
+    closeModal();
+  };
+
+  const handleSubmit = async () => {
+    const token = localStorage.getItem("access_token");
+
+    if (!token) {
+      console.error("No access token found");
+      return;
+    }
+
     const data = {
-      type,
       title,
       content,
-      event: type === "event" ? event : null,
+      notice_type: type === "event" ? "event" : "operational",
+      event_type: type === "event" ? event : null,
+      is_important: isImportant,
     };
-    const method = isEdit ? "PUT" : "POST";
-    const url = isEdit ? `/api/notices/${existingData.id}` : "/api/notices";
 
-    fetch(url, {
-      method,
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(data),
-    }).then(() => {
-      // 저장 후 리스트 페이지로 이동
-      window.location.href = "/NoticeList";
-    });
+    try {
+      if (isEdit) {
+        // 수정 요청
+        await instance.patch(
+          `${process.env.REACT_APP_SERVER_PORT}/notice/${noticeToEdit.id}/`,
+          data,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+              "Content-Type": "application/json",
+            },
+          }
+        );
+      } else {
+        // 작성 요청
+        await instance.post(
+          `${process.env.REACT_APP_SERVER_PORT}/notice/create/`,
+          data,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
+      }
+      navigate("/notice-list");
+    } catch (error) {
+      console.error("Error submitting notice:", error);
+    }
   };
 
   return (
     <Wrapper>
       <Header />
       <Container>
-        <Title>공지 작성하기</Title>
+        <Title>{isEdit ? "공지 수정하기" : "공지 작성하기"}</Title>
         <NoticeType>
           <TypeButton
-            active={type === "operation"} // '운영 공지'가 선택되었는지 확인
+            active={type === "operation"}
             onClick={() => setType("operation")}
           >
             운영 공지
           </TypeButton>
           <TypeButton
-            active={type === "event"} // '행사 공지'가 선택되었는지 확인
+            active={type === "event"}
             onClick={() => setType("event")}
           >
             행사 공지
@@ -62,8 +132,8 @@ function NoticeCreatePage({ isEdit, existingData }) {
         {type === "event" && (
           <select value={event} onChange={(e) => setEvent(e.target.value)}>
             {eventOptions.map((option) => (
-              <option key={option} value={option}>
-                {option}
+              <option key={option.value} value={option.value}>
+                {option.label}
               </option>
             ))}
           </select>
@@ -83,21 +153,163 @@ function NoticeCreatePage({ isEdit, existingData }) {
           onChange={(e) => setContent(e.target.value)}
         />
       </Container>
+
       <BottomContainer>
         <Select>
-          <div></div>
-          <p>중요 공지로 설정</p>
+          <label>
+            <input
+              type="checkbox"
+              checked={isImportant}
+              onChange={() => setIsImportant(!isImportant)}
+            />
+            중요 공지로 설정
+          </label>
         </Select>
         <ButtonContainer>
-          <button>취소</button>
-          <button onClick={handleSubmit}>{isEdit ? "수정하기" : "완료"}</button>
+          <button
+            onClick={() =>
+              openModal(
+                isEdit ? "공지 수정 취소" : "공지 작성 취소",
+                <>
+                  {isEdit
+                    ? "공지 수정을 취소하시겠습니까?"
+                    : "공지 작성을 취소하시겠습니까?"}
+                  <p>작성된 내용은 저장되지 않습니다.</p>
+                </>
+              )
+            }
+          >
+            취소
+          </button>
+          <button
+            onClick={() =>
+              openModal(
+                isEdit ? "공지 수정 완료" : "공지 작성 완료",
+                isEdit
+                  ? "공지 수정을 완료하시겠습니까?"
+                  : "공지 작성을 완료하시겠습니까?"
+              )
+            }
+          >
+            완료
+          </button>
         </ButtonContainer>
       </BottomContainer>
+
+      {isModalOpen && (
+        <ModalOverlay>
+          <ModalContent>
+            <h1>{modalTitle}</h1>
+            <div>{modalMessage}</div>
+            <ModalButtons>
+              <button
+                onClick={closeModal}
+                style={{ background: "#F7F7F7", color: "#BBBBBB" }}
+              >
+                아니오
+              </button>
+              <button
+                onClick={confirmAction}
+                style={{ background: "#00F16F", color: "white" }}
+              >
+                예
+              </button>
+            </ModalButtons>
+          </ModalContent>
+        </ModalOverlay>
+      )}
     </Wrapper>
   );
 }
 
 export default NoticeCreatePage;
+
+const ModalOverlay = styled.div`
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+`;
+
+const ModalContent = styled.div`
+  background-color: white;
+  border-radius: 10px;
+  text-align: center;
+  width: 286px;
+  height: 151px;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-between;
+  padding-bottom: 20px;
+  h1 {
+    margin: 0;
+    width: 286px;
+    height: 52px;
+    flex-shrink: 0;
+    border-radius: 10px 10px 0px 0px;
+    background: var(--green04, #1ef380);
+    color: var(--wh01, var(--wh, #fff));
+    text-align: center;
+    font-family: Pretendard;
+    font-size: 18px;
+    font-style: normal;
+    font-weight: 700;
+    line-height: 100%; /* 18px */
+    letter-spacing: -0.5px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  div {
+    margin-top: 10px;
+    color: #000;
+    text-align: center;
+    font-family: Pretendard;
+    font-size: 14px;
+    font-style: normal;
+    font-weight: 500;
+    line-height: normal;
+    p {
+      color: #928d8d;
+      text-align: center;
+      font-family: Pretendard;
+      font-size: 10px;
+      font-style: normal;
+      font-weight: 400;
+      line-height: normal;
+      margin: 6px 0 6px 0;
+    }
+  }
+`;
+
+const ModalButtons = styled.div`
+  margin-top: 20px;
+  display: flex;
+  justify-content: space-around;
+  width: 183px;
+  height: 30px;
+  button {
+    padding: 5px 20px;
+    font-size: 16px;
+    cursor: pointer;
+    border-radius: 5px;
+    border: 1px solid var(--gray02, #f2f2f2);
+    text-align: center;
+    font-family: Pretendard;
+    font-size: 12px;
+    font-style: normal;
+    font-weight: 700;
+    line-height: 20px; /* 166.667% */
+    letter-spacing: -0.5px;
+  }
+`;
 
 const BottomContainer = styled.div`
   margin: 30px 0 0 0;
@@ -190,6 +402,33 @@ const Container = styled.div`
   flex-direction: column;
   align-items: center;
   margin-top: 60px;
+  select {
+    /* -moz-appearance: none;
+    -webkit-appearance: none;
+    appearance: none; */
+    border-radius: 30px;
+    border: 1px solid var(--gray02, #f2f2f2);
+    background: var(--gray03, #f7f7f7);
+    width: 343px;
+    padding: 9px 17px;
+    margin-bottom: 30px;
+  }
+  select:hover {
+    border-color: #bbbbbb;
+  }
+  select:focus {
+    border-color: #bbbbbb;
+    box-shadow: 0 0 1px 3px rgba(59, 153, 252, 0.7);
+  }
+  option {
+    margin-top: 3px;
+    border-radius: 14px;
+    border: 1px solid var(--gray02, #f2f2f2);
+    background: var(--gray03, #f2f2f2);
+    width: 343px;
+    padding: 16px 12px;
+    gap: 16px;
+  }
   input {
     color: var(--bk01, #000);
     font-family: Pretendard;
@@ -205,7 +444,7 @@ const Container = styled.div`
 
     background: transparent; // 배경을 투명하게 설정
     border: none; // 전체 테두리 제거
-    border-top: none; // 상단 테두리 없음
+    border-top: 2px solid #00f16f; // 상단 테두리 없음
     border-bottom: 2px solid #00f16f; // 하단에만 테두리 설정 (#00F16F 색상)
     padding: 10px;
     outline: none; // 포커스 시 기본 테두리 제거
@@ -267,6 +506,5 @@ const Title = styled.h1`
 
 const Wrapper = styled.div`
   height: calc(var(--vh, 1vh) * 100);
-  background-image: url(${background});
   margin: 0;
 `;
