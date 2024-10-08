@@ -40,12 +40,14 @@ const BoothItem = ({ booth, onClick }) => {
       if (!booth.is_scraped) {
         const response = await instance.post(
           `/booths/${booth.id}/scrap/`,
+          {},
           config
         );
         console.log("Response: ", response); // 응답 로그 확인
-      } else if (booth.is_scraped === true) {
+      } else {
         const response = await instance.delete(
           `/booths/${booth.id}/scrap/`,
+
           config
         );
         console.log("Response: ", response); // 응답 로그 확인

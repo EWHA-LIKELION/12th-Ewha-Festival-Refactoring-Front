@@ -127,6 +127,39 @@ const MadeByPage = () => {
             />
           </Makers>
         </BottomContent>
+        <OtherteamWrapper>
+          <Team>
+            <TeamName>홍보팀</TeamName>
+            <TeamMember>
+              <>
+                교공24 임수빈 <br />
+                휴기바24 곽정은 <br />
+                불문24 김현아 <br />
+                서양화24 정지은 <br />
+                경영24 정다원 <br />
+                중문22 정다연 <br />
+                융콘24 서지민 <br />
+                체육24 조연아
+              </>
+            </TeamMember>
+          </Team>
+          <Team>
+            <TeamName>부스팀</TeamName>
+            <TeamMember>
+              <>
+                체육24 김시현 <br />
+                융콘23 임수아 <br />
+                경영24 라피야 <br />
+                사학24 최수영 <br />
+                반도체24 박주혜 <br />
+                수교23 정이지 <br />
+                과교24 남시은 <br />
+                컴공24 신지민 <br />
+                간호23 임세빈
+              </>
+            </TeamMember>
+          </Team>
+        </OtherteamWrapper>
       </Content>
       <Footer />
     </Wrapper>
@@ -138,6 +171,10 @@ export default MadeByPage;
 const Wrapper = styled.div`
   height: calc(var(--vh, 1vh) * 100);
   margin: 0;
+  ::-webkit-scrollbar {
+    width: 0;
+    height: 0;
+  }
 `;
 
 const Content = styled.div`
@@ -203,4 +240,49 @@ const FilterButton = styled.button`
   line-height: 20px;
   letter-spacing: -0.5px;
   white-space: nowrap;
+`;
+
+const OtherteamWrapper = styled.div`
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 90px;
+  margin-bottom: 55px;
+`;
+
+const Team = styled.div`
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+`;
+
+const TeamName = styled.div`
+  display: inline-flex;
+  padding: 8px 24px;
+  justify-content: center;
+  align-items: center;
+  gap: 10px;
+  border-radius: 30px;
+  background: var(--green_01, #00f16f);
+  box-shadow: 0px 0px 4px 0px rgba(0, 0, 0, 0.1);
+  color: var(--wh01, var(--wh, #fff));
+  text-align: center;
+  font-family: Pretendard;
+  font-size: 13px;
+  font-style: normal;
+  font-weight: 700;
+  line-height: 20px; /* 153.846% */
+  letter-spacing: -0.5px;
+  margin-bottom: 6px;
+`;
+
+const TeamMember = styled.div`
+  color: #000;
+  text-align: center;
+  font-family: Pretendard;
+  font-size: 10px;
+  font-style: normal;
+  font-weight: 600;
+  line-height: 20px; /* 200% */
+  letter-spacing: -0.5px;
 `;
