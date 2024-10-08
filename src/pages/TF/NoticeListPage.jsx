@@ -5,6 +5,7 @@ import instance from "../../api/axios";
 import searchicon from "../../images/searchicon.svg";
 import createicon from "../../images/createicon.svg";
 import { useNavigate } from "react-router-dom";
+import Footer from "../../components/Footer";
 
 function NoticeListPage() {
   const [notices, setNotices] = useState([]);
@@ -182,6 +183,7 @@ function NoticeListPage() {
           </Create>
         </CreateContainer>
       </TopContainer>
+      <Footer />
     </Wrapper>
   );
 }
@@ -240,6 +242,7 @@ const TopContainer = styled.div`
   flex-direction: column;
   align-items: center;
   margin-top: 60px;
+  margin-bottom: 75px;
   ul {
     margin: 0;
     padding: 0;

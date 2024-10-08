@@ -5,6 +5,7 @@ import { useNavigate } from "react-router-dom";
 import TFBoothItem from "../components/TFBoothItem";
 import TFEventItem from "../components/TFEventItem";
 import instance from "../api/axios";
+import Footer from "../components/Footer";
 
 function FestivalSchedule() {
   const [selectedDay, setSelectedDay] = useState("수"); // 요일 기본값
@@ -167,6 +168,7 @@ function FestivalSchedule() {
           </PopupContent>
         </PopupContainer>
       )}
+      <Footer />
     </Wrapper>
   );
 }
@@ -234,6 +236,7 @@ const DayButton = styled.button`
 
 const BoothContainer = styled.div`
   padding: 20px;
+  margin-bottom: 132px;
 `;
 
 const BoothItemList = styled.div`

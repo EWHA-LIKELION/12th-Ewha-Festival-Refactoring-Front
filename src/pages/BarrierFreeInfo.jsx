@@ -1,14 +1,15 @@
 import React, { useState, useEffect } from "react";
 import styled from "styled-components";
 import background from "../images/background.png";
-import HeaderBackVer from "../components/HeaderBackVer";
+import MainHeader from "../components/MainHeader";
 import { useNavigate } from "react-router-dom";
 import BarrierFreeMap from "../images/BarrierFreeMap.svg";
+import Footer from "../components/Footer";
 
 function BarrierFreeInfo() {
   return (
     <Wrapper>
-      <HeaderBackVer />
+      <MainHeader />
       <Container>
         <Title>배리어프리 확인하기</Title>
         <img src={BarrierFreeMap} />
@@ -30,6 +31,7 @@ function BarrierFreeInfo() {
           <br /> 입장해주시면 감사하겠습니다.
         </div>
       </TextBox>
+      <Footer />
     </Wrapper>
   );
 }

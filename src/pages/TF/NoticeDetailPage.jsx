@@ -3,6 +3,7 @@ import styled from "styled-components";
 import Header from "../../components/Header";
 import { useNavigate, useParams } from "react-router-dom";
 import instance from "../../api/axios";
+import Footer from "../../components/Footer";
 
 const NoticeDetailPage = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -123,6 +124,7 @@ const NoticeDetailPage = () => {
           </ModalContent>
         </ModalOverlay>
       )}
+      <Footer />
     </Wrapper>
   );
 };
@@ -215,6 +217,8 @@ const ButtonContainer = styled.div`
   justify-content: flex-end;
   gap: 10px;
   margin-right: 19px;
+  margin-bottom: 270px;
+
   button {
     padding: 7px 17px;
     border-radius: 30px;

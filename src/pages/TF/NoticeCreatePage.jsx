@@ -3,6 +3,7 @@ import styled from "styled-components";
 import Header from "../../components/Header";
 import instance from "../../api/axios";
 import { useNavigate, useParams, useLocation } from "react-router-dom";
+import Footer from "../../components/Footer";
 
 function NoticeCreatePage({ notice }) {
   const navigate = useNavigate();
@@ -224,6 +225,7 @@ function NoticeCreatePage({ notice }) {
           </ModalContent>
         </ModalOverlay>
       )}
+      <Footer />
     </Wrapper>
   );
 }
@@ -329,6 +331,7 @@ const BottomContainer = styled.div`
   display: flex;
   justify-content: space-around;
   align-items: center;
+  margin-bottom: 200px;
 `;
 
 const Select = styled.div`
