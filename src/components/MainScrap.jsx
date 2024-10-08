@@ -137,6 +137,7 @@ const MainScrap = () => {
 export default MainScrap;
 
 const Wrapper = styled.div`
+  position: relative;
   margin: 2.19rem auto 0;
   width: 77%;
   flex-shrink: 0;

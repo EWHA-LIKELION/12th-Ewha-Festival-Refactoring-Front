@@ -96,10 +96,8 @@ const Title = styled.div`
 `;
 
 const ScrapP = styled.p`
-  position: fixed;
-  top: 5rem;
-  left: 50%;
-  transform: translate(-50%, -50%);
+  height: 1px;
+  margin: 0 auto;
   width: fit-content;
   color: var(--gray02, #f2f2f2);
   text-align: center;
