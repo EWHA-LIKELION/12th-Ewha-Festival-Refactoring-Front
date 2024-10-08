@@ -49,7 +49,6 @@ const BoothItem = ({ booth, onClick }) => {
       } else {
         const response = await instance.delete(
           `/booths/${booth.id}/scrap/`,
-
           config
         );
         console.log("Response: ", response); // 응답 로그 확인
@@ -82,10 +81,14 @@ const BoothItem = ({ booth, onClick }) => {
     }
   };
 
+  const handleBoothClick = () => {
+    navigate(`/booth-detail/`); // 부스 상세 페이지로 이동
+  };
+
   return (
     <Booth
       isOpened={booth.is_opened}
-      onClick={onClick}
+      onClick={handleBoothClick} // 부스 클릭 핸들러 추가
       style={{
         backgroundImage: `url(${
           booth.thumbnail
