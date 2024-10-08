@@ -87,7 +87,7 @@ const BoothItem = ({ booth, onClick }) => {
           alt="Scrap"
           onClick={clickScrap}
         />
-
+        <ScrapCount>{booth.scrap_count}</ScrapCount>
         {!booth.is_opened && <ClosedLabel>운영 종료</ClosedLabel>}
         <BoothName>{booth.name}</BoothName>
         <BoothLocation>
@@ -147,6 +147,19 @@ const BoothInfo = styled.div`
     cursor: pointer;
     z-index: 3;
   }
+`;
+
+const ScrapCount = styled.div`
+  color: var(--green_01, #00f16f);
+  text-shadow: 0px 0px 4px rgba(0, 0, 0, 0.25);
+  font-size: 12px;
+  font-style: normal;
+  font-weight: 400;
+  line-height: 20px; /* 166.667% */
+  letter-spacing: -0.5px;
+  position: absolute;
+  top: 2.8rem;
+  right: 1.6rem;
 `;
 
 const BoothName = styled.div`
