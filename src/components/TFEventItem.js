@@ -8,7 +8,7 @@ const TFEventItem = ({ booth }) => {
       <BoothInfo>
         <BoothName>{booth.name}</BoothName>
         <BoothLocation>
-          {booth.booth_place} &nbsp; {booth.time}
+          {booth.booth_place} &nbsp; {booth.days}
         </BoothLocation>
       </BoothInfo>
     </Booth>

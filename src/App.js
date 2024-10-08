@@ -61,11 +61,6 @@ function App() {
           <Route path="/booth-edit-addmenu" element={<AddMenuPage />} />
           <Route path="/booth-detail" element={<BoothDetailPage />} />
           <Route path="/mypage" element={<MyPage />} />
-          <Route path="/NoticeList" element={<NoticeListPage />} />
-          <Route path="/NoticeCreate" element={<NoticeCreatePage />} />
-          <Route path="/NoticeDetail" element={<NoticeDetailPage />} />
-          <Route path="/FestivalIntro" element={<FestivalIntro />} />
-          <Route path="/BarrierFree" element={<BarrierFreeInfo />} />
           <Route path="/show" element={<ShowPage />} />
 
           {/* 공연 */}

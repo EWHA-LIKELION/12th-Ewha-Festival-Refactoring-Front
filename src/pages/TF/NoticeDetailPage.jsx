@@ -3,6 +3,7 @@ import styled from "styled-components";
 import Header from "../../components/Header";
 import { useNavigate, useParams } from "react-router-dom";
 import instance from "../../api/axios";
+import Footer from "../../components/Footer";
 
 const NoticeDetailPage = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -28,7 +29,7 @@ const NoticeDetailPage = () => {
   };
 
   const deleteNotice = () => {
-    const accessToken = localStorage.getItem("access_token"); // 로컬 스토리지에서 토큰 가져오기
+    const accessToken = localStorage.getItem("accessToken"); // 로컬 스토리지에서 토큰 가져오기
     instance
       .delete(`${process.env.REACT_APP_SERVER_PORT}/notice/list/${pk}/`, {
         headers: {
@@ -70,7 +71,13 @@ const NoticeDetailPage = () => {
           <div>
             <h3>
               {noticeData.title} {noticeData.category}
-              <div>{noticeData.type}</div>
+              <div>
+                {noticeData.notice_type === "event"
+                  ? "행사 공지"
+                  : noticeData.notice_type === "operational"
+                  ? "운영 공지"
+                  : noticeData.notice_type}
+              </div>
             </h3>
             <p>{noticeData.content}</p>
           </div>
@@ -117,6 +124,7 @@ const NoticeDetailPage = () => {
           </ModalContent>
         </ModalOverlay>
       )}
+      <Footer />
     </Wrapper>
   );
 };
@@ -209,6 +217,8 @@ const ButtonContainer = styled.div`
   justify-content: flex-end;
   gap: 10px;
   margin-right: 19px;
+  margin-bottom: 270px;
+
   button {
     padding: 7px 17px;
     border-radius: 30px;
@@ -254,6 +264,15 @@ const ModalContent = styled.div`
   align-items: center;
   justify-content: space-between;
   padding-bottom: 20px;
+  p {
+    color: #928d8d;
+    text-align: center;
+    font-family: Pretendard;
+    font-size: 10px;
+    font-style: normal;
+    font-weight: 400;
+    line-height: normal;
+  }
   h1 {
     margin: 0;
     width: 286px;
@@ -291,13 +310,17 @@ const ModalButtons = styled.div`
   display: flex;
   justify-content: space-between;
   margin: 0 20px;
+  gap: 9px;
   button {
     padding: 7px 17px;
-    border-radius: 30px;
+    width: 87px;
+    height: 30px;
+    flex-shrink: 0;
+    border-radius: 5px;
     border: none;
     cursor: pointer;
     font-family: Pretendard;
-    font-size: 15px;
+    font-size: 12px;
     font-weight: 700;
     line-height: 20px; /* 133.333% */
     letter-spacing: -0.5px;

@@ -5,14 +5,16 @@ import TFBooth from "../images/TFBooth.svg"; // 기본 부스 이미지 경로
 const TFBoothItem = ({ booth }) => {
   return (
     <Booth>
-      <BoothInfo>
-        <BoothName>{booth.name}</BoothName>
-        <BoothLocation>
-          {booth.booth_place}
-          <br />
-          {booth.time}
-        </BoothLocation>
-      </BoothInfo>
+      <a href={`/booths/${booth.id}`}>
+        <BoothInfo>
+          <BoothName>{booth.name}</BoothName>
+          <BoothLocation>
+            {booth.booth_place}
+            <br />
+            {booth.days}
+          </BoothLocation>
+        </BoothInfo>
+      </a>
     </Booth>
   );
 };
@@ -31,6 +33,9 @@ const Booth = styled.div`
 
   /* 기존 코드 유지 */
   gap: 16px;
+  a {
+    text-decoration-line: none;
+  }
 `;
 
 const BoothInfo = styled.div`
