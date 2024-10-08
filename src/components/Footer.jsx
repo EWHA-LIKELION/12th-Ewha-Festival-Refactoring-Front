@@ -1,14 +1,5 @@
 import React from "react";
 import styled from "styled-components";
-<<<<<<< HEAD
-
-//제가 나중에 만들 거에영
-const Footer = () => {
-  return;
-};
-
-export default Footer;
-=======
 import ewhaMeotsa from "../images/ewhaMeotsa.svg";
 import insta from "../images/insta.svg";
 import git from "../images/git.svg";
@@ -108,4 +99,3 @@ const Bottom = styled.p`
   font-weight: 300;
   line-height: normal;
 `;
->>>>>>> master

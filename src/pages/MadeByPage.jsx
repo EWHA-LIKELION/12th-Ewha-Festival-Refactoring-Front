@@ -12,10 +12,7 @@ import Making from "../components/Making";
 import 김가영 from "../images/Makers/김가영.svg";
 import 김지형 from "../images/Makers/김지형.svg";
 
-const TrashPage = () => {
-  const [activeFilter, setActiveFilter] = useState("all");
-  const navigate = useNavigate();
-
+const MadeByPage = () => {
   return (
     <Wrapper>
       <Header />
@@ -136,7 +133,7 @@ const TrashPage = () => {
   );
 };
 
-export default TrashPage;
+export default MadeByPage;
 
 const Wrapper = styled.div`
   height: calc(var(--vh, 1vh) * 100);

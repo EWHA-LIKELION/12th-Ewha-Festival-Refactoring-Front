@@ -1,233 +1,274 @@
-import React, { useState, useEffect, useRef } from "react";
-import styled from "styled-components";
-import BoothItem from "./BoothItem";
-import { useNavigate } from "react-router-dom";
-import moreScrap from "../images/moreScrap.svg";
-import instance from "../api/axios.js";
+import React, { useState } from "react";
+import styled, { createGlobalStyle } from "styled-components";
+import { useNavigate, useLocation } from "react-router-dom";
+import whitelogo from "../images/whitelogo.svg";
+import whitehamburger from "../images/whitehamburger.svg";
+import closeIcon from "../images/closeIcon.svg"; // X 버튼 이미지 추가
+import searchIcon from "../images/search.svg";
+import instance from "../api/axios";
 
-const MainScrap = () => {
-  const [scrapData, setScrapData] = useState({
-    booths: [],
-    menus: [],
-    shows: [],
-  });
-  const [selectedCategory, setSelectedCategory] = useState("부스");
-  const categories = ["부스", "메뉴", "공연"];
-  const optionRefs = useRef([]);
+const MainHeader = () => {
+  const [isModalOpen, setModalOpen] = useState(false);
+  const [isClosing, setIsClosing] = useState(false);
+  const [searchTerm, setSearchTerm] = useState("");
+
+  const location = useLocation(); // 현재 페이지의 경로를 가져옴
   const navigate = useNavigate();
 
-  const [highlightStyle, setHighlightStyle] = useState({});
-
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const token = localStorage.getItem("accessToken");
-        const response = await instance.get(`/main/`, {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        });
-        const { booths, menus, shows } = response.data;
-        setScrapData({ booths, menus, shows });
-        console.log(response.data);
-      } catch (error) {
-        console.error("데이터 가져오기 실패:", error);
-      }
-    };
-    fetchData();
-  }, []);
-
-  useEffect(() => {
-    const currentIndex = categories.indexOf(selectedCategory);
-    const currentRef = optionRefs.current[currentIndex];
-    if (currentRef) {
-      const { offsetLeft: left, clientWidth: width } = currentRef;
-      setHighlightStyle({ left, width });
-    }
-  }, [selectedCategory]);
-
-  const handleOption = (option) => {
-    setSelectedCategory(option);
+  const openModal = () => {
+    setModalOpen(true);
+    setIsClosing(false);
   };
 
-  const filteredData =
-    scrapData[
-      selectedCategory === "부스"
-        ? "booths"
-        : selectedCategory === "메뉴"
-        ? "menus"
-        : "shows"
-    ];
+  const closeModal = () => {
+    setIsClosing(true);
+    setTimeout(() => {
+      setModalOpen(false);
+    }, 300); // 애니메이션 시간과 맞추기 위해 300ms 설정
+  };
+
+  const handleSearch = async () => {
+    console.log("검색어:", searchTerm);
+
+    try {
+      const response = await instance.get(
+        `${process.env.REACT_APP_SERVER_PORT}/main/search`,
+        {
+          params: {
+            q: searchTerm,
+          },
+        }
+      );
+
+      // 부스와 공지사항을 둘 다 상태에 넘겨서 페이지 이동
+      navigate("/search", {
+        state: {
+          booths: response.data.booths,
+          notices: response.data.notices,
+          searchTerm,
+        },
+      });
+    } catch (error) {
+      navigate("/search", { state: { booths: [], notices: [] } }); // 부스와 공지사항 모두 빈 배열로 전달
+    }
+  };
+
+  const goToPage = (url) => {
+    if (location.pathname === url) {
+      closeModal(); // 현재 페이지를 클릭했을 때 모달 닫기
+    } else {
+      navigate(url);
+    }
+  };
 
   return (
-    <Wrapper>
-      <MenuSlider>
-        <Highlighter style={highlightStyle} />
-        {categories.map((category, index) => (
-          <CategoryBtn
-            key={category}
-            ref={(el) => (optionRefs.current[index] = el)}
-            selected={selectedCategory === category}
-            onClick={() => handleOption(category)}
-          >
-            {category}
-          </CategoryBtn>
-        ))}
-      </MenuSlider>
+    <>
+      <GlobalStyle /> {/* GlobalStyle 적용 */}
       <Container>
-        {filteredData.length === 0 ? (
-          <NoScrapMessage>
-            <img src={moreScrap} alt="빈 스크랩" />
-            스크랩한 내용이 아직 없어요🥹
-          </NoScrapMessage>
-        ) : (
-          <ItemContainer>
-            {Array.from({ length: 4 }).map((_, index) => {
-              if (filteredData[index]) {
-                return (
-                  <BoothItem
-                    key={filteredData[index].id}
-                    booth={filteredData[index]}
-                  />
-                );
-              } else {
-                return (
-                  <NoScrapCard>
-                    <img src={moreScrap} alt="빈 스크랩" />더 많은 스크랩으로
-                    <br />
-                    채워주세요
-                  </NoScrapCard>
-                );
-              }
-            })}
-          </ItemContainer>
+        <Hamburger
+          src={whitehamburger}
+          alt="hamburger menu"
+          onClick={openModal}
+        />
+        {isModalOpen && (
+          <Modal isClosing={isClosing}>
+            <ModalHeader>
+              <CloseButton
+                src={closeIcon}
+                alt="close button"
+                onClick={closeModal}
+              />
+              <SearchBar>
+                <SearchInput
+                  type="text"
+                  placeholder="검색어를 입력해 주세요"
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  onKeyPress={(e) => {
+                    if (e.key === "Enter") {
+                      handleSearch();
+                    }
+                  }}
+                />
+                <SearchButton onClick={handleSearch}>
+                  <img src={searchIcon} alt="search" />
+                </SearchButton>
+              </SearchBar>
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="349"
+                height="2"
+                viewBox="0 0 349 2"
+                fill="none"
+              >
+                <path d="M0 1.00003L349 0.999969" stroke="black" />
+              </svg>
+            </ModalHeader>
+            <MenuList>
+              <li onClick={() => goToPage("/booth")}>부스 목록</li>
+              <li onClick={() => goToPage("/show")}>공연 목록</li>
+              <li onClick={() => goToPage("/notice-list")}>축준위 공지</li>
+              <li onClick={() => goToPage("/festival-schedule")}>
+                축제 일정 및 상설 부스
+              </li>
+              <li onClick={() => goToPage("/trash")}>쓰레기통 및 그릇 반납</li>
+              <li onClick={() => goToPage("/barrier-free")}>배리어프리</li>
+              <li onClick={() => goToPage("/mypage")}>마이페이지</li>
+            </MenuList>
+          </Modal>
         )}
+        <img
+          src={whitelogo}
+          onClick={() => navigate("/")}
+          alt="logo"
+          width="80px"
+          height="20px"
+        />
       </Container>
-    </Wrapper>
+    </>
   );
 };
 
-export default MainScrap;
+export default MainHeader;
 
-const Wrapper = styled.div`
-  margin: 2.19rem auto 0;
-  width: 77%;
-  flex-shrink: 0;
-  background: linear-gradient(
-    158deg,
-    rgba(245, 245, 245, 0.4) 3.91%,
-    rgba(247, 247, 247, 0.4) 102.63%
-  );
-
-  aspect-ratio: 330 / 429;
-  border-radius: 0.9375rem;
-  box-shadow: 0px 0px 4px 0px rgba(0, 0, 0, 0.1), 0px 0px 4px 0px #fff inset;
-  backdrop-filter: blur(10px);
-  padding: 1.69rem 0.94rem;
-  display: flex;
-  flex-direction: column;
-`;
-
-const MenuSlider = styled.div`
-  position: absolute;
-  top: 0;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  display: flex;
-  width: max-content;
-  height: 2.25rem;
-  justify-content: center;
-  align-items: center;
-  border-radius: 1.875rem;
-  background: #c1d9cc;
-  box-shadow: 0px 0px 4px 0px rgba(0, 0, 0, 0.1);
-  margin-bottom: 1rem;
-`;
-
-const CategoryBtn = styled.div`
-  padding: 0.5rem 1.0625rem;
-  border-radius: 1.875rem;
-  color: white;
-  font-size: 0.8125rem;
-  font-weight: 700;
-  cursor: pointer;
-  z-index: 1;
-  position: relative;
-`;
-
-const Highlighter = styled.div`
-  position: absolute;
-  bottom: 0;
-  height: 100%;
-  background-color: #00f16f;
-  border-radius: 1.875rem;
-  transition: left 0.3s ease, width 0.3s ease;
-  z-index: 0;
-`;
-
-const Container = styled.div`
-  display: flex;
-  justify-content: space-around;
-  width: 100%;
-  height: 100%;
-`;
-
-const ItemContainer = styled.div`
-  width: 100%;
-  height: 100%;
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  grid-template-rows: repeat(2, 1fr);
-  gap: 0.44rem 0.69rem;
-`;
-
-const NoScrapMessage = styled.div`
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  row-gap: 1rem;
-  color: var(--gray02, #f2f2f2);
-  text-align: center;
-  font-family: Pretendard;
-  font-size: 0.9375rem;
-  font-style: normal;
-  font-weight: 600;
-  line-height: 0.9375rem;
-  letter-spacing: -0.03125rem;
-
-  img {
-    width: 2.6875rem;
-    height: 2.6875rem;
-    flex-shrink: 0;
+const GlobalStyle = createGlobalStyle`
+  :root{
+    --vh: 100%;
+    margin: 0 auto;
+    max-width: 390px;
+    box-sizing: border-box;
+    font-family: 'Pretendard';
   }
 `;
 
-const NoScrapCard = styled.div`
-  border-radius: 0.9375rem;
-  border: 1px solid var(--wh02, rgba(251, 251, 251, 0.3));
-  background: linear-gradient(
-    336deg,
-    rgba(0, 0, 0, 0.23) -71.64%,
-    rgba(0, 0, 0, 0) 100.58%
-  );
+const Container = styled.div`
+  position: relative;
   display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  row-gap: 1rem;
-  color: var(--wh01, var(--wh, #fff));
-  text-align: center;
-  font-family: Pretendard;
-  font-size: 0.75rem;
-  font-style: normal;
-  font-weight: 600;
-  line-height: 0.9375rem; /* 125% */
-  letter-spacing: -0.03125rem;
+  justify-content: space-between;
+  padding: 40px 20px 26px;
 
   img {
-    width: 2.6875rem;
-    height: 2.6875rem;
-    flex-shrink: 0;
+    cursor: pointer;
+  }
+`;
+
+const Hamburger = styled.img`
+  width: 22px;
+  height: 18px;
+  cursor: pointer;
+`;
+
+const Modal = styled.div`
+  position: absolute;
+  top: 0;
+  left: 0;
+  max-width: 390px;
+  width: 100%;
+  height: calc(var(--vh, 1vh) * 100);
+  margin: 0 auto;
+  background-color: white;
+  animation: ${({ isClosing }) => (isClosing ? "slideOut" : "slideIn")} 0.3s
+    ease-in-out forwards;
+  clip-path: ${({ isClosing }) =>
+    isClosing ? "inset(0% 100% 0% 0%)" : "inset(0% 0% 0% 0%)"};
+  z-index: 10; /* Add a higher z-index to the sidebar */
+
+  @keyframes slideIn {
+    from {
+      clip-path: inset(0% 100% 0% 0%);
+    }
+    to {
+      clip-path: inset(0% 0% 0% 0%);
+    }
+  }
+
+  @keyframes slideOut {
+    from {
+      clip-path: inset(0% 0% 0% 0%);
+    }
+    to {
+      clip-path: inset(0% 100% 0% 0%);
+    }
+  }
+`;
+
+const ModalHeader = styled.div`
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  padding-left: 19px;
+  padding-top: 25px;
+  padding-right: 25px;
+`;
+
+const CloseButton = styled.img`
+  display: flex;
+  width: 25px;
+  height: 25px;
+  justify-content: center;
+  align-items: center;
+  flex-shrink: 0;
+  cursor: pointer;
+`;
+
+const SearchBar = styled.div`
+  display: flex;
+  width: 100%;
+  margin-left: 1px;
+  margin-right: 1px;
+  margin-top: 29px;
+  padding-bottom: 5px;
+  flex-direction: row;
+  justify-content: space-between;
+`;
+
+const SearchInput = styled.input`
+  color: #000;
+  font-family: Pretendard;
+  font-size: 15px;
+  font-style: normal;
+  font-weight: 600;
+  line-height: 20px; /* 133.333% */
+  letter-spacing: -0.5px;
+  border: none;
+  padding-left: 5px;
+
+  &:focus {
+    outline: none;
+  }
+
+  &::placeholder {
+    color: #c1d9cc;
+    font-family: Pretendard;
+    font-size: 15px;
+    font-style: normal;
+    font-weight: 600;
+    line-height: 20px; /* 133.333% */
+    letter-spacing: -0.5px;
+  }
+`;
+
+const SearchButton = styled.button`
+  background: none;
+  border: none;
+  cursor: pointer;
+`;
+
+const MenuList = styled.ul`
+  margin: 0px;
+  padding-left: 21px;
+  margin-top: 32px;
+  list-style-type: none;
+
+  li {
+    margin-bottom: 21px;
+    color: var(--bk01, #000);
+    font-family: Pretendard;
+    font-size: 20px;
+    font-style: normal;
+    font-weight: 600;
+    line-height: 20px; /* 100% */
+    letter-spacing: -0.5px;
+    cursor: pointer;
   }
 `;

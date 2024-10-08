@@ -1,4 +1,5 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import { useLocation, useNavigate } from "react-router-dom"; // useNavigate 추가
 import styled from "styled-components";
 import BackArrow from "../../images/BoothDetail/arrow-left.svg";
 import EditButton from "../../images/BoothDetail/editbuttom.svg";
@@ -8,68 +9,126 @@ import scrapBefore from "../../images/BoothDetail/scrapbefore.svg";
 import scrapAfter from "../../images/BoothDetail/scrapafter.svg";
 import BoothInfo from "./BoothInfo";
 import MenuImage from "../../components/MenuImage";
+import instance from "../../api/axios";
 
 const BoothDetailPage = () => {
-  const [showBoothInfo, setShowBoothInfo] = useState(true); // 초기 상태를 true로 설정하여 부스정보를 표시
+  const location = useLocation();
+  const navigate = useNavigate(); // useNavigate 추가
+  const boothId = location.state?.id;
 
-  const [isscraped, setisccraped] = useState(false);
+  const [menuDetails, setMenuDetails] = useState({});
+  const [isScraped, setIsScraped] = useState(false);
+  const [boothData, setBoothData] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    if (!boothId) {
+      setError("부스 아이디를 찾을 수 없습니다.");
+      setLoading(false);
+      return;
+    }
+
+    const fetchBoothData = async () => {
+      try {
+        const response = await instance.get(`/booths/${boothId}/`);
+        setBoothData(response.data.data);
+        const savedMenuDetails = localStorage.getItem("menuDetails");
+        if (savedMenuDetails) {
+          setMenuDetails(JSON.parse(savedMenuDetails));
+        }
+      } catch (error) {
+        console.error("Error fetching booth data:", error);
+        setError("부스 정보를 불러오는 데 실패했습니다.");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchBoothData();
+  }, [boothId]);
 
   const clickScrap = () => {
-    setisccraped(!isscraped);
+    setIsScraped((prev) => !prev);
   };
+
+  const handleEditClick = () => {
+    navigate(`/booth-edit/`, { state: { id: boothId } }); // 수정 버튼 클릭 시 부스 ID 전달
+  };
+
+  if (loading) {
+    return <LoadingMessage>Loading...</LoadingMessage>;
+  }
+
+  if (error) {
+    return <ErrorMessage>{error}</ErrorMessage>;
+  }
+
   return (
     <Wrapper>
       <Header>
         <img src={BackArrow} alt="뒤로가기" />
-        <img src={EditButton} alt="편집 버튼" />
+        <img src={EditButton} alt="편집 버튼" onClick={handleEditClick} />{" "}
+        {/* 수정 버튼 클릭 핸들러 추가 */}
       </Header>
       <BoothImage>
-        <img src={임시부스이미지} alt="부스이미지" />
+        <img src={boothData?.thumbnail || 임시부스이미지} alt="부스이미지" />
       </BoothImage>
       <div className="booth">
-        <div className="boothName">부스명입니다</div>
-        <div className="boothInfo">포스코관/음식</div>
+        {boothData ? (
+          <>
+            <div className="boothName">{boothData.name}</div>
+            <div className="boothInfo">
+              {boothData.booth_place}/{boothData.category}
+            </div>
+          </>
+        ) : (
+          <div>Loading...</div>
+        )}
       </div>
       <Contact>
-        <img src={ContactButton}></img>
+        <img src={ContactButton} alt="Contact" />
         <div className="scrap">
-          <span>1000명이 스크랩했어요</span>
+          <span>
+            {boothData
+              ? `${boothData.scrap_count}명이 스크랩했어요`
+              : "Loading..."}
+          </span>
           <img
-            src={isscraped ? scrapAfter : scrapBefore}
+            src={isScraped ? scrapAfter : scrapBefore}
             alt="Scrap"
             onClick={clickScrap}
-          ></img>
+          />
         </div>
       </Contact>
       <Notice>
         <div className="noticetitle">실시간 공지사항</div>
         <div className="noticebox">
-          <div className="noticeCatagory">판매 공지</div>
-          <div className="notice">떡꼬치는 재료소진하여,,,,,,</div>
-          <div className="noticetime">2시간전</div>
+          {boothData && boothData.notice ? (
+            <>
+              <div className="noticeCatagory">
+                {boothData.notice.notice_type}
+              </div>
+              <div className="notice">{boothData.notice.content}</div>
+              <div className="noticetime">2시간전</div>
+            </>
+          ) : (
+            <div>공지사항이 없습니다.</div>
+          )}
         </div>
         <div className="noticedot"></div>
       </Notice>
       <MiddleWrapper>
         <div className="top">
-          <div className="boothInfo" onClick={() => setShowBoothInfo(true)}>
-            부스정보
-          </div>
-          <div className="guestBook" onClick={() => setShowBoothInfo(false)}>
-            방명록
-          </div>
+          <div className="boothInfo">부스정보</div>
+          <div className="guestBook">방명록</div>
         </div>
-        {showBoothInfo && ( // showBoothInfo가 true일 때만 Booth 컴포넌트를 렌더링
-          <Booth>
-            <BoothInfo />
-            <MenuWrapper>
-              <MenuImage />
-              <MenuImage />
-              <MenuImage />
-              <MenuImage />
-            </MenuWrapper>
-          </Booth>
-        )}
+        <Booth>
+          <BoothInfo boothData={boothData} />
+          <MenuWrapper>
+            <MenuImage menu={menuDetails} />
+          </MenuWrapper>
+        </Booth>
       </MiddleWrapper>
     </Wrapper>
   );
@@ -98,6 +157,20 @@ const Wrapper = styled.div`
   }
 `;
 
+const LoadingMessage = styled.div`
+  font-size: 16px;
+  color: #999;
+  text-align: center;
+  margin-top: 20px;
+`;
+
+const ErrorMessage = styled.div`
+  font-size: 16px;
+  color: red;
+  text-align: center;
+  margin-top: 20px;
+`;
+
 const Header = styled.div`
   width: 90%;
   display: flex;
@@ -121,6 +194,7 @@ const BoothImage = styled.div`
     object-fit: cover; /* 이미지가 비율을 유지하며 부모 div에 꽉 차도록 설정 */
   }
 `;
+
 const Contact = styled.div`
   width: 90%;
   height: 32px;
@@ -142,6 +216,7 @@ const Contact = styled.div`
     padding: 5px;
   }
 `;
+
 const Notice = styled.div`
   .noticetitle {
     font-size: 16px;
@@ -187,6 +262,7 @@ const Notice = styled.div`
     text-align: right;
   }
 `;
+
 const MiddleWrapper = styled.div`
   width: 100%;
   display: flex;
@@ -202,11 +278,13 @@ const MiddleWrapper = styled.div`
     margin-right: 20px;
   }
 `;
+
 const Booth = styled.div`
   display: flex;
   flex-direction: column;
   align-items: center;
 `;
+
 const MenuWrapper = styled.div`
   display: grid;
   grid-template-columns: 1fr 1fr;

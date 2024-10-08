@@ -12,7 +12,7 @@ import checkGreen from "../images/checkGreen.svg";
 import arrowLeft from "../images/arrowLeft.svg";
 import whitelogo from "../images/whitelogo.svg";
 
-const SignupPage = () => {
+const KakaoSignupPage = () => {
   const navigate = useNavigate();
 
   const [ID, setID] = useState();
@@ -30,30 +30,9 @@ const SignupPage = () => {
   const isSame = PW !== "" && PWconfirm !== "" && PW === PWconfirm;
 
   const goSignup = async () => {
-    if (!ID && !PW && !name) {
-      alert("아이디와 비밀번호, 닉네임를 입력해주세요.");
-      return;
-    }
-    if (!ID) {
-      alert("아이디를 입력해주세요.");
-      idInputRef.current.focus();
-      return;
-    }
-    if (!PW) {
-      alert("비밀번호를 입력해주세요.");
-      pwInputRef.current.focus();
-      return;
-    }
-
     if (!name) {
       alert("닉네임을 입력해주세요.");
       nameInputRef.current.focus();
-      return;
-    }
-
-    if (idsame === false) {
-      alert("다른 아이디를 사용해주세요.");
-      idInputRef.current.focus();
       return;
     }
 
@@ -61,8 +40,6 @@ const SignupPage = () => {
       const response = await instance.post(
         `${process.env.REACT_APP_SERVER_PORT}/accounts/signup/`,
         {
-          username: ID,
-          password: PW,
           nickname: name,
         }
       );
@@ -71,28 +48,6 @@ const SignupPage = () => {
     } catch (error) {
       console.error(error);
       alert("다른 사람이 사용 중인 이름입니다.");
-    }
-  };
-
-  const checkIDDuplicate = async () => {
-    if (!ID) {
-      alert("아이디를 입력해주세요.");
-      idInputRef.current.focus();
-      return;
-    }
-
-    try {
-      const response = await instance.post(
-        `${process.env.REACT_APP_SERVER_PORT}/accounts/check-username/`,
-        { username: ID }
-      );
-      console.log(response);
-      setError("*사용 가능한 아이디입니다.");
-      setIdsame(true);
-    } catch (error) {
-      console.error(error);
-      setError("*다른 사람이 사용 중인 아이디입니다.");
-      setIdsame(false);
     }
   };
 
@@ -111,74 +66,6 @@ const SignupPage = () => {
 
       <Content>
         <Ment>회원가입</Ment>
-        <IdWrapper>
-          <IdTopWrapper>
-            <InputWrapper
-              style={{
-                width: "177px",
-              }}
-            >
-              <img src={loginImg} alt="로그인 이미지" />
-              <input
-                ref={idInputRef}
-                placeholder="아이디"
-                type="text"
-                value={ID}
-                onChange={(e) => setID(e.target.value)}
-              />
-            </InputWrapper>
-            <button onClick={checkIDDuplicate}>중복확인</button>
-          </IdTopWrapper>
-          <Idcheck>{error}</Idcheck>
-        </IdWrapper>
-
-        <InputWrapper>
-          <img src={PwImg} alt="자물쇠 이미지" />
-          <input
-            ref={pwInputRef}
-            type="password"
-            placeholder="비밀번호"
-            value={PW}
-            onChange={(e) => setPW(e.target.value)}
-          />
-        </InputWrapper>
-        <PwWrapper>
-          <InputWrapper
-            style={{
-              width: "202px",
-              marginRight: "16px",
-            }}
-          >
-            <img src={PwImg} alt="자물쇠 이미지" />
-            <input
-              ref={PwconfirmInputRef}
-              type="password"
-              placeholder="비밀번호 확인"
-              value={PWconfirm}
-              onChange={(e) => setPWConfirm(e.target.value)}
-            />
-          </InputWrapper>
-          {PW && PWconfirm !== "" && isSame ? (
-            <img
-              style={{
-                marginRight: "6px",
-                marginTop: "15px",
-              }}
-              src={checkGreen}
-              alt="비밀번호 확인 이미지"
-            />
-          ) : (
-            <img
-              style={{
-                marginRight: "6px",
-                marginTop: "15px",
-              }}
-              src={check}
-              alt="비밀번호 확인 이미지"
-            />
-          )}
-        </PwWrapper>
-
         <InputWrapper>
           <img src={nickImg} alt="꽃 이미지" />
           <input
@@ -195,7 +82,7 @@ const SignupPage = () => {
   );
 };
 
-export default SignupPage;
+export default KakaoSignupPage;
 
 const Wrapper = styled.div`
   height: calc(var(--vh, 1vh) * 100);

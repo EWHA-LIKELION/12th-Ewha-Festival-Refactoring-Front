@@ -1,8 +1,6 @@
 const webpack = require("webpack");
 
 module.exports = {
-<<<<<<< HEAD
-=======
   resolve: {
     fallback: {
       http: false,
@@ -14,7 +12,6 @@ module.exports = {
       assert: false,
     },
   },
->>>>>>> master
   plugins: [
     new webpack.ProvidePlugin({
       process: "process/browser",
