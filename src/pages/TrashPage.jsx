@@ -133,13 +133,19 @@ export default TrashPage;
 
 const Wrapper = styled.div`
   height: calc(var(--vh, 1vh) * 100);
+
   margin: 0;
+  ::-webkit-scrollbar {
+    width: 0;
+    height: 0;
+  }
 `;
 
 const Content = styled.div`
   display: flex;
   flex-direction: column;
   align-items: center;
+  margin-bottom: 90px;
 `;
 
 const Ment = styled.div`

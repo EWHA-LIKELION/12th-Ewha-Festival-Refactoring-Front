@@ -114,12 +114,9 @@ const MyPageScrap = () => {
         ) : (
           <ItemContainer>
             {filteredData.slice(0, itemsPerPage).map((item, index) => {
-              // selectedCategory가 '메뉴'인 경우 MenuImage 렌더링
               if (selectedCategory === "메뉴") {
                 return <MenuImage key={item.menu_pk} menu={item} />;
-              }
-              // 그 외의 경우 BoothItem 렌더링
-              else {
+              } else {
                 return <BoothItem key={item.id} booth={item} />;
               }
             })}
