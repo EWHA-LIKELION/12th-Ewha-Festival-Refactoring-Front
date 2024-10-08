@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { useLocation } from "react-router-dom";
 import styled from "styled-components";
 import axios from "axios"; // Axios 추가
-import 임시메뉴이미지 from "../images/BoothDetail/임시메뉴이미지.svg";
+import BasicBooth from "../images/basicbooth.svg";
 import scrapBefore from "../images/BoothDetail/scrapbefore.svg";
 import scrapAfter from "../images/BoothDetail/scrapafter.svg";
 import trash from "../images/BoothEdit/trash.svg";
@@ -45,11 +45,16 @@ const MenuImage = ({ menu }) => {
     <Wrapper>
       <img
         className="menuImage"
-        src={menu.menuImage || 임시메뉴이미지}
+        src={
+          menu.img
+            ? `${process.env.REACT_APP_SERVER_PORT}${menu.img}`
+            : BasicBooth
+        }
         alt="Menu"
       />
+
       <Top>
-        <div className="menubegan">{menu.selectedDiet}</div>
+        <div className="menubegan">{menu.is_vegan}</div>
         {isEditRoute ? (
           <img
             className="menuscrap"
@@ -67,7 +72,7 @@ const MenuImage = ({ menu }) => {
         )}
       </Top>
       <Bottom>
-        <div className="menuName">{menu.menuName}</div>
+        <div className="menuName">{menu.menu}</div>
         <div className="price">{menu.price}원</div>
       </Bottom>
 
