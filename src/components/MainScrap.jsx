@@ -27,17 +27,26 @@ const MainScrap = () => {
           Authorization: `Bearer ${token}`,
         },
       });
-      // booths 데이터의 is_scraped 값을 강제로 true로 설정
+      // booths, menus, shows 데이터의 is_scraped 값을 강제로 true로 설정
       const boothsWithScrapTrue = response.data.booths.map((booth) => ({
         ...booth,
         is_scraped: true,
       }));
 
-      const { menus, shows } = response.data;
+      const menusWithScrapTrue = response.data.menus.map((menu) => ({
+        ...menu,
+        is_scraped: true,
+      }));
+
+      const showsWithScrapTrue = response.data.shows.map((show) => ({
+        ...show,
+        is_scraped: true,
+      }));
+
       setScrapData({
         booths: boothsWithScrapTrue,
-        menus,
-        shows,
+        menus: menusWithScrapTrue,
+        shows: showsWithScrapTrue,
       });
     } catch (error) {
       console.error("데이터 가져오기 실패:", error);
