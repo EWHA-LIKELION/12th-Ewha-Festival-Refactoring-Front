@@ -3,8 +3,10 @@ import styled from "styled-components";
 import Header from "../components/Header"; // Header 컴포넌트 가져오기
 import BoothItem from "../components/BoothItem"; // 분리된 BoothItem 컴포넌트 가져오기
 import instance from "../api/axios"; // axios 인스턴스 가져오기
+import { useNavigate } from "react-router-dom"; // useNavigate 훅 가져오기
 
 const ShowPage = () => {
+  const navigate = useNavigate(); // navigate 훅 선언
   const [selectedDay, setSelectedDay] = useState("수"); // 요일 기본값
   const [selectedType, setSelectedType] = useState("전체"); // 부스 종류 기본값
   const [isPopupOpen, setIsPopupOpen] = useState(false); // 팝업 상태 관리
@@ -158,7 +160,13 @@ const ShowPage = () => {
         {/* 부스 목록 */}
         <BoothList>
           {currentBooths.map((booth) => (
-            <BoothItem key={booth.id} booth={booth} />
+            <BoothItem
+              key={booth.id}
+              booth={booth}
+              onClick={() =>
+                navigate("/show-detail", { state: { id: booth.id } })
+              } // 부스 아이디를 전달하여 상세 페이지로 이동
+            />
           ))}
         </BoothList>
         {/* 페이지 넘버 */}

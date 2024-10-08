@@ -71,6 +71,17 @@ const SearchPage = () => {
 
   const filteredNotices = selectedCategory === "notice" ? notices : [];
 
+  // BoothItem 클릭 시 카테고리에 따라 상세 페이지로 이동하는 함수 추가
+  const handleBoothItemClick = (booth) => {
+    if (["음식", "굿즈", "체험"].includes(booth.category)) {
+      // 부스일 경우
+      navigate("/booth-detail", { state: { id: booth.id } });
+    } else if (["밴드", "댄스"].includes(booth.category)) {
+      // 공연일 경우
+      navigate("/show-detail", { state: { id: booth.id } });
+    }
+  };
+
   return (
     <>
       <Wrapper>
@@ -156,7 +167,11 @@ const SearchPage = () => {
             {/* 검색 결과 표시 */}
             <BoothList hasItems={filteredBooths.length > 0}>
               {filteredBooths.map((booth) => (
-                <BoothItem key={booth.id} booth={booth} />
+                <BoothItem
+                  key={booth.id}
+                  booth={booth}
+                  onClick={() => handleBoothItemClick(booth)} // 클릭 시 페이지 이동 함수 호출
+                />
               ))}
             </BoothList>
 
