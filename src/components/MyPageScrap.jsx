@@ -29,8 +29,16 @@ const MyPageScrap = () => {
             Authorization: `Bearer ${token}`,
           },
         });
-        const { booths, menus, shows } = response.data;
-        setScrapData({ booths, menus, shows });
+        const boothsWithScrapTrue = response.data.booths.map((booth) => ({
+          ...booth,
+          is_scraped: true,
+        }));
+        const { menus, shows } = response.data;
+        setScrapData({
+          booths: boothsWithScrapTrue,
+          menus,
+          shows,
+        });
         console.log(response.data);
       } catch (error) {
         console.error("데이터 가져오기 실패:", error);
