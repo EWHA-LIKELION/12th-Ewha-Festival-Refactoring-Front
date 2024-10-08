@@ -47,10 +47,9 @@ function UserDetailView({ booth }) {
     <Wrap>
       {activeTab == "공연 정보" ? (
         <HeaderNav>
-          
-					<BackButton>
-						<img src={arrowLeft} />
-					</BackButton> 
+          <BackButton>
+            <img src={arrowLeft} />
+          </BackButton>
 
           <Logo />
         </HeaderNav>
@@ -77,7 +76,7 @@ function UserDetailView({ booth }) {
           <SwiperSlide>
             <NoticeInfo notice={notice} />
           </SwiperSlide>
-        ))} */} 
+        ))} */}
         {/* 추후 공지사항 받아오면 주석 해제 하면 스와이퍼 생김 */}
       </Swiper>
       <Taps>

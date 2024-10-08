@@ -8,11 +8,7 @@
  * 2. Prevent adjustments of font size after orientation changes in iOS.
  */
 
-<<<<<<< HEAD
 html {
-=======
- html {
->>>>>>> master
   line-height: 1.15; /* 1 */
   -webkit-text-size-adjust: 100%; /* 2 */
 }
@@ -353,8 +349,6 @@ template {
 [hidden] {
   display: none;
 }
-<<<<<<< HEAD
-=======
 
 .swiper {
   width: 100%;
@@ -384,4 +378,3 @@ template {
 :root {
   --swiper-theme-color: #8e8e8e !important;
 }
->>>>>>> master

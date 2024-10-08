@@ -1,20 +1,9 @@
-<<<<<<< HEAD
-import React, { useState } from "react";
-=======
 import React, { useCallback, useState } from "react";
->>>>>>> master
 import styled from "styled-components";
 import arrowLeft from "../../images/arrowLeft.svg";
 import checked from "../../images/checked.svg";
 import mainImage from "../../images/main1.png";
 import unChecked from "../../images/unChecked.svg";
-<<<<<<< HEAD
-import { BackButton, HeaderNav, Logo } from "./common";
-
-export default function EditView() {
-  const [image, setImage] = useState(mainImage);
-  const [activeButton, setActiveButton] = useState("운영 중"); // 기본 선택된 버튼
-=======
 import ICO_PLUS_BLACK from "../../images/ico/ico_plus_black.svg";
 import { BackButton, HeaderNav, Logo } from "./common";
 import NoticeForm from "./NoticeForm";
@@ -30,7 +19,6 @@ export default function EditView({ booth }) {
   const [image, setImage] = useState(mainImage);
   const [activeButton, setActiveButton] = useState("운영 중"); // 기본 선택된 버튼
   const [noticeList, setNoticeList] = useState([noticeType]);
->>>>>>> master
 
   const handleImageChange = (event) => {
     const file = event.target.files[0];
@@ -47,8 +35,6 @@ export default function EditView({ booth }) {
     setActiveButton(status);
   };
 
-<<<<<<< HEAD
-=======
   const deleteNoticeForm = (booth) => {
     if (noticeList.length === 1) return;
     // 공지사항 삭제 API 호출 후 목록 조회,,? 작성하던 내용 날라감,,?
@@ -140,7 +126,6 @@ export default function EditView({ booth }) {
 
   // const requestNoticeList = () => {}
 
->>>>>>> master
   return (
     <Wrap>
       <HeaderNav>
@@ -166,17 +151,6 @@ export default function EditView({ booth }) {
           onChange={handleImageChange}
         />
       </ImageWrap>
-<<<<<<< HEAD
-      <LabelTitle style={{ marginTop: "25px" }}>부스 이름</LabelTitle>
-      <input className="input" placeholder="공연명을 입력해주세요(최대 14자)" />
-
-      <LabelTitle style={{ marginTop: "35px" }}>실시간 공지사항</LabelTitle>
-      <textarea
-        rows={5}
-        className="input"
-        placeholder="실시간으로 알리고 싶은 정보를 작성해주세요(최대 100자)"
-      />
-=======
       <LabelTitle style={{ marginTop: "25px" }}>공연 이름</LabelTitle>
       <input className="input" placeholder="공연명을 입력해주세요(최대 14자)" />
 
@@ -213,7 +187,6 @@ export default function EditView({ booth }) {
           />
         ))}
       </div>
->>>>>>> master
 
       <LabelTitle style={{ marginTop: "35px" }}>공연 운영시간</LabelTitle>
       <div className="row_box">
@@ -298,13 +271,9 @@ export default function EditView({ booth }) {
       <LabelTitle style={{ marginTop: "121px" }} className="blind">
         submit
       </LabelTitle>
-<<<<<<< HEAD
-      <button className="btn3">작성 완료</button>
-=======
       <button className="btn3" onClick={handleSubmit}>
         작성 완료
       </button>
->>>>>>> master
     </Wrap>
   );
 }
@@ -437,8 +406,6 @@ const Wrap = styled.div`
     letter-spacing: -0.5px;
     white-space: nowrap;
   }
-<<<<<<< HEAD
-=======
 
   .btn4 {
     position: absolute;
@@ -456,7 +423,6 @@ const Wrap = styled.div`
     align-items: center;
     gap: 2px;
   }
->>>>>>> master
 `;
 
 const ImageWrap = styled.div`

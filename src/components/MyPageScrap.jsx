@@ -4,16 +4,21 @@ import BoothItem from "./BoothItem.jsx";
 import { useNavigate } from "react-router-dom";
 import instance from "../api/axios.js";
 import bookMark from "../images/bookMark.svg";
+import MenuImage from "./MenuImage.jsx";
 
 const MyPageScrap = () => {
-  const [scrapData, setScrapData] = useState([]);
+  const [scrapData, setScrapData] = useState({
+    booths: [],
+    menus: [],
+    shows: [],
+  });
   const [selectedCategory, setSelectedCategory] = useState("부스");
   const categories = ["부스", "메뉴", "공연"];
   const optionRefs = useRef([]);
   const navigate = useNavigate();
-
-  const [highlightStyle, setHighlightStyle] = useState({});
+  const [currentPage, setCurrentPage] = useState(1); // 현재 페이지
   const itemsPerPage = 8;
+  const [highlightStyle, setHighlightStyle] = useState({});
 
   useEffect(() => {
     const fetchData = async () => {
@@ -24,8 +29,9 @@ const MyPageScrap = () => {
             Authorization: `Bearer ${token}`,
           },
         });
-        const data = response.data.booths;
-        setScrapData(data);
+        const { booths, menus, shows } = response.data;
+        setScrapData({ booths, menus, shows });
+        console.log(response.data);
       } catch (error) {
         console.error("데이터 가져오기 실패:", error);
       }
@@ -44,14 +50,45 @@ const MyPageScrap = () => {
 
   const handleOption = (option) => {
     setSelectedCategory(option);
+    setCurrentPage(1);
   };
 
-  const filteredData = scrapData.filter((item) => {
-    if (selectedCategory === "부스" && item.type === "booth") return true;
-    if (selectedCategory === "메뉴" && item.type === "menu") return true;
-    if (selectedCategory === "공연" && item.type === "show") return true;
-    return false;
-  });
+  const filteredData =
+    scrapData[
+      selectedCategory === "부스"
+        ? "booths"
+        : selectedCategory === "메뉴"
+        ? "menus"
+        : "shows"
+    ];
+
+  const boothsPerPage = 10; // 한 페이지당 보여줄 부스 수
+  const maxPageButtons = 5; // 한번에 보여줄 페이지 버튼의 최대 개수
+  const [pageGroup, setPageGroup] = useState(0); // 페이지 그룹 상태
+
+  // 전체 페이지 수 계산
+  const totalPages = Math.ceil(filteredData.length / boothsPerPage);
+
+  // 페이지네이션 계산
+  const indexOfLastBooth = currentPage * boothsPerPage;
+  const indexOfFirstBooth = indexOfLastBooth - boothsPerPage;
+  const currentBooths = filteredData.slice(indexOfFirstBooth, indexOfLastBooth);
+  // 페이지네이션에서 표시할 페이지 번호 그룹 계산
+  const startPage = pageGroup * maxPageButtons + 1;
+  const endPage = Math.min((pageGroup + 1) * maxPageButtons, totalPages);
+
+  // 화살표 클릭 시 페이지 그룹 이동
+  const handleNextPageGroup = () => {
+    if ((pageGroup + 1) * maxPageButtons < totalPages) {
+      setPageGroup(pageGroup + 1);
+    }
+  };
+
+  const handlePrevPageGroup = () => {
+    if (pageGroup > 0) {
+      setPageGroup(pageGroup - 1);
+    }
+  };
 
   return (
     <Wrapper>
@@ -76,12 +113,62 @@ const MyPageScrap = () => {
           </NoScrapMessage>
         ) : (
           <ItemContainer>
-            {filteredData.slice(0, itemsPerPage).map((item) => (
-              <BoothItem key={item.id} booth={item} />
-            ))}
+            {filteredData.slice(0, itemsPerPage).map((item, index) => {
+              // selectedCategory가 '메뉴'인 경우 MenuImage 렌더링
+              if (selectedCategory === "메뉴") {
+                return <MenuImage key={item.menu_pk} menu={item} />;
+              }
+              // 그 외의 경우 BoothItem 렌더링
+              else {
+                return <BoothItem key={item.id} booth={item} />;
+              }
+            })}
           </ItemContainer>
         )}
       </Container>
+      <Pagination>
+        {pageGroup > 0 && (
+          <ArrowButtonLeft onClick={handlePrevPageGroup}>
+            <svg
+              width="12"
+              height="14"
+              viewBox="0 0 12 14"
+              fill="none"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                d="M12 7.00688L12 9.92965C12 13.553 9.64853 15.0417 6.77673 13.2246L4.46529 11.7577L2.15385 10.2909C-0.717949 8.47374 -0.717949 5.50719 2.15385 3.69004L4.46529 2.22319L6.77674 0.756339C9.64853 -1.02797 12 0.449832 12 4.08413L12 7.00688Z"
+                fill="#F2F2F2"
+              />
+            </svg>
+          </ArrowButtonLeft>
+        )}
+        {Array.from({ length: endPage - startPage + 1 }, (_, idx) => (
+          <PageButton
+            key={startPage + idx}
+            onClick={() => setCurrentPage(startPage + idx)}
+            selected={currentPage === startPage + idx}
+          >
+            {startPage + idx}
+          </PageButton>
+        ))}
+        {(pageGroup + 1) * maxPageButtons < totalPages && (
+          <ArrowButtonRight onClick={handleNextPageGroup}>
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="12"
+              height="14"
+              viewBox="0 0 12 14"
+              fill="none"
+            >
+              <path
+                d="M0 6.99361V4.27962C0 0.915079 2.35147 -0.467329 5.22326 1.22002L7.53471 2.5821L9.84615 3.94418C12.7179 5.63153 12.7179 8.38618 9.84615 10.0735L7.53471 11.4356L5.22326 12.7977C2.35147 14.4545 0 13.0823 0 9.7076V6.99361Z"
+                fill="#F2F2F2"
+              />
+            </svg>
+          </ArrowButtonRight>
+        )}
+      </Pagination>
     </Wrapper>
   );
 };
@@ -165,4 +252,58 @@ const NoScrapMessage = styled.div`
   font-weight: 400;
   line-height: 0.9375rem;
   letter-spacing: -0.03125rem;
+  margin-top: 100px;
+`;
+
+/* 페이지 넘버 */
+const Pagination = styled.div`
+  margin-top: 64px;
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  padding-bottom: 300px;
+`;
+
+const PageButton = styled.button`
+  display: flex;
+  width: 38px;
+  padding: 8px 17px;
+  justify-content: center;
+  align-items: center;
+  gap: 3px;
+  margin-left: 10px;
+  border-radius: 10px;
+  background-color: ${(props) => (props.selected ? "#00F16F" : "#F7F7F7")};
+  border: 1px solid ${(props) => (props.selected ? "#03D664" : "#F2F2F2")};
+  cursor: pointer;
+
+  color: ${(props) => (props.selected ? "#FFF" : "#BBB")};
+  text-align: center;
+  font-family: Pretendard;
+  font-size: 15px;
+  font-style: normal;
+  font-weight: 700;
+  line-height: 20px;
+  letter-spacing: -0.5px;
+`;
+
+const ArrowButtonLeft = styled.button`
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: #fff;
+  border: none;
+  cursor: pointer;
+  padding: 0px;
+`;
+
+const ArrowButtonRight = styled.button`
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: #fff;
+  border: none;
+  cursor: pointer;
+  padding: 0px;
+  margin-left: 10px;
 `;
