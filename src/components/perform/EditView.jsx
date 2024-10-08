@@ -1,14 +1,24 @@
-import React, { useState } from "react";
+import React, { useCallback, useState } from "react";
 import styled from "styled-components";
 import arrowLeft from "../../images/arrowLeft.svg";
 import checked from "../../images/checked.svg";
 import mainImage from "../../images/main1.png";
 import unChecked from "../../images/unChecked.svg";
+import ICO_PLUS_BLACK from "../../images/ico/ico_plus_black.svg";
 import { BackButton, HeaderNav, Logo } from "./common";
+import NoticeForm from "./NoticeForm";
+import instance from "../../api/axios";
 
-export default function EditView() {
+export default function EditView({ booth }) {
+  const noticeType = {
+    notice_type: "운영공지",
+    content: "",
+    booth: booth + 1,
+    created_at: "",
+  };
   const [image, setImage] = useState(mainImage);
   const [activeButton, setActiveButton] = useState("운영 중"); // 기본 선택된 버튼
+  const [noticeList, setNoticeList] = useState([noticeType]);
 
   const handleImageChange = (event) => {
     const file = event.target.files[0];
@@ -24,6 +34,97 @@ export default function EditView() {
   const handleButtonClick = (status) => {
     setActiveButton(status);
   };
+
+  const deleteNoticeForm = (booth) => {
+    if (noticeList.length === 1) return;
+    // 공지사항 삭제 API 호출 후 목록 조회,,? 작성하던 내용 날라감,,?
+    console.log("공지 삭제하기");
+    deleteNotice();
+  };
+
+  const deleteNotice = async () => {
+    try {
+      const token = localStorage.getItem("accessToken");
+      const response = await instance.delete(
+        `${process.env.REACT_APP_SERVER_PORT}/manages/${booth.id}/realtime_info/${booth.info_id}`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+      console.log(response.data);
+    } catch (error) {
+      console.error("공지 삭제 실패:", error);
+    }
+  };
+
+  const addNoticeForm = useCallback(() => {
+    console.log("공지 추가하기");
+
+    const booth = noticeList.reduce((acc, cur) => Math.max(acc, cur.booth), 0);
+
+    setNoticeList((prev) => [...prev, noticeType]);
+  }, [noticeList]);
+
+  const handleNoticeContent = (index, content) => {
+    setNoticeList((prev) => {
+      prev[index - 1].content = content;
+      return [...prev];
+    });
+  };
+
+  const handleSubmit = () => {
+    console.log("공지 제출하기");
+    postNotice();
+  };
+
+  const postNotice = async () => {
+    try {
+      const token = localStorage.getItem("accessToken");
+      const response = await instance.post(
+        `${process.env.REACT_APP_SERVER_PORT}/manages/${booth.id}/realtime_info`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+      console.log(response.data);
+    } catch (error) {
+      console.error("공지 추가 실패:", error);
+    }
+  };
+
+  /**
+   {
+     "count": {
+     "notice_count": 3
+   },
+     "notice": {
+       "1": {
+         "notice_type": "판매공지",
+         "content": "dasdf",
+         "booth": 1,
+         "created_at": "2024-09-26T06:33:41.837058Z"
+       },
+       "2": {
+         "notice_type": "운영공지",
+         "content": "adf",
+         "booth": 1,
+         "created_at": "2024-09-26T06:33:48.225083Z"
+       },
+       "3": {
+         "notice_type": "운영공지",
+         "content": "안녕하세요",
+         "booth": 1,
+         "created_at": "2024-09-30T09:39:15.914780Z"
+       }
+     }
+   }
+  */
+
+  // const requestNoticeList = () => {}
 
   return (
     <Wrap>
@@ -50,15 +151,42 @@ export default function EditView() {
           onChange={handleImageChange}
         />
       </ImageWrap>
-      <LabelTitle style={{ marginTop: "25px" }}>부스 이름</LabelTitle>
+      <LabelTitle style={{ marginTop: "25px" }}>공연 이름</LabelTitle>
       <input className="input" placeholder="공연명을 입력해주세요(최대 14자)" />
 
-      <LabelTitle style={{ marginTop: "35px" }}>실시간 공지사항</LabelTitle>
-      <textarea
-        rows={5}
-        className="input"
-        placeholder="실시간으로 알리고 싶은 정보를 작성해주세요(최대 100자)"
-      />
+      <div
+        style={{
+          position: "relative",
+          marginTop: "35px",
+        }}
+      >
+        <LabelTitle>실시간 공지사항</LabelTitle>
+        <button className="btn4" onClick={addNoticeForm}>
+          <img src={ICO_PLUS_BLACK} alt="" />
+          <span>공지 추가하기</span>
+        </button>
+      </div>
+      <div
+        style={{
+          display: "flex",
+          flexDirection: "column",
+          gap: "10px",
+          justifyContent: "center",
+          alignItems: "center",
+        }}
+      >
+        {noticeList.map((item, index) => (
+          <NoticeForm
+            key={index}
+            type={item.notice_type}
+            content={item.content}
+            booth={item.booth}
+            createdAt={item.created_at}
+            onDelete={deleteNoticeForm}
+            onChange={(index, content) => handleNoticeContent(index, content)}
+          />
+        ))}
+      </div>
 
       <LabelTitle style={{ marginTop: "35px" }}>공연 운영시간</LabelTitle>
       <div className="row_box">
@@ -143,7 +271,9 @@ export default function EditView() {
       <LabelTitle style={{ marginTop: "121px" }} className="blind">
         submit
       </LabelTitle>
-      <button className="btn3">작성 완료</button>
+      <button className="btn3" onClick={handleSubmit}>
+        작성 완료
+      </button>
     </Wrap>
   );
 }
@@ -275,6 +405,23 @@ const Wrap = styled.div`
     line-height: 20px; /* 125% */
     letter-spacing: -0.5px;
     white-space: nowrap;
+  }
+
+  .btn4 {
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 80px;
+    height: 21px;
+    font-size: 9.76px;
+    padding: 0 0 0 0;
+    border: none;
+    border-radius: 5px;
+    background-color: #e8eaee;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 2px;
   }
 `;
 

@@ -15,7 +15,7 @@ import "swiper/css";
 import "swiper/css/pagination";
 import { Pagination } from "swiper/modules";
 
-function DetailView({ booth }) {
+function UserDetailView({ booth }) {
   const [activeTab, setActiveTab] = useState("공연 정보"); // Default active tab
   const [noticeInfo, setNoticeInfo] = useState([]);
   const handleTabClick = (tab) => {
@@ -51,7 +51,7 @@ function DetailView({ booth }) {
             <img src={arrowLeft} />
           </BackButton>
 
-          <EditButton>수정</EditButton>
+          <Logo />
         </HeaderNav>
       ) : (
         <HeaderNav>
@@ -98,7 +98,7 @@ function DetailView({ booth }) {
   );
 }
 
-export default DetailView;
+export default UserDetailView;
 
 const Wrap = styled.div`
   button {
