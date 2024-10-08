@@ -37,15 +37,15 @@ const BoothItem = ({ booth, onClick }) => {
 
       console.log("Sending request for booth id: ", booth.id); // booth.id 로그로 확인
 
-      if (booth.is_scraped === false) {
+      if (!booth.is_scraped) {
         const response = await instance.post(
-          `${process.env.REACT_APP_SERVER_PORT}/booths/${booth.id}/scrap/`,
+          `/booths/${booth.id}/scrap/`,
           config
         );
         console.log("Response: ", response); // 응답 로그 확인
       } else if (booth.is_scraped === true) {
         const response = await instance.delete(
-          `${process.env.REACT_APP_SERVER_PORT}/booths/${booth.id}/scrap/`,
+          `/booths/${booth.id}/scrap/`,
           config
         );
         console.log("Response: ", response); // 응답 로그 확인
