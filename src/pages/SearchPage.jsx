@@ -107,15 +107,6 @@ const SearchPage = () => {
                 <img src={searchIcon} alt="search" />
               </SearchButton>
             </SearchBar>
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              width="310"
-              height="2"
-              viewBox="0 0 310 2"
-              fill="none"
-            >
-              <path d="M0 0.999969L310 0.999973" stroke="black" />
-            </svg>
           </Search>
         </HeaderContainer>
 
@@ -263,10 +254,12 @@ const BackButton = styled.button`
 const Search = styled.div`
   display: flex;
   width: 311px;
-  padding: 9px 0px;
+  padding-top: 9px;
+  padding-bottom: 5px;
   flex-direction: column;
   align-items: flex-start;
   gap: 10px;
+  border-bottom: 1.5px solid #000;
 `;
 
 const SearchBar = styled.div`
@@ -305,6 +298,7 @@ const SearchButton = styled.button`
   background: none;
   border: none;
   cursor: pointer;
+  padding: 0px;
 `;
 
 const CategoryBar = styled.div`
