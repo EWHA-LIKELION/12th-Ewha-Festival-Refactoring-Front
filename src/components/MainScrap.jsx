@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import styled from "styled-components";
 import BoothItem from "./BoothItem";
+import MenuImage from "./MenuImage.jsx";
 import { useNavigate } from "react-router-dom";
 import moreScrap from "../images/moreScrap.svg";
 import instance from "../api/axios.js";
@@ -84,12 +85,21 @@ const MainScrap = () => {
           <ItemContainer>
             {Array.from({ length: 4 }).map((_, index) => {
               if (filteredData[index]) {
-                return (
-                  <BoothItem
-                    key={filteredData[index].id}
-                    booth={filteredData[index]}
-                  />
-                );
+                if (selectedCategory === "메뉴") {
+                  return (
+                    <MenuImage
+                      key={filteredData[index].menu_pk}
+                      menu={filteredData[index]}
+                    />
+                  );
+                } else {
+                  return (
+                    <BoothItem
+                      key={filteredData[index].id}
+                      booth={filteredData[index]}
+                    />
+                  );
+                }
               } else {
                 return (
                   <NoScrapCard>
