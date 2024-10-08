@@ -83,8 +83,8 @@ const BoothItem = ({ booth, render, setRender }) => {
 export default BoothItem;
 
 const Booth = styled.div`
-  width: 170px;
-  height: 197px;
+  max-width: 170px;
+  max-height: 197px;
   background: linear-gradient(
       180deg,
       rgba(0, 0, 0, 0.4) 0%,
@@ -107,8 +107,8 @@ const Booth = styled.div`
 const BoothInfo = styled.div`
   img {
     position: absolute;
-    top: 17px;
-    left: 130px;
+    top: 1.06rem;
+    right: 0.87rem;
     cursor: pointer;
   }
 `;
