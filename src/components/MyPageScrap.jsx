@@ -54,56 +54,51 @@ const MyPageScrap = () => {
   });
 
   return (
-    <WrapperContainer>
-      <Wrapper>
-        <MenuSlider>
-          <Highlighter style={highlightStyle} />
-          {categories.map((category, index) => (
-            <CategoryBtn
-              key={category}
-              ref={(el) => (optionRefs.current[index] = el)}
-              selected={selectedCategory === category}
-              onClick={() => handleOption(category)}
-            >
-              {category}
-            </CategoryBtn>
-          ))}
-        </MenuSlider>
-        <Container>
-          {filteredData.length === 0 ? (
-            <NoScrapMessage>
-              <img src={bookMark} alt="빈 스크랩" />
-              스크랩한 내용이 아직 없어요🥹
-            </NoScrapMessage>
-          ) : (
-            <ItemContainer>
-              {filteredData.slice(0, itemsPerPage).map((item) => (
-                <BoothItem key={item.id} booth={item} />
-              ))}
-            </ItemContainer>
-          )}
-        </Container>
-      </Wrapper>
-    </WrapperContainer>
+    <Wrapper>
+      <MenuSlider>
+        <Highlighter style={highlightStyle} />
+        {categories.map((category, index) => (
+          <CategoryBtn
+            key={category}
+            ref={(el) => (optionRefs.current[index] = el)}
+            selected={selectedCategory === category}
+            onClick={() => handleOption(category)}
+          >
+            {category}
+          </CategoryBtn>
+        ))}
+      </MenuSlider>
+      <Container>
+        {filteredData.length === 0 ? (
+          <NoScrapMessage>
+            <img src={bookMark} alt="빈 스크랩" />
+            스크랩한 내용이 아직 없어요🥹
+          </NoScrapMessage>
+        ) : (
+          <ItemContainer>
+            {filteredData.slice(0, itemsPerPage).map((item) => (
+              <BoothItem key={item.id} booth={item} />
+            ))}
+          </ItemContainer>
+        )}
+      </Container>
+    </Wrapper>
   );
 };
 
 export default MyPageScrap;
 
-const WrapperContainer = styled.div`
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  justify-content: flex-start;
-`;
-
 const Wrapper = styled.div`
   margin-top: 96px;
-  flex-shrink: 0;
-  aspect-ratio: 330 / 429;
   border-radius: 0.9375rem;
-  backdrop-filter: blur(10px);
-  padding: 1.69rem 0.94rem;
+
+  width: 330px;
+  padding: 27px 15px;
+  justify-content: center;
+  align-items: flex-start;
+  align-content: flex-start;
+  gap: 11px 7px;
+  flex-wrap: wrap;
 `;
 
 const MenuSlider = styled.div`
@@ -117,6 +112,10 @@ const MenuSlider = styled.div`
   background: #c1d9cc;
   box-shadow: 0px 0px 4px 0px rgba(0, 0, 0, 0.1);
   margin-bottom: 1rem;
+  position: relative;
+
+  left: 70px;
+  top: -70px;
 `;
 
 const CategoryBtn = styled.div`

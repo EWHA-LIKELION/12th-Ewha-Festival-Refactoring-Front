@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import styled, { createGlobalStyle } from "styled-components";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import greenlogo from "../images/greenlogo.svg";
 import grayhamburger from "../images/grayhamburger.svg";
 import closeIcon from "../images/closeIcon.svg"; // X 버튼 이미지 추가
@@ -11,6 +11,9 @@ const MainHeader = () => {
   const [isModalOpen, setModalOpen] = useState(false);
   const [isClosing, setIsClosing] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
+
+  const location = useLocation(); // 현재 페이지의 경로를 가져옴
+  const navigate = useNavigate();
 
   const openModal = () => {
     setModalOpen(true);
@@ -29,30 +32,33 @@ const MainHeader = () => {
 
     try {
       const response = await instance.get(
-        `${process.env.REACT_APP_SERVER_PORT}/main/search`, // api 명세에 맞게 수정
+        `${process.env.REACT_APP_SERVER_PORT}/main/search`,
         {
           params: {
-            q: searchTerm, // 입력된 검색어 전달
+            q: searchTerm,
           },
         }
       );
 
-      console.log("검색 결과:", response.data.booths);
-
-      // 검색 결과를 받아와서 다른 페이지로 navigate
+      // 부스와 공지사항을 둘 다 상태에 넘겨서 페이지 이동
       navigate("/search", {
-        state: { booths: response.data.booths, searchTerm },
+        state: {
+          booths: response.data.booths,
+          notices: response.data.notices,
+          searchTerm,
+        },
       });
     } catch (error) {
-      console.error("검색 오류:", error);
-      navigate("/search", { state: { booths: [] } }); // 검색 결과가 없을 경우 빈 배열 전달
+      navigate("/search", { state: { booths: [], notices: [] } }); // 부스와 공지사항 모두 빈 배열로 전달
     }
   };
 
-  const navigate = useNavigate();
-
   const goToPage = (url) => {
-    navigate(url);
+    if (location.pathname === url) {
+      closeModal(); // 현재 페이지를 클릭했을 때 모달 닫기
+    } else {
+      navigate(url);
+    }
   };
 
   return (
@@ -101,10 +107,12 @@ const MainHeader = () => {
             <MenuList>
               <li onClick={() => goToPage("/booth")}>부스 목록</li>
               <li onClick={() => goToPage("/show")}>공연 목록</li>
-              <li onClick={() => goToPage("/NoticeList")}>축준위 공지</li>
-              <li onClick={() => goToPage("/")}>축제 일정 및 상설 부스</li>
-              <li onClick={() => goToPage("/")}>쓰레기통 및 그릇 반납</li>
-              <li onClick={() => goToPage("/BarrierFree")}>배리어프리</li>
+              <li onClick={() => goToPage("/notice-list")}>축준위 공지</li>
+              <li onClick={() => goToPage("/festival-schedule")}>
+                축제 일정 및 상설 부스
+              </li>
+              <li onClick={() => goToPage("/trash")}>쓰레기통 및 그릇 반납</li>
+              <li onClick={() => goToPage("/barrier-free")}>배리어프리</li>
               <li onClick={() => goToPage("/mypage")}>마이페이지</li>
             </MenuList>
           </Modal>
@@ -163,6 +171,7 @@ const Modal = styled.div`
     ease-in-out forwards;
   clip-path: ${({ isClosing }) =>
     isClosing ? "inset(0% 100% 0% 0%)" : "inset(0% 0% 0% 0%)"};
+  z-index: 10; /* Add a higher z-index to the sidebar */
 
   @keyframes slideIn {
     from {

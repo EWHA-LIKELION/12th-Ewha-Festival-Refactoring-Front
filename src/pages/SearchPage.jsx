@@ -3,13 +3,16 @@ import styled from "styled-components";
 import BoothItem from "../components/BoothItem"; // BoothItem 컴포넌트 불러오기
 import { useLocation, useNavigate } from "react-router-dom"; // 네비게이션으로 받은 state 접근하기
 import backIcon from "../images/backIcon.svg"; // 뒤로 가기 버튼 아이콘 추가
-import searchIcon from "../images/search.svg"; // 검색 아이콘 추가
+import searchIcon from "../images/search.svg";
+import noresultIcon from "../images/noResult.png"; // 검색 아이콘 추가
 import instance from "../api/axios"; // API 호출을 위한 axios 인스턴스
+import Footer from "../components/Footer";
 
 const SearchPage = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const [booths, setBooths] = useState([]);
+  const [notices, setNotices] = useState([]); // 공지사항 상태 추가
   const [selectedCategory, setSelectedCategory] = useState("전체");
   const [searchTerm, setSearchTerm] = useState(
     location.state?.searchTerm || ""
@@ -19,6 +22,9 @@ const SearchPage = () => {
     // 검색 결과가 전달되면 상태에 저장
     if (location.state && location.state.booths) {
       setBooths(location.state.booths);
+    }
+    if (location.state && location.state.notices) {
+      setNotices(location.state.notices); // 공지사항 데이터 저장
     }
   }, [location.state]);
 
@@ -43,9 +49,11 @@ const SearchPage = () => {
 
       // 검색 결과를 받아와서 상태 업데이트
       setBooths(response.data.booths);
+      setNotices(response.data.notices); // 공지사항도 업데이트
     } catch (error) {
       console.error("검색 오류:", error);
       setBooths([]); // 검색 결과가 없을 경우 빈 배열 설정
+      setNotices([]); // 공지사항도 빈 배열 설정
     }
   };
 
@@ -53,7 +61,7 @@ const SearchPage = () => {
     navigate(-1); // 이전 페이지로 돌아가기
   };
 
-  // 선택된 카테고리에 맞는 부스/공연 필터링
+  // 선택된 카테고리에 맞는 부스/공연/공지사항 필터링
   const filteredBooths = booths.filter((booth) => {
     if (selectedCategory === "전체") {
       return true; // 전체 선택 시 모든 부스를 보여줌
@@ -61,94 +69,165 @@ const SearchPage = () => {
     return booth.type === selectedCategory;
   });
 
+  const filteredNotices = selectedCategory === "notice" ? notices : [];
+
   return (
     <>
-      {/* 헤더 부분 */}
-      <HeaderContainer>
-        <BackButton onClick={handleBack}>
-          <img src={backIcon} alt="뒤로 가기" />
-        </BackButton>
-        <SearchBar>
-          <SearchInput
-            type="text"
-            placeholder="검색어를 입력해 주세요"
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            onKeyPress={(e) => {
-              if (e.key === "Enter") {
-                handleSearch();
-              }
-            }}
-          />
-          <SearchButton onClick={handleSearch}>
-            <img src={searchIcon} alt="search" />
-          </SearchButton>
-        </SearchBar>
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          width="349"
-          height="2"
-          viewBox="0 0 349 2"
-          fill="none"
-        >
-          <path d="M0 1.00003L349 0.999969" stroke="black" />
-        </svg>
-      </HeaderContainer>
-
       <Wrapper>
-        <CategoryBar>
-          <Category
-            selected={selectedCategory === "전체"}
-            onClick={() => handleCategoryChange("전체")}
-          >
-            전체
-          </Category>
-          <Category
-            selected={selectedCategory === "부스"}
-            onClick={() => handleCategoryChange("booth")}
-          >
-            부스
-          </Category>
-          <Category
-            selected={selectedCategory === "공연"}
-            onClick={() => handleCategoryChange("show")}
-          >
-            공연
-          </Category>
-        </CategoryBar>
+        {/* 헤더 부분 */}
+        <HeaderContainer>
+          <BackButton onClick={handleBack}>
+            <img src={backIcon} alt="뒤로 가기" />
+          </BackButton>
+          <Search>
+            <SearchBar>
+              <SearchInput
+                type="text"
+                placeholder="검색어를 입력해 주세요"
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                onKeyPress={(e) => {
+                  if (e.key === "Enter") {
+                    handleSearch();
+                  }
+                }}
+              />
+              <SearchButton onClick={handleSearch}>
+                <img src={searchIcon} alt="search" />
+              </SearchButton>
+            </SearchBar>
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="310"
+              height="2"
+              viewBox="0 0 310 2"
+              fill="none"
+            >
+              <path d="M0 0.999969L310 0.999973" stroke="black" />
+            </svg>
+          </Search>
+        </HeaderContainer>
 
-        {/* 검색 결과가 없을 경우 */}
-        {filteredBooths.length === 0 ? (
+        {/* 전체 카테고리에서 검색 결과가 없을 때 */}
+        {selectedCategory === "전체" &&
+        filteredBooths.length === 0 &&
+        notices.length === 0 ? (
           <NoResult>
-            <ExclamationMark>!</ExclamationMark>
-            <NoResultText>검색결과를 찾을 수 없어요😱</NoResultText>
+            <img src={noresultIcon} alt="결과 없음" />
           </NoResult>
         ) : (
           <>
-            <SearchResult>총 {filteredBooths.length}개의 부스</SearchResult>
-            <BoothList>
+            {/* 검색 결과가 있을 때만 검색 결과 표시 및 카테고리 바 렌더링 */}
+            <SearchResult>
+              총{" "}
+              {filteredBooths.length +
+                (selectedCategory === "전체"
+                  ? notices.length
+                  : filteredNotices.length)}
+              개의 검색결과
+            </SearchResult>
+            <CategoryBar>
+              <Category
+                $selected={selectedCategory === "전체"}
+                onClick={() => handleCategoryChange("전체")}
+              >
+                전체
+              </Category>
+              <Category
+                $selected={selectedCategory === "booth"}
+                onClick={() => handleCategoryChange("booth")}
+              >
+                부스
+              </Category>
+              <Category
+                $selected={selectedCategory === "show"}
+                onClick={() => handleCategoryChange("show")}
+              >
+                공연
+              </Category>
+              <Category
+                $selected={selectedCategory === "notice"}
+                onClick={() => handleCategoryChange("notice")}
+              >
+                공지사항
+              </Category>
+            </CategoryBar>
+
+            {/* 검색 결과 표시 */}
+            <BoothList hasItems={filteredBooths.length > 0}>
               {filteredBooths.map((booth) => (
                 <BoothItem key={booth.id} booth={booth} />
               ))}
             </BoothList>
+
+            {/* 공지사항은 전체 카테고리일 때만 아래에 표시 */}
+            {selectedCategory === "전체" && notices.length > 0 && (
+              <>
+                <NoticeList>
+                  {notices.map((notice) => (
+                    <NoticeItem key={notice.id}>
+                      <a href={`/notice-detail/${notice.id}`}>{notice.name}</a>
+                      <NoticeWrapper>
+                        <NoticeAuthor>(준)축제준비위원회</NoticeAuthor>
+                        <NoticeDate>{notice.created_at}</NoticeDate>
+                      </NoticeWrapper>
+                    </NoticeItem>
+                  ))}
+                </NoticeList>
+              </>
+            )}
           </>
         )}
+
+        {/* 공지사항 카테고리를 선택했을 때만 공지사항만 표시 */}
+        {selectedCategory === "notice" && (
+          <NoticeList>
+            {filteredNotices.map((notice) => (
+              <NoticeItem key={notice.id}>
+                <a href={`/notice-detail/${notice.id}`}>{notice.name}</a>
+                <NoticeWrapper>
+                  <NoticeAuthor>(준)축제준비위원회</NoticeAuthor>
+                  <NoticeDate>{notice.created_at}</NoticeDate>
+                </NoticeWrapper>
+              </NoticeItem>
+            ))}
+          </NoticeList>
+        )}
       </Wrapper>
+      <Footer />
     </>
   );
 };
 
 export default SearchPage;
 
-/* 스타일 정의 */
+const Wrapper = styled.div`
+  height: calc(var(--vh, 1vh) * 100);
+  margin: 0 auto;
+  max-width: 390px;
+  display: flex;
+  flex-direction: column;
+  padding: 27px 20px 301px 20px;
+`;
+
+const BoothList = styled.div`
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 16px;
+  justify-content: center;
+  width: 100%;
+  box-sizing: border-box;
+  grid-auto-rows: 197px;
+  margin-top: 17px;
+  margin-bottom: ${(props) =>
+    props.hasItems ? "33px" : "0px"}; /* 조건부 margin-bottom */
+`;
 
 const HeaderContainer = styled.div`
   display: flex;
+  flex-direction: row;
   align-items: center;
-  padding: 10px 16px;
-  background-color: #fff;
-  border-bottom: 1px solid #eaeaea;
-  flex-direction: column; /* 검색창과 라인 정렬을 위해 column으로 설정 */
+  margin-bottom: 13px;
 `;
 
 const BackButton = styled.button`
@@ -156,24 +235,48 @@ const BackButton = styled.button`
   border: none;
   cursor: pointer;
   padding: 0;
-  margin-bottom: 10px; /* 위쪽에 여백 추가 */
+  margin-right: 15px;
+`;
+
+const Search = styled.div`
+  display: flex;
+  width: 311px;
+  padding: 9px 0px;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 10px;
 `;
 
 const SearchBar = styled.div`
   display: flex;
-  align-items: center;
-  border: 1px solid #eaeaea;
-  border-radius: 8px;
-  padding: 5px 8px;
-  margin-bottom: 10px; /* SVG와의 간격을 주기 위해 추가 */
+  width: 100%;
+  flex-direction: row;
+  justify-content: space-between;
 `;
 
 const SearchInput = styled.input`
-  flex: 1;
+  color: #000;
+  font-family: Pretendard;
+  font-size: 15px;
+  font-style: normal;
+  font-weight: 600;
+  line-height: 20px;
+  letter-spacing: -0.5px;
   border: none;
-  outline: none;
-  padding-left: 8px;
-  font-size: 14px;
+
+  &:focus {
+    outline: none;
+  }
+
+  &::placeholder {
+    color: #c1d9cc;
+    font-family: Pretendard;
+    font-size: 15px;
+    font-style: normal;
+    font-weight: 600;
+    line-height: 20px;
+    letter-spacing: -0.5px;
+  }
 `;
 
 const SearchButton = styled.button`
@@ -182,42 +285,34 @@ const SearchButton = styled.button`
   cursor: pointer;
 `;
 
-// 나머지 스타일 코드는 그대로 유지합니다.
-
-const Wrapper = styled.div`
-  height: calc(var(--vh, 1vh) * 100);
-  margin: 0 auto;
-  max-width: 390px;
-  display: flex;
-  flex-direction: column;
-  padding-left: 17px;
-  padding-right: 17px;
-`;
-
 const CategoryBar = styled.div`
   display: flex;
-  justify-content: space-around;
-  width: 100%;
-  margin-bottom: 16px;
+  margin-bottom: 0px;
 `;
 
+/* 카테고리 버튼에 $selected prop 추가 */
 const Category = styled.button`
   display: flex;
+  flex-direction: row;
   justify-content: center;
   align-items: center;
-  width: 90px;
-  padding: 8px 0;
+  gap: 10px;
+  padding: 7px 17px;
+  height: 34px;
   border-radius: 30px;
-  border: 1px solid ${(props) => (props.selected ? "#03d664" : "#C1D9CC")};
-  background-color: ${(props) => (props.selected ? "#00f16f" : "#C1D9CC")};
+  border: 1px solid ${(props) => (props.$selected ? "#03d664" : "#F2F2F2")};
+  background-color: ${(props) => (props.$selected ? "#00f16f" : "#F7F7F7")};
   cursor: pointer;
 
-  color: var(--wh01, var(--wh, #fff));
+  color: ${(props) => (props.$selected ? "#FFF" : "#BBB")};
   text-align: center;
   font-family: Pretendard;
   font-size: 15px;
+  font-style: normal;
   font-weight: 700;
   line-height: 20px;
+  letter-spacing: -0.5px;
+  margin-right: 10px;
 `;
 
 const SearchResult = styled.div`
@@ -230,33 +325,87 @@ const SearchResult = styled.div`
   font-weight: 500;
   line-height: 20px;
   letter-spacing: -0.5px;
-  margin-bottom: 9px;
-`;
-
-const BoothList = styled.div`
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(170px, 170px));
-  gap: 16px;
-  justify-content: center;
-  width: 100%;
-  box-sizing: border-box;
+  margin-bottom: 17px;
 `;
 
 const NoResult = styled.div`
   display: flex;
-  flex-direction: column;
-  align-items: center;
   justify-content: center;
-  height: 60vh;
+  align-items: center;
+  flex-direction: column;
+  margin-top: 203px;
 `;
 
-const ExclamationMark = styled.div`
-  font-size: 48px;
-  color: #4caf50;
+const NoticeList = styled.ul`
+  list-style: none;
+  padding: 0;
+  margin-top: 0px;
 `;
 
-const NoResultText = styled.div`
-  font-size: 18px;
-  color: #4caf50;
-  text-align: center;
+const NoticeItem = styled.li`
+  display: flex;
+  padding: 20px;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 10px;
+  border-radius: 15px;
+  border: 1px solid var(--gray04, #c1d9cc);
+  background: var(--wh, #fff);
+
+  color: var(--bk01, #000);
+  font-family: Pretendard;
+  font-size: 16px;
+  font-style: normal;
+  font-weight: 600;
+  line-height: 22px;
+  letter-spacing: -0.5px;
+
+  margin-bottom: 15px;
+
+  a {
+    color: var(--bk01, #000);
+    font-family: Pretendard;
+    font-size: 16px;
+    font-style: normal;
+    font-weight: 600;
+    line-height: 22px;
+    letter-spacing: -0.5px;
+    text-decoration-line: none;
+  }
+`;
+
+const NoticeWrapper = styled.div`
+  display: flex;
+  flex-direction: row;
+`;
+
+const NoticeAuthor = styled.div`
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  width: 87px;
+  height: 15px;
+  color: var(--green01, var(--green_01, #00f16f));
+  font-family: Pretendard;
+  font-size: 12px;
+  font-style: normal;
+  font-weight: 400;
+  line-height: 12px;
+  letter-spacing: -0.5px;
+`;
+
+const NoticeDate = styled.div`
+  margin-left: 10px;
+  display: flex;
+  width: 228px;
+  height: 15px;
+  flex-direction: column;
+  justify-content: center;
+  color: var(--gray05, #8e8e8e);
+  font-family: Pretendard;
+  font-size: 12px;
+  font-style: normal;
+  font-weight: 400;
+  line-height: 22px;
+  letter-spacing: -0.5px;
 `;

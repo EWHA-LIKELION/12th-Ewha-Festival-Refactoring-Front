@@ -40,7 +40,7 @@ const TFMainPage = () => {
           <img
             src={TFNotice}
             alt="공지사항 바로 가기"
-            onClick={() => handleNavigate("/notice")}
+            onClick={() => handleNavigate("/notice-list")}
           />
           <img
             src={TFManage}

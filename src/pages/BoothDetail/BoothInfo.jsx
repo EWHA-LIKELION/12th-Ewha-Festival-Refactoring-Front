@@ -2,11 +2,11 @@ import React, { useState } from "react";
 import styled from "styled-components";
 import arrowdown from "../../images/BoothDetail/arrow-down.svg";
 
-const BoothInfo = () => {
-  const [isExpanded, setIsExpanded] = useState(false); // 상태 관리
+const BoothInfo = ({ boothData }) => {
+  const [isExpanded, setIsExpanded] = useState(false);
 
   const toggleExpand = () => {
-    setIsExpanded(!isExpanded); // 상태 토글
+    setIsExpanded(!isExpanded);
   };
 
   return (
@@ -14,19 +14,24 @@ const BoothInfo = () => {
       <InfoWrapper>
         <div className="locationbox">
           <div className="locate">위치</div>
-          <div className="location">포스코관</div>
+          <div className="location">
+            {boothData?.booth_place || "위치 정보 없음"}
+          </div>
         </div>
         <div className="runtimebox">
           <div className="runtime">운영시간</div>
           <div className="time">
-            <div className="time1">10일 수요일 - 10:00 ~ 15:00</div>
-            <div className="time2">11일 목요일 - 10:00 ~ 15:00</div>
+            {boothData?.days.map((day, index) => (
+              <div key={index} className="timeEntry">
+                {day}
+              </div>
+            ))}
           </div>
         </div>
         <div className="introducebox">
           <div className="introduce">소개글</div>
           <div className={`introducemessage ${isExpanded ? "expanded" : ""}`}>
-            부스소개글부스소개글부스소개글부스소개글부스소개글부스소개글부스소개글부스소개글부스소개글부스소개글부스소개글부스소개글부스소개글부스소개글부스소개글부스소개글부스소개글부스소개글부스소개글소개글부스소개글소개글부스
+            {boothData?.description || "소개글이 없습니다."}
           </div>
           <img src={arrowdown} alt="Toggle" onClick={toggleExpand} />
         </div>

@@ -7,7 +7,7 @@ import BasicBooth from "../images/basicbooth.svg"; // 기본 부스 이미지 �
 import scrapBefore from "../images/BoothDetail/scrapbefore.svg";
 import scrapAfter from "../images/BoothDetail/scrapafter.svg";
 
-const BoothItem = ({ booth, render, setRender }) => {
+const BoothItem = ({ booth, onClick }) => {
   const [isscraped, setisscraped] = useState(false);
   const navigate = useNavigate();
 
@@ -28,7 +28,6 @@ const BoothItem = ({ booth, render, setRender }) => {
         );
         console.log(response.data);
         setisscraped(true);
-        setRender(render + 1);
       } catch (error) {
         console.error(error);
       }
@@ -44,7 +43,6 @@ const BoothItem = ({ booth, render, setRender }) => {
         );
         console.log(response.data);
         setisscraped(false);
-        setRender(render + 1);
       } catch (error) {
         console.error(error);
       }
@@ -56,6 +54,8 @@ const BoothItem = ({ booth, render, setRender }) => {
 
   return (
     <Booth
+      isOpened={booth.is_opened}
+      onClick={onClick} // 추가: BoothItem 클릭 시 onClick 호출
       style={{
         backgroundImage: `url(${
           booth.thumbnail
@@ -70,7 +70,7 @@ const BoothItem = ({ booth, render, setRender }) => {
           alt="Scrap"
           onClick={clickScrap}
         />
-
+        {!booth.is_opened && <ClosedLabel>운영 종료</ClosedLabel>}
         <BoothName>{booth.name}</BoothName>
         <BoothLocation>
           {booth.booth_place} · {booth.category}
@@ -85,23 +85,42 @@ export default BoothItem;
 const Booth = styled.div`
   max-width: 170px;
   max-height: 197px;
-  background: linear-gradient(
-      180deg,
-      rgba(0, 0, 0, 0.4) 0%,
-      rgba(0, 0, 0, 0) 161.62%
-    ),
-    url(<path-to-image>) lightgray 50% / cover no-repeat;
+  background: url(<path-to-image>) lightgray 50% / cover no-repeat;
   background-size: cover;
   background-position: center;
   border-radius: 20px;
-  box-sizing: border-box; /* 패딩과 보더를 width, height에 포함 */
+  box-sizing: border-box;
   box-shadow: 0px 0px 9px 0px rgba(255, 255, 255, 0.25) inset;
   display: flex;
   padding: 17px;
   flex-direction: column;
   justify-content: flex-end;
-  overflow: hidden; /* 자식 요소가 부모를 넘어서지 않도록 설정 */
-  position: relative; //이거 스크랩을 위해 추가됨
+  overflow: hidden;
+  position: relative;
+  z-index: 1;
+  cursor: pointer;
+
+  /* 그라디언트를 ::before로 적용 */
+  &::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(
+      180deg,
+      rgba(0, 0, 0, 0.4) 0%,
+      rgba(0, 0, 0, 0) 161.62%
+    );
+    border-radius: 20px;
+    z-index: 2; /* 이미지 위에 그라디언트를 표시 */
+  }
+
+  /* 이 안의 내용이 그라디언트와 이미지 위에 올라오게 */
+  & > * {
+    z-index: 3;
+  }
 `;
 
 const BoothInfo = styled.div`
@@ -121,7 +140,6 @@ const BoothName = styled.div`
   font-weight: 700;
   line-height: 20px; /* 100% */
   letter-spacing: -0.3px;
-  margin-bottom: 4px;
 `;
 
 const BoothLocation = styled.div`
@@ -132,4 +150,30 @@ const BoothLocation = styled.div`
   font-weight: 500;
   line-height: 20px; /* 166.667% */
   letter-spacing: -0.5px;
+`;
+
+const ClosedLabel = styled.div`
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: var(--green05, rgba(0, 241, 111, 0.4));
+  color: white;
+  font-size: 18px;
+  font-weight: bold;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  border-radius: 20px; /* Booth의 border-radius와 동일하게 설정 */
+  z-index: 2; /* 다른 요소들보다 앞에 오도록 z-index를 높임 */
+
+  color: var(--wh01, var(--wh, #fff));
+  text-align: center;
+  font-family: Pretendard;
+  font-size: 24px;
+  font-style: normal;
+  font-weight: 800;
+  line-height: 20px; /* 83.333% */
+  letter-spacing: -0.3px;
 `;
