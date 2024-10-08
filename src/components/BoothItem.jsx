@@ -37,24 +37,19 @@ const BoothItem = ({ booth, onClick }) => {
 
       console.log("Sending request for booth id: ", booth.id); // booth.id 로그로 확인
 
-      if (!isscraped) {
+      if (booth.is_scraped === false) {
         const response = await instance.post(
           `${process.env.REACT_APP_SERVER_PORT}/booths/${booth.id}/scrap/`,
-          null, // 빈 객체 제거
           config
         );
         console.log("Response: ", response); // 응답 로그 확인
-        if (response.data.message === "스크랩 성공") {
-          console.log("Response: ", response);
-        } else {
-          alert(response.data.message);
-        }
-      } else {
+      } else if (booth.is_scraped === true) {
         const response = await instance.delete(
           `${process.env.REACT_APP_SERVER_PORT}/booths/${booth.id}/scrap/`,
           config
         );
         console.log("Response: ", response); // 응답 로그 확인
+
         if (response.data.message === "스크랩 삭제") {
           console.log("Response: ", response);
         } else {
@@ -84,7 +79,7 @@ const BoothItem = ({ booth, onClick }) => {
     >
       <BoothInfo>
         <img
-          src={isscraped ? scrapAfter : scrapBefore}
+          src={booth.is_scraped ? scrapAfter : scrapBefore}
           alt="Scrap"
           onClick={clickScrap}
         />
