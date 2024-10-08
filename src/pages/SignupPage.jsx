@@ -1,6 +1,9 @@
 import React, { useState, useRef } from "react";
 import styled from "styled-components";
+<<<<<<< HEAD
 import Header from "../components/Header";
+=======
+>>>>>>> master
 import { useNavigate } from "react-router-dom";
 import instance from "../api/axios";
 
@@ -9,9 +12,17 @@ import PwImg from "../images/PwImg.svg";
 import nickImg from "../images/nickImg.svg";
 import check from "../images/check.svg";
 import checkGreen from "../images/checkGreen.svg";
+<<<<<<< HEAD
 
 const SignupPage = () => {
   const navigate = useNavigate();
+=======
+import arrowLeft from "../images/arrowLeft.svg";
+
+const SignupPage = () => {
+  const navigate = useNavigate();
+
+>>>>>>> master
   const [ID, setID] = useState();
   const [PW, setPW] = useState();
   const [PWconfirm, setPWConfirm] = useState();
@@ -22,9 +33,17 @@ const SignupPage = () => {
   const nameInputRef = useRef(null);
   const PwconfirmInputRef = useRef(null);
 
+<<<<<<< HEAD
   const goSignup = async () => {
     if (!ID && !PW) {
       alert("아이디와 비밀번호를 입력해주세요.");
+=======
+  const isSame = PW !== "" && PWconfirm !== "" && PW === PWconfirm;
+
+  const goSignup = async () => {
+    if (!ID && !PW && !name) {
+      alert("아이디와 비밀번호, 닉네임를 입력해주세요.");
+>>>>>>> master
       return;
     }
     if (!ID) {
@@ -38,9 +57,21 @@ const SignupPage = () => {
       return;
     }
 
+<<<<<<< HEAD
     try {
       const response = await instance.post(
         `${process.env.REACT_APP_SERVER_PORT}/accounts/signup`,
+=======
+    if (!name) {
+      alert("닉네임을 입력해주세요.");
+      nameInputRef.current.focus();
+      return;
+    }
+
+    try {
+      const response = await instance.post(
+        `${process.env.REACT_APP_SERVER_PORT}/accounts/signup/`,
+>>>>>>> master
         {
           username: ID,
           password: PW,
@@ -48,13 +79,18 @@ const SignupPage = () => {
         }
       );
       console.log(response);
+<<<<<<< HEAD
       navigate("/");
+=======
+      navigate("/login");
+>>>>>>> master
     } catch (error) {
       console.error(error);
       alert("회원가입에 실패했습니다.");
     }
   };
 
+<<<<<<< HEAD
   const checkIDDuplicate = async () => {
     if (!ID) {
       alert("아이디를 입력해주세요.");
@@ -81,6 +117,36 @@ const SignupPage = () => {
   return (
     <Wrapper>
       <Header />
+=======
+  // const checkIDDuplicate = async () => {
+  //   if (!ID) {
+  //     alert("아이디를 입력해주세요.");
+  //     idInputRef.current.focus();
+  //     return;
+  //   }
+
+  //   try {
+  //     const response = await instance.post(
+  //       `${process.env.REACT_APP_SERVER_PORT}/accounts/check-id`,
+  //       { username: ID }
+  //     );
+  //     if (response.data.isDuplicate) {
+  //       alert("이미 사용 중인 아이디입니다.");
+  //     } else {
+  //       alert("사용 가능한 아이디입니다.");
+  //     }
+  //   } catch (error) {
+  //     console.error(error);
+  //     alert("아이디 중복 확인에 실패했습니다.");
+  //   }
+  // };
+
+  return (
+    <Wrapper>
+      <Header>
+        <img src={arrowLeft} onClick={() => navigate("/login")} />
+      </Header>
+>>>>>>> master
       <Content>
         <Ment>회원가입</Ment>
         <IdWrapper>
@@ -93,10 +159,20 @@ const SignupPage = () => {
             <input
               ref={idInputRef}
               placeholder="아이디"
+<<<<<<< HEAD
               onChange={(e) => setID(e.target.value)}
             />
           </InputWrapper>
           <button onClick={checkIDDuplicate}>중복확인</button>
+=======
+              type="text"
+              value={ID}
+              onChange={(e) => setID(e.target.value)}
+            />
+          </InputWrapper>
+          {/* <button onClick={checkIDDuplicate}>중복확인</button> */}
+          <button>중복확인</button>
+>>>>>>> master
         </IdWrapper>
 
         <InputWrapper>
@@ -105,6 +181,10 @@ const SignupPage = () => {
             ref={pwInputRef}
             type="password"
             placeholder="비밀번호"
+<<<<<<< HEAD
+=======
+            value={PW}
+>>>>>>> master
             onChange={(e) => setPW(e.target.value)}
           />
         </InputWrapper>
@@ -120,6 +200,7 @@ const SignupPage = () => {
               ref={PwconfirmInputRef}
               type="password"
               placeholder="비밀번호 확인"
+<<<<<<< HEAD
               onChange={(e) => setPWConfirm(e.target.value)}
             />
           </InputWrapper>
@@ -130,14 +211,45 @@ const SignupPage = () => {
             src={PW === PWconfirm ? check : checkGreen}
             alt="비밀번호 확인 이미지"
           />
+=======
+              value={PWconfirm}
+              onChange={(e) => setPWConfirm(e.target.value)}
+            />
+          </InputWrapper>
+          {PW && PWconfirm !== "" && isSame ? (
+            <img
+              style={{
+                marginRight: "6px",
+              }}
+              src={checkGreen}
+              alt="비밀번호 확인 이미지"
+            />
+          ) : (
+            <img
+              style={{
+                marginRight: "6px",
+              }}
+              src={check}
+              alt="비밀번호 확인 이미지"
+            />
+          )}
+>>>>>>> master
         </PwWrapper>
 
         <InputWrapper>
           <img src={nickImg} alt="꽃 이미지" />
           <input
+<<<<<<< HEAD
             type="password"
             placeholder="닉네임(최대 8자)"
             onChange={(e) => setPW(e.target.value)}
+=======
+            type="text"
+            ref={nameInputRef}
+            value={name}
+            placeholder="닉네임(최대 8자)"
+            onChange={(e) => setName(e.target.value)}
+>>>>>>> master
           />
         </InputWrapper>
         <LoginBtn onClick={goSignup}>회원가입</LoginBtn>
@@ -158,6 +270,20 @@ const Content = styled.div`
   align-items: center;
 `;
 
+<<<<<<< HEAD
+=======
+const Header = styled.div`
+  position: relative;
+  display: flex;
+  justify-content: space-between;
+  padding: 40px 20px 26px;
+
+  img {
+    cursor: pointer;
+  }
+`;
+
+>>>>>>> master
 const InputWrapper = styled.div`
   color: #bbb;
   font-size: 12px;

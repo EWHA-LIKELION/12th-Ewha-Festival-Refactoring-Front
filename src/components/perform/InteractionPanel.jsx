@@ -2,6 +2,10 @@ import React from "react";
 import styled from "styled-components";
 import archiveTick from "../../images/archive-tick.svg";
 import messages from "../../images/messages-2.svg";
+<<<<<<< HEAD
+=======
+import scrapBefore from "../../images/BoothDetail/scrapbefore.svg";
+>>>>>>> master
 
 function InteractionPanel() {
 	return (

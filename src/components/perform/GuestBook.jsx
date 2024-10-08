@@ -1,7 +1,29 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import styled from "styled-components";
 import arrowUp from "../../images/arrow-up.svg";
-export default function GuestBook() {
+import instance from "../../api/axios";
+
+export default function GuestBook({ booth }) {
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const token = localStorage.getItem("accessToken");
+        const response = await instance.get(
+          `${process.env.REACT_APP_SERVER_PORT}/shows/${booth.id}/guestbook`,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
+        console.log(response.data);
+      } catch (error) {
+        console.error("데이터 가져오기 실패:", error);
+      }
+    };
+    fetchData();
+  }, [booth?.id]);
+
   const users = [
     { name: "", isAdmin: true },
     { name: "", isAdmin: false },
@@ -9,10 +31,10 @@ export default function GuestBook() {
   return (
     <Wrap>
       {/* map으로 수정하기! */}
-      <Comment user={users[0]} />
-      <Comment user={users[1]} />
-      <Comment user={users[1]} />
-      <CommentInput user={users[0]} />
+      <Comment user={users[0]} booth={booth} />
+      <Comment user={users[1]} booth={booth} />
+      <Comment user={users[1]} booth={booth} />
+      <CommentInput user={users[0]} booth={booth} />
     </Wrap>
   );
 }
@@ -23,11 +45,52 @@ const Wrap = styled.div`
   gap: 10px;
 `;
 
-const CommentInput = () => {
+const CommentInput = ({ booth }) => {
+  const [comment, setComment] = useState("");
+
+  const handleSubmit = () => {
+    console.log("submit", comment);
+    setComment("");
+    postComment();
+  };
+
+  const handleKeyPress = (e) => {
+    if (e.key === "Enter") {
+      e.preventDefault(); // 폼 제출 방지
+      handleSubmit(e);
+    }
+  };
+
+  const postComment = async () => {
+    try {
+      const token = localStorage.getItem("accessToken");
+      const response = await instance.post(
+        `${process.env.REACT_APP_SERVER_PORT}/shows/${booth.id}/guestbook`,
+        {
+          comment,
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+      console.log(response.data);
+    } catch (error) {
+      console.error("댓글 작성 실패:", error);
+    }
+  };
+
   return (
     <InputContainer>
-      <TextInput type="text" placeholder="방명록을 남겨주세요" />
-      <SubmitButton>
+      <TextInput
+        type="text"
+        placeholder="방명록을 남겨주세요"
+        value={comment}
+        onChange={(e) => setComment(e.target.value)}
+        onKeyPress={handleKeyPress}
+      />
+      <SubmitButton onClick={handleSubmit} tabIndex={0}>
         <ArrowImage src={arrowUp} alt="Submit" />
       </SubmitButton>
     </InputContainer>
@@ -78,9 +141,31 @@ const ArrowImage = styled.img`
   height: 24px;
 `;
 
-const Comment = ({ user }) => {
+const Comment = ({ user, booth }) => {
   const commentText = "멋지다";
   const timestamp = "작성시간 9월 10일 13:41 14분";
+
+  const handleDelete = () => {
+    console.log("delete");
+    deleteComment();
+  };
+
+  const deleteComment = async () => {
+    try {
+      const token = localStorage.getItem("accessToken");
+      const response = await instance.delete(
+        `${process.env.REACT_APP_SERVER_PORT}/shows/${booth.id}/guestbook`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+      console.log(response.data);
+    } catch (error) {
+      console.error("댓글 삭제 실패:", error);
+    }
+  };
 
   return (
     <CommentContainer user={user}>
@@ -88,7 +173,9 @@ const Comment = ({ user }) => {
       {/* user prop 전달 */}
       <div className="top">
         <span className="user">{user.name || "Anonymous"}</span>
-        <button className="rm">삭제</button>
+        <button onClick={handleDelete} className="rm">
+          삭제
+        </button>
       </div>
       <p className="content">{commentText}</p>
       <span className="timestamp">{timestamp}</span>
@@ -151,5 +238,6 @@ const CommentContainer = styled.div`
     letter-spacing: -0.5px;
     background-color: transparent;
     border: transparent;
+    cursor: pointer;
   }
 `;

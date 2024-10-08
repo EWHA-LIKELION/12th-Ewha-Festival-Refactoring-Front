@@ -1,12 +1,19 @@
 import React, { useState, useRef } from "react";
 import styled from "styled-components";
+<<<<<<< HEAD
 import Header from "../components/Header";
+=======
+>>>>>>> master
 import { useNavigate } from "react-router-dom";
 import instance from "../api/axios";
 
 import loginImg from "../images/loginImg.svg";
 import PwImg from "../images/PwImg.svg";
 import kakaoLogin from "../images/kakaoLogin.svg";
+<<<<<<< HEAD
+=======
+import arrowLeft from "../images/arrowLeft.svg";
+>>>>>>> master
 
 const LoginPage = () => {
   const navigate = useNavigate();
@@ -34,7 +41,11 @@ const LoginPage = () => {
 
     try {
       const response = await instance.post(
+<<<<<<< HEAD
         `${process.env.REACT_APP_SERVER_PORT}/accounts/login`,
+=======
+        `${process.env.REACT_APP_SERVER_PORT}/accounts/login/`,
+>>>>>>> master
         {
           username: ID,
           password: PW,
@@ -42,10 +53,29 @@ const LoginPage = () => {
       );
       console.log(response.data);
 
+<<<<<<< HEAD
       const { username, access_token, id } = response.data.data;
       localStorage.setItem("accessToken", access_token);
       localStorage.setItem("username", username);
       localStorage.setItem("user_id", id);
+=======
+      const { access_token, id, nickname, is_tf, is_admin, is_show } =
+        response.data.data;
+
+      let userType = "general";
+      if (is_tf && !is_admin && !is_show) {
+        userType = "tf";
+      } else if (is_admin && !is_tf && !is_show) {
+        userType = "admin";
+      } else if (is_show && !is_tf && !is_admin) {
+        userType = "show";
+      }
+
+      localStorage.setItem("accessToken", access_token);
+      localStorage.setItem("nickname", nickname);
+      localStorage.setItem("user_id", id);
+      localStorage.setItem("type", userType);
+>>>>>>> master
 
       navigate("/");
       console.log(response.data);
@@ -55,9 +85,29 @@ const LoginPage = () => {
     }
   };
 
+<<<<<<< HEAD
   return (
     <Wrapper>
       <Header />
+=======
+  const kakao = async () => {
+    try {
+      const response = await instance.get(
+        `${process.env.REACT_APP_SERVER_PORT}/login/kakao/`
+      );
+      console.log(response.data);
+    } catch (error) {
+      console.error(error);
+      alert("카카오 연결에 실패했습니다.");
+    }
+  };
+
+  return (
+    <Wrapper>
+      <Header>
+        <img src={arrowLeft} onClick={() => navigate("/")} />
+      </Header>
+>>>>>>> master
       <Content>
         <Ment>로그인</Ment>
         <InputWrapper>
@@ -79,7 +129,11 @@ const LoginPage = () => {
         </InputWrapper>
 
         <LoginBtn onClick={goLogin}>로그인</LoginBtn>
+<<<<<<< HEAD
         <KakaoBtn>
+=======
+        <KakaoBtn onClick={kakao}>
+>>>>>>> master
           <img src={kakaoLogin} alt="카카오 이미지" />
           카카오 로그인
         </KakaoBtn>
@@ -129,6 +183,20 @@ const InputWrapper = styled.div`
   }
 `;
 
+<<<<<<< HEAD
+=======
+const Header = styled.div`
+  position: relative;
+  display: flex;
+  justify-content: space-between;
+  padding: 40px 20px 26px;
+
+  img {
+    cursor: pointer;
+  }
+`;
+
+>>>>>>> master
 const Ment = styled.div`
   font-size: 24px;
   font-weight: bold;

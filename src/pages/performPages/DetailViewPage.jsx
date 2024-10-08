@@ -1,12 +1,16 @@
 import React from "react";
-import DetailView from "../../components/perform/DetailView";
+
+import DetailView from "../../components/perform/UserDetailView";
 
 function DetailPage() {
   return (
     <div>
-      <DetailView />
+      <div>
+        <DetailView />
+      </div>
     </div>
   );
+  
 }
 
 export default DetailPage;

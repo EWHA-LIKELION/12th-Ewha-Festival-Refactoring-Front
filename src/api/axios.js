@@ -6,4 +6,8 @@ const instance = axios.create({
     "Content-Type": "application/json",
   },
 });
+<<<<<<< HEAD
+=======
+
+>>>>>>> master
 export default instance;
