@@ -31,7 +31,7 @@ const MainPage = () => {
   };
 
   const navNotice = () => {
-    navigate("/notice-detail/24");
+    navigate("/notice/24");
   };
 
   return (

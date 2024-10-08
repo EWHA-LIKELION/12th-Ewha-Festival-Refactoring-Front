@@ -54,7 +54,7 @@ const Modal = () => {
             <Item
               src={modal3}
               alt="축준위 공지"
-              onClick={() => navigate("notice-list")}
+              onClick={() => navigate("/notice")}
             />
             <Item
               src={modal4}
