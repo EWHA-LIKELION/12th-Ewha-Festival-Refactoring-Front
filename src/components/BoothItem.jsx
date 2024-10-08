@@ -1,5 +1,5 @@
-import React, { useState } from "react";
-import instance from "../api/axios.js";
+import React, { useState, useEffect } from "react";
+import instance from "../api/axios";
 import { useNavigate } from "react-router-dom";
 
 import styled from "styled-components";
@@ -8,53 +8,73 @@ import scrapBefore from "../images/BoothDetail/scrapbefore.svg";
 import scrapAfter from "../images/BoothDetail/scrapafter.svg";
 
 const BoothItem = ({ booth, onClick }) => {
-  const [isscraped, setisscraped] = useState(false);
+  const [scrapCount, setScrapCount] = useState(booth.scrap_count); // booth.scrap_count 값을 초기 상태로 사용
   const navigate = useNavigate();
 
-  const clickScrap = async () => {
-    setisscraped(!isscraped);
+  // booth.scrap_count가 변경될 때마다 scrapCount 상태를 업데이트
+  useEffect(() => {
+    setScrapCount(booth.scrap_count); // booth.scrap_count 값이 변경될 때 scrapCount를 업데이트
+  }, [booth.scrap_count]);
+
+  const clickScrap = async (e) => {
+    e.stopPropagation();
     const token = localStorage.getItem("accessToken");
 
-    if (token && isscraped === false) {
-      try {
-        const response = await instance.post(
-          `${process.env.REACT_APP_SERVER_PORT}/booths/${booth.id}/scrap/`,
-          {
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
-          }
-        );
-        console.log(response.data);
-        setisscraped(true);
-      } catch (error) {
-        console.error(error);
-      }
-    } else if (token && isscraped === true) {
-      try {
-        const response = await instance.delete(
-          `${process.env.REACT_APP_SERVER_PORT}/booths/${booth.id}/scrap/`,
-          {
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
-          }
-        );
-        console.log(response.data);
-        setisscraped(false);
-      } catch (error) {
-        console.error(error);
-      }
-    } else {
+    if (!token) {
       alert("로그인을 해야 스크랩이 가능해요.");
       navigate("/login");
+      return;
+    }
+
+    try {
+      const config = {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      };
+
+      console.log("Sending request for booth id: ", booth.id); // booth.id 로그로 확인
+
+      // scrapCount가 0이면 스크랩을 추가, 1이면 스크랩을 삭제
+      if (scrapCount === 0) {
+        const response = await instance.post(
+          `${process.env.REACT_APP_SERVER_PORT}/booths/${booth.id}/scrap/`,
+          null, // 빈 객체 제거
+          config
+        );
+        console.log("Response: ", response); // 응답 로그 확인
+        if (response.data.message === "스크랩 성공") {
+          setScrapCount(1); // 스크랩 성공 시 상태 업데이트
+          window.location.reload(); // 페이지 새로고침
+        } else {
+          alert(response.data.message);
+        }
+      } else if (scrapCount === 1) {
+        const response = await instance.delete(
+          `${process.env.REACT_APP_SERVER_PORT}/booths/${booth.id}/scrap/`,
+          config
+        );
+        console.log("Response: ", response); // 응답 로그 확인
+        if (response.data.message === "스크랩 삭제") {
+          setScrapCount(0); // 스크랩 취소 시 상태 업데이트
+          window.location.reload(); // 페이지 새로고침
+        } else {
+          alert(response.data.message);
+        }
+      }
+    } catch (error) {
+      console.error("Error: ", error);
+      if (error.response) {
+        console.log("Error response data: ", error.response.data);
+      }
+      alert("스크랩 처리 중 오류가 발생했습니다.");
     }
   };
 
   return (
     <Booth
       isOpened={booth.is_opened}
-      onClick={onClick} // 추가: BoothItem 클릭 시 onClick 호출
+      onClick={onClick}
       style={{
         backgroundImage: `url(${
           booth.thumbnail
@@ -65,10 +85,11 @@ const BoothItem = ({ booth, onClick }) => {
     >
       <BoothInfo>
         <img
-          src={isscraped ? scrapAfter : scrapBefore}
+          src={scrapCount === 1 ? scrapAfter : scrapBefore} // scrapCount 값에 따라 이미지 변경
           alt="Scrap"
           onClick={clickScrap}
         />
+
         {!booth.is_opened && <ClosedLabel>운영 종료</ClosedLabel>}
         <BoothName>{booth.name}</BoothName>
         <BoothLocation>
@@ -99,7 +120,6 @@ const Booth = styled.div`
   z-index: 1;
   cursor: pointer;
 
-  /* 그라디언트를 ::before로 적용 */
   &::before {
     content: "";
     position: absolute;
@@ -113,10 +133,9 @@ const Booth = styled.div`
       rgba(0, 0, 0, 0) 161.62%
     );
     border-radius: 20px;
-    z-index: 2; /* 이미지 위에 그라디언트를 표시 */
+    z-index: 2;
   }
 
-  /* 이 안의 내용이 그라디언트와 이미지 위에 올라오게 */
   & > * {
     z-index: 3;
   }
@@ -128,6 +147,7 @@ const BoothInfo = styled.div`
     top: 1.06rem;
     right: 0.87rem;
     cursor: pointer;
+    z-index: 3;
   }
 `;
 
@@ -135,9 +155,8 @@ const BoothName = styled.div`
   color: var(--wh01, var(--wh, #fff));
   font-family: Pretendard;
   font-size: 20px;
-  font-style: normal;
   font-weight: 700;
-  line-height: 20px; /* 100% */
+  line-height: 20px;
   letter-spacing: -0.3px;
 `;
 
@@ -145,9 +164,8 @@ const BoothLocation = styled.div`
   color: var(--wh01, var(--wh, #fff));
   font-family: Pretendard;
   font-size: 12px;
-  font-style: normal;
   font-weight: 500;
-  line-height: 20px; /* 166.667% */
+  line-height: 20px;
   letter-spacing: -0.5px;
 `;
 
@@ -164,15 +182,12 @@ const ClosedLabel = styled.div`
   display: flex;
   justify-content: center;
   align-items: center;
-  border-radius: 20px; /* Booth의 border-radius와 동일하게 설정 */
-  z-index: 2; /* 다른 요소들보다 앞에 오도록 z-index를 높임 */
-
-  color: var(--wh01, var(--wh, #fff));
+  border-radius: 20px;
+  z-index: 2;
   text-align: center;
   font-family: Pretendard;
   font-size: 24px;
-  font-style: normal;
   font-weight: 800;
-  line-height: 20px; /* 83.333% */
+  line-height: 20px;
   letter-spacing: -0.3px;
 `;
