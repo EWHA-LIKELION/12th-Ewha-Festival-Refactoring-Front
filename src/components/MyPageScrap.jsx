@@ -89,11 +89,11 @@ const MyPageScrap = () => {
 export default MyPageScrap;
 
 const Wrapper = styled.div`
-  margin-top: 96px;
+  margin-top: 50px;
   border-radius: 0.9375rem;
 
-  width: 330px;
-  padding: 27px 15px;
+  width: 100%;
+
   justify-content: center;
   align-items: flex-start;
   align-content: flex-start;
@@ -114,8 +114,8 @@ const MenuSlider = styled.div`
   margin-bottom: 1rem;
   position: relative;
 
-  left: 70px;
-  top: -70px;
+  left: 105px;
+  top: 15px;
 `;
 
 const CategoryBtn = styled.div`
@@ -143,7 +143,11 @@ const Container = styled.div``;
 
 const ItemContainer = styled.div`
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: repeat(auto-fill, minmax(170px, 170px));
+
+  box-sizing: border-box;
+  grid-auto-rows: 197px;
+  margin: 20px;
   gap: 7px;
 `;
 
