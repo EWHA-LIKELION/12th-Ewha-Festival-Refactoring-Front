@@ -30,6 +30,10 @@ const MainPage = () => {
     }
   };
 
+  const navNotice = () => {
+    navigate("/notice-detail/24");
+  };
+
   return (
     <Wrapper>
       <MainHeader />
@@ -54,7 +58,9 @@ const MainPage = () => {
           <img src={hashTag} alt="hashTag" width={148} />
         </MainBox>
       )}
-      {!openScrap && <NoticeBox>📣 ‘초록의 밤' 입장 공지</NoticeBox>}
+      {!openScrap && (
+        <NoticeBox onClick={navNotice}>📣 ‘초록의 밤' 입장 공지</NoticeBox>
+      )}
       <MainModal />
     </Wrapper>
   );
