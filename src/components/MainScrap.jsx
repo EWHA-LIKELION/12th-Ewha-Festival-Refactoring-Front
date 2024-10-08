@@ -28,9 +28,18 @@ const MainScrap = () => {
             Authorization: `Bearer ${token}`,
           },
         });
-        const { booths, menus, shows } = response.data;
-        setScrapData({ booths, menus, shows });
-        console.log(response.data);
+        // booths 데이터의 is_scraped 값을 강제로 true로 설정
+        const boothsWithScrapTrue = response.data.booths.map((booth) => ({
+          ...booth,
+          is_scraped: true,
+        }));
+
+        const { menus, shows } = response.data;
+        setScrapData({
+          booths: boothsWithScrapTrue,
+          menus,
+          shows,
+        });
       } catch (error) {
         console.error("데이터 가져오기 실패:", error);
       }
