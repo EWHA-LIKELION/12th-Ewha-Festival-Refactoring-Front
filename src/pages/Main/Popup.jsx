@@ -24,7 +24,6 @@ const Popup = ({ onClose }) => {
 
 export default Popup;
 
-// 스타일 컴포넌트
 const PopupOverlay = styled.div`
   position: fixed;
   top: 0;
