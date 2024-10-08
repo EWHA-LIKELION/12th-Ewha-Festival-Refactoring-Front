@@ -13,7 +13,7 @@ import MenuImage from "../../components/MenuImage";
 const BoothEditPage = () => {
   const location = useLocation();
   const navigate = useNavigate();
-  const boothId = location.state?.id; // BoothDetailPage에서 전달된 boothId 가져오기
+  const [fetchedBoothId, setFetchedBoothId] = useState(null);
 
   const [boothImage, setBoothImage] = useState(임시부스이미지);
   const [boothName, setBoothName] = useState("");
@@ -23,20 +23,70 @@ const BoothEditPage = () => {
   const [isNoticeBoxVisible, setIsNoticeBoxVisible] = useState(false);
   const [menuDetails, setMenuDetails] = useState({});
   const [selectedManage, setSelectedManage] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [errorMessage, setErrorMessage] = useState("");
 
   useEffect(() => {
     const fetchBoothData = async () => {
       try {
-        const response = await instance.get(`/booths/${boothId}/`);
-        setBoothName(response.data.data.name); // 부스 이름 설정
-        // 기타 부스 데이터 설정 가능
+        setLoading(true);
+        const accessToken = localStorage.getItem("accessToken");
+
+        // /manages/main/에서 booth_id 가져오기
+        const boothIdResponse = await instance.get("/manages/main/", {
+          headers: {
+            Authorization: `Bearer${accessToken}`,
+          },
+        });
+
+        const fetchedBoothId = boothIdResponse.data.booth_id;
+        setFetchedBoothId(fetchedBoothId);
+
+        // 부스 정보 가져오기
+        const response = await instance.get(`/booths/${fetchedBoothId}/`);
+        setBoothName(response.data.data.name);
+
+        // 부스 실시간 공지사항 가져오기
+        const noticesResponse = await instance.get(
+          `/manages/${fetchedBoothId}/realtime_info/`,
+          {
+            headers: {
+              Authorization: `Bearer ${accessToken}`,
+            },
+          }
+        );
+
+        const noticeData = noticesResponse.data.notice;
+        const noticesArray = Object.keys(noticeData).map((key) => ({
+          id: key, // notice의 ID를 키로 사용
+          type: noticeData[key].notice_type,
+          content: noticeData[key].content,
+          createdAt: noticeData[key].created_at,
+        }));
+
+        setNotices(noticesArray);
       } catch (error) {
-        console.error("Error fetching booth data:", error);
+        if (error.response) {
+          if (error.response.status === 401) {
+            setErrorMessage("인증 정보가 제공되지 않았습니다.");
+          } else if (error.response.status === 404) {
+            setErrorMessage("사용자의 부스가 없습니다.");
+          } else if (error.response.status === 403) {
+            setErrorMessage("권한이 없습니다.");
+          } else {
+            setErrorMessage("부스 정보를 가져오는 중 오류가 발생했습니다.");
+          }
+        } else {
+          console.error("Error fetching booth data:", error);
+          setErrorMessage("부스 정보를 가져오는 중 오류가 발생했습니다.");
+        }
+      } finally {
+        setLoading(false);
       }
     };
 
     fetchBoothData();
-  }, [boothId]);
+  }, []);
 
   const handleImageChange = (event) => {
     const file = event.target.files[0];
@@ -61,7 +111,29 @@ const BoothEditPage = () => {
     setNewNoticeContent(event.target.value);
   };
 
-  const handleNoticeSubmit = (event) => {
+  const createNotice = async (noticeType, content) => {
+    try {
+      const response = await instance.post(
+        `manages/${fetchedBoothId}/realtime_info/`,
+        {
+          notice_type: noticeType,
+          content: content,
+        }
+      );
+
+      if (response.status === 200) {
+        alert(response.data.message);
+      }
+    } catch (error) {
+      if (error.response) {
+        alert(error.response.data.message);
+      } else {
+        alert("공지 추가 중 오류가 발생했습니다.");
+      }
+    }
+  };
+
+  const handleNoticeSubmit = async (event) => {
     if (event.key === "Enter" && newNoticeContent.trim() !== "") {
       event.preventDefault();
       const timestamp = new Date().toLocaleTimeString([], {
@@ -77,6 +149,11 @@ const BoothEditPage = () => {
       setNotices([...notices, notice]);
       setNewNoticeContent("");
       setIsNoticeBoxVisible(false);
+
+      await createNotice(
+        selectedNotice === "판매" ? "행사공지" : "운영공지",
+        newNoticeContent
+      );
     }
   };
 
@@ -85,7 +162,7 @@ const BoothEditPage = () => {
   };
 
   const goToAddMenuPage = () => {
-    navigate("/booth-edit-addmenu", { state: { id: boothId } });
+    navigate("/booth-edit-addmenu", { state: { id: fetchedBoothId } });
   };
 
   const handleManageSelect = (manages) => {
@@ -94,35 +171,67 @@ const BoothEditPage = () => {
 
   const handleUpdateBooth = async () => {
     const accessToken = localStorage.getItem("accessToken");
-    const userType = localStorage.getItem("type"); // 사용자 유형을 로컬 스토리지에서 가져오기
+    const userType = localStorage.getItem("type");
 
     if (userType !== "tf") {
-      alert("권한이 없습니다."); // 권한 체크
-      return; // 권한이 없으면 함수 종료
+      alert("권한이 없습니다.");
+      return;
     }
 
     try {
+      setLoading(true);
       const response = await instance.patch(
-        `/manages/${boothId}/`, // boothId를 사용하여 요청
+        `/manages/${fetchedBoothId}/`,
         {
           name: boothName,
         },
         {
           headers: {
-            Authorization: `Bearer ${accessToken}`, // Authorization 헤더 설정
+            Authorization: `Bearer ${accessToken}`,
           },
         }
       );
 
       if (response.status === 200) {
         alert(response.data.message);
-        navigate(`/booth-detail/${boothId}`, { state: { id: boothId } }); // 수정 후 상세 페이지로 이동
+        navigate(`/booth-detail/${fetchedBoothId}`, {
+          state: { id: fetchedBoothId },
+        });
       }
     } catch (error) {
       if (error.response) {
         alert(error.response.data.detail || error.response.data.message);
       } else {
         alert("부스 수정 중 오류가 발생했습니다.");
+      }
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleNoticeDelete = async (infoId) => {
+    const accessToken = localStorage.getItem("accessToken");
+
+    try {
+      const response = await instance.delete(
+        `/manages/${fetchedBoothId}/realtime_info/${infoId}/`, // 공지사항 삭제 요청
+        {
+          headers: {
+            Authorization: `Bearer ${accessToken}`,
+          },
+        }
+      );
+
+      if (response.status === 200) {
+        alert(response.data.message);
+        // 공지사항 삭제 후 상태 업데이트
+        setNotices(notices.filter((notice) => notice.id !== infoId)); // infoId로 공지 삭제
+      }
+    } catch (error) {
+      if (error.response) {
+        alert(error.response.data.message);
+      } else {
+        alert("공지 삭제 중 오류가 발생했습니다.");
       }
     }
   };
@@ -227,9 +336,7 @@ const BoothEditPage = () => {
                 </div>
                 <div
                   className="delete"
-                  onClick={() =>
-                    setNotices(notices.filter((_, i) => i !== index))
-                  }
+                  onClick={() => handleNoticeDelete(notice.id)} // notice.id를 사용하여 삭제
                 >
                   삭제
                 </div>
@@ -274,7 +381,11 @@ const BoothEditPage = () => {
           </Option>
         ))}
       </ManageOptions>
-      <SubmitButton onClick={handleUpdateBooth}>작성 완료</SubmitButton>
+      <SubmitButton onClick={handleUpdateBooth} disabled={loading}>
+        {loading ? "업데이트 중..." : "작성 완료"}
+      </SubmitButton>
+      {errorMessage && <ErrorMessage>{errorMessage}</ErrorMessage>}{" "}
+      {/* 에러 메시지 표시 */}
     </Wrapper>
   );
 };
@@ -501,6 +612,10 @@ const SubmitButton = styled.button`
   font-size: 16px;
   font-weight: 700;
   cursor: pointer;
+  &:disabled {
+    background: #b2e0b2; /* 비활성화 상태 스타일 */
+    cursor: not-allowed; /* 비활성화 상태 커서 */
+  }
 `;
 
 const ManageOptions = styled.div`
@@ -524,4 +639,10 @@ const Option = styled.div`
   &:hover {
     background-color: #e0e0e0;
   }
+`;
+
+const ErrorMessage = styled.div`
+  color: red;
+  margin-top: 10px;
+  font-size: 14px;
 `;
