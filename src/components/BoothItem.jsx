@@ -9,7 +9,9 @@ import scrapAfter from "../images/BoothDetail/scrapafter.svg";
 
 const BoothItem = ({ booth, onClick }) => {
   const [scrapCount, setScrapCount] = useState(booth.scrap_count); // booth.scrap_count 값을 초기 상태로 사용
-  const [isscraped, setIsScraped] = useState(booth.is_scraped);
+  const [isscraped, setIsScraped] = useState(
+    booth.is_scraped !== undefined ? booth.is_scraped : true
+  );
   const navigate = useNavigate();
 
   // booth.scrap_count가 변경될 때마다 scrapCount 상태를 업데이트
