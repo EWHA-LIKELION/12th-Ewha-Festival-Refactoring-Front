@@ -60,7 +60,20 @@ const BoothItem = ({ booth, onClick }) => {
       }
     } catch (error) {
       console.error("Error: ", error);
-      if (error.response) {
+      if (error.response.data === "이미 스크랩 하셨습니다.") {
+        const response = await instance.delete(`/booths/${booth.id}/scrap/`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+        console.log("Response: ", response); // 응답 로그 확인
+
+        if (response.data.message === "스크랩 삭제") {
+          console.log("Response: ", response);
+        } else {
+          alert(response.data.message);
+        }
+      } else {
         console.log("Error response data: ", error.response.data);
       }
       alert("스크랩 처리 중 오류가 발생했습니다.");
