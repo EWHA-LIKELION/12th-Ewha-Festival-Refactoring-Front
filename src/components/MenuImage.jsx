@@ -101,14 +101,14 @@ const MenuImage = ({ menu }) => {
 export default MenuImage;
 
 const Wrapper = styled.div`
-  margin: 10px;
-  width: 170px;
-  height: 197px;
+  max-width: 170px;
+  max-height: 197px;
   flex-shrink: 0;
   border-radius: 20px;
   box-shadow: 0px 0px 9px 0px rgba(255, 255, 255, 0.25) inset;
   overflow: hidden;
   position: relative;
+
   .menuImage {
     object-fit: cover;
     position: absolute;
