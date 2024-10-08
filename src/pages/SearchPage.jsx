@@ -227,7 +227,7 @@ const Wrapper = styled.div`
 
 const BoothList = styled.div`
   display: grid;
-  grid-template-columns: repeat(2, 1fr);
+  grid-template-columns: repeat(2, 1fr); /* 두 개의 열로 고정 */
   gap: 16px;
   justify-content: center;
   width: 100%;
@@ -236,6 +236,13 @@ const BoothList = styled.div`
   margin-top: 17px;
   margin-bottom: ${(props) =>
     props.hasItems ? "33px" : "0px"}; /* 조건부 margin-bottom */
+
+  @media (max-width: 600px) {
+    grid-template-columns: repeat(
+      2,
+      minmax(100px, 1fr)
+    ); /* 화면이 좁아지면 크기를 유동적으로 변경 */
+  }
 `;
 
 const HeaderContainer = styled.div`

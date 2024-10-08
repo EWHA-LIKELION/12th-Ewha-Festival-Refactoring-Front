@@ -1,4 +1,3 @@
-
 import { useNavigate } from "react-router-dom"; // useNavigate 훅 사용
 import React, { useState, useEffect, useRef } from "react";
 import styled from "styled-components";
@@ -356,12 +355,19 @@ const SearchResult = styled.div`
 /* 부스 목록 */
 const BoothList = styled.div`
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(170px, 170px));
+  grid-template-columns: repeat(2, 1fr); /* 두 개의 열로 고정 */
   gap: 16px;
   justify-content: center;
   width: 100%;
   box-sizing: border-box;
-  grid-auto-rows: 197px; /* 높이도 설정 */
+  grid-auto-rows: 197px;
+
+  @media (max-width: 600px) {
+    grid-template-columns: repeat(
+      2,
+      minmax(100px, 1fr)
+    ); /* 화면이 좁아지면 크기를 유동적으로 변경 */
+  }
 `;
 
 /* 페이지 넘버 */
