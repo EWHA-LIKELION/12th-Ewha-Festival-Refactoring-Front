@@ -6,12 +6,15 @@ import "./style/normalize.css";
 
 import AdminDetailPage from "./pages/performPages/AdminViewPage.jsx";
 import BoothPage from "./pages/BoothPage.jsx";
+import BoothDetailPage from "./pages/BoothDetail/BoothDetailPage.jsx";
+import BoothEditPage from "./pages/BoothEdit/BoothEditPage.jsx";
+import AddMenuPage from "./pages/BoothEdit/AddMenuPage.jsx";
+
 import DetailPage from "./pages/performPages/DetailViewPage.jsx";
 import EditViewPage from "./pages/performPages/EditViewPage.jsx";
 import LoginPage from "./pages/LoginPage.jsx";
 import DefineType from "./pages/Main/DefineType.jsx";
-import BoothDetailPage from "./pages/BoothDetail/BoothDetailPage.jsx";
-import BoothEditPage from "./pages/BoothEdit/BoothEditPage.jsx";
+
 import Footer from "./components/Footer";
 import SignupPage from "./pages/SignupPage.jsx";
 import MyPage from "./pages/MyPage.jsx";
@@ -54,7 +57,16 @@ function App() {
           <Route path="/search" element={<SearchPage />} />
           <Route path="/detail/admin" element={<AdminDetailPage />} />
           <Route path="/detail/admin/edit" element={<EditViewPage />} />
+          <Route path="/booth-edit" element={<BoothEditPage />} />
+          <Route path="/booth-edit-addmenu" element={<AddMenuPage />} />
           <Route path="/booth-detail" element={<BoothDetailPage />} />
+          <Route path="/mypage" element={<MyPage />} />
+          <Route path="/NoticeList" element={<NoticeListPage />} />
+          <Route path="/NoticeCreate" element={<NoticeCreatePage />} />
+          <Route path="/NoticeDetail" element={<NoticeDetailPage />} />
+          <Route path="/FestivalIntro" element={<FestivalIntro />} />
+          <Route path="/BarrierFree" element={<BarrierFreeInfo />} />
+          <Route path="/show" element={<ShowPage />} />
 
           {/* 공연 */}
           <Route path="/show" element={<ShowPage />} />

@@ -5,14 +5,15 @@ import checkedAfter from "../../images/BoothEdit/checkafter.svg";
 
 const BoothTimeSetting = () => {
   const [time, setTime] = useState("");
-  const [ischecked, setischecked] = useState(false);
+  const [checkedStates, setCheckedStates] = useState([false, false, false]);
 
-  const handlecheckclick = () => {
-    setischecked(!ischecked);
+  const handleCheckClick = (index) => {
+    const newCheckedStates = [...checkedStates];
+    newCheckedStates[index] = !newCheckedStates[index];
+    setCheckedStates(newCheckedStates);
   };
 
   const inputTimeColon = (value) => {
-    // 콜론을 제거하고 숫자 길이를 확인
     const replaceTime = value.replace(/\:/g, "");
 
     if (replaceTime.length >= 4 && replaceTime.length < 5) {
@@ -39,100 +40,48 @@ const BoothTimeSetting = () => {
 
       setTime(`${hours}:${minutes}`);
     } else if (replaceTime.length < 4) {
-      setTime(replaceTime); // 길이가 4 미만일 때는 입력값 그대로 반영
+      setTime(replaceTime);
     }
   };
 
   return (
     <Wrapper>
-      <TimeWrapper>
-        <CheckboxWrapper>
-          <img
-            src={ischecked ? checkedAfter : checkedBefore}
-            alt="checkbox"
-            onClick={handlecheckclick}
-          />
-          <Label htmlFor="check">10일 수요일</Label>
-        </CheckboxWrapper>
-        <TimeSetBox>
-          <Input
-            type="text"
-            value={time}
-            onChange={(e) => inputTimeColon(e.target.value)}
-            placeholder="HH:MM"
-            maxLength="4"
-          />
-          <div className="Timesepertater">~</div>
-          <Input
-            type="text"
-            value={time}
-            onChange={(e) => inputTimeColon(e.target.value)}
-            placeholder="HH:MM"
-            maxLength="4"
-          />
-        </TimeSetBox>
-      </TimeWrapper>
-      <TimeWrapper>
-        <CheckboxWrapper>
-          <img
-            src={ischecked ? checkedAfter : checkedBefore}
-            alt="checkbox"
-            onClick={handlecheckclick}
-          />
-          <Label htmlFor="check"> 11일 목요일</Label>
-        </CheckboxWrapper>
-        <TimeSetBox>
-          <Input
-            type="text"
-            value={time}
-            onChange={(e) => inputTimeColon(e.target.value)}
-            placeholder="HH:MM"
-            maxLength="4"
-          />
-          <div className="Timesepertater">~</div>
-          <Input
-            type="text"
-            value={time}
-            onChange={(e) => inputTimeColon(e.target.value)}
-            placeholder="HH:MM"
-            maxLength="4"
-          />
-        </TimeSetBox>
-      </TimeWrapper>
-      <TimeWrapper>
-        <CheckboxWrapper>
-          <img
-            src={ischecked ? checkedAfter : checkedBefore}
-            alt="checkbox"
-            onClick={handlecheckclick}
-          />
-          <Label htmlFor="check">12일 금요일</Label>
-        </CheckboxWrapper>
-        <TimeSetBox>
-          <Input
-            type="text"
-            value={time}
-            onChange={(e) => inputTimeColon(e.target.value)}
-            placeholder="HH:MM"
-            maxLength="4"
-          />
-          <div className="Timesepertater">~</div>
-          <Input
-            type="text"
-            value={time}
-            onChange={(e) => inputTimeColon(e.target.value)}
-            placeholder="HH:MM"
-            maxLength="4"
-          />
-        </TimeSetBox>
-      </TimeWrapper>
+      {["10일 수요일", "11일 목요일", "12일 금요일"].map((day, index) => (
+        <TimeWrapper key={index}>
+          <CheckboxWrapper>
+            <img
+              src={checkedStates[index] ? checkedAfter : checkedBefore}
+              alt="checkbox"
+              onClick={() => handleCheckClick(index)}
+            />
+            <Label htmlFor={`check${index}`}>{day}</Label>
+          </CheckboxWrapper>
+          <TimeSetBox>
+            <Input
+              type="text"
+              value={time}
+              onChange={(e) => inputTimeColon(e.target.value)}
+              placeholder="HH:MM"
+              maxLength="4"
+            />
+            <div className="Timesepertater">~</div>
+            <Input
+              type="text"
+              value={time}
+              onChange={(e) => inputTimeColon(e.target.value)}
+              placeholder="HH:MM"
+              maxLength="4"
+            />
+          </TimeSetBox>
+        </TimeWrapper>
+      ))}
     </Wrapper>
   );
 };
 
 const Wrapper = styled.div`
-  height: 100px; /* 높이 조정 */
-  width: 350px; /* 너비 조정 */
+  height: 100px;
+  width: 350px;
   display: flex;
   flex-direction: column;
   align-items: center;
