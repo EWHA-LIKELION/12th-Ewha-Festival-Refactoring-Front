@@ -9,12 +9,14 @@ import scrapAfter from "../images/BoothDetail/scrapafter.svg";
 
 const BoothItem = ({ booth, onClick }) => {
   const [scrapCount, setScrapCount] = useState(booth.scrap_count); // booth.scrap_count 값을 초기 상태로 사용
+  const [isscraped, setIsScraped] = useState(booth.is_scraped);
   const navigate = useNavigate();
 
   // booth.scrap_count가 변경될 때마다 scrapCount 상태를 업데이트
   useEffect(() => {
     setScrapCount(booth.scrap_count); // booth.scrap_count 값이 변경될 때 scrapCount를 업데이트
-  }, [booth.scrap_count]);
+    setIsScraped(booth.is_scraped);
+  }, [booth.scrap_count, booth.is_scraped]);
 
   const clickScrap = async (e) => {
     e.stopPropagation();
@@ -35,8 +37,7 @@ const BoothItem = ({ booth, onClick }) => {
 
       console.log("Sending request for booth id: ", booth.id); // booth.id 로그로 확인
 
-      // scrapCount가 0이면 스크랩을 추가, 1이면 스크랩을 삭제
-      if (scrapCount === 0) {
+      if (!isscraped) {
         const response = await instance.post(
           `${process.env.REACT_APP_SERVER_PORT}/booths/${booth.id}/scrap/`,
           null, // 빈 객체 제거
@@ -44,18 +45,18 @@ const BoothItem = ({ booth, onClick }) => {
         );
         console.log("Response: ", response); // 응답 로그 확인
         if (response.data.message === "스크랩 성공") {
-          setScrapCount(1); // 스크랩 성공 시 상태 업데이트
+          console.log("Response: ", response);
         } else {
           alert(response.data.message);
         }
-      } else if (scrapCount === 1) {
+      } else {
         const response = await instance.delete(
           `${process.env.REACT_APP_SERVER_PORT}/booths/${booth.id}/scrap/`,
           config
         );
         console.log("Response: ", response); // 응답 로그 확인
         if (response.data.message === "스크랩 삭제") {
-          setScrapCount(0); // 스크랩 취소 시 상태 업데이트
+          console.log("Response: ", response);
         } else {
           alert(response.data.message);
         }
@@ -83,7 +84,7 @@ const BoothItem = ({ booth, onClick }) => {
     >
       <BoothInfo>
         <img
-          src={scrapCount === 1 ? scrapAfter : scrapBefore} // scrapCount 값에 따라 이미지 변경
+          src={isscraped ? scrapAfter : scrapBefore}
           alt="Scrap"
           onClick={clickScrap}
         />
@@ -160,6 +161,7 @@ const ScrapCount = styled.div`
   position: absolute;
   top: 2.8rem;
   right: 1.6rem;
+  text-align: center;
 `;
 
 const BoothName = styled.div`
