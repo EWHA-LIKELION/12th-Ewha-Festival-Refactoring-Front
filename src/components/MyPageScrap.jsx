@@ -20,31 +20,39 @@ const MyPageScrap = () => {
   const itemsPerPage = 8;
   const [highlightStyle, setHighlightStyle] = useState({});
 
+  const fetchData = async () => {
+    try {
+      const token = localStorage.getItem("accessToken");
+      const response = await instance.get(`/main/`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      const boothsWithScrapTrue = response.data.booths.map((booth) => ({
+        ...booth,
+        is_scraped: true,
+      }));
+      const { menus, shows } = response.data;
+      setScrapData({
+        booths: boothsWithScrapTrue,
+        menus,
+        shows,
+      });
+      console.log(response.data);
+    } catch (error) {
+      console.error("데이터 가져오기 실패:", error);
+    }
+  };
+
+  // 처음 데이터 가져오기
   useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const token = localStorage.getItem("accessToken");
-        const response = await instance.get(`/main/`, {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        });
-        const boothsWithScrapTrue = response.data.booths.map((booth) => ({
-          ...booth,
-          is_scraped: true,
-        }));
-        const { menus, shows } = response.data;
-        setScrapData({
-          booths: boothsWithScrapTrue,
-          menus,
-          shows,
-        });
-        console.log(response.data);
-      } catch (error) {
-        console.error("데이터 가져오기 실패:", error);
-      }
-    };
     fetchData();
+  }, []);
+
+  // is_scraped 값이 변경될 때마다 데이터 재가져오기
+  useEffect(() => {
+    const interval = setInterval(fetchData, 5000); // 5초마다 데이터 가져오기
+    return () => clearInterval(interval); // 컴포넌트 언마운트 시 interval 클리어
   }, []);
 
   useEffect(() => {
