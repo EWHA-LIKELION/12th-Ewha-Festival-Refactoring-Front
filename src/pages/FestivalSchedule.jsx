@@ -1,12 +1,10 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import styled from "styled-components";
 import Header from "../components/Header";
-import axios from "axios";
 import { useNavigate } from "react-router-dom";
-import { mockDataEvent } from "../components/MockDataTFevent";
-import { mockDataBooth } from "../components/MockDataTFBooth";
 import TFBoothItem from "../components/TFBoothItem";
 import TFEventItem from "../components/TFEventItem";
+import instance from "../api/axios";
 
 function FestivalSchedule() {
   const [selectedDay, setSelectedDay] = useState("수"); // 요일 기본값
@@ -15,16 +13,37 @@ function FestivalSchedule() {
   const [description, setDescription] = useState(
     "기획부스에서 참여할 수 있는 체험을 알아봐요🍀"
   ); // 선택된 부스 설명
+  const [allEvents, setAllEvents] = useState([]); // 전체 행사 데이터
+  const [allBooths, setAllBooths] = useState([]); // 전체 부스 데이터
 
-  // 선택한 요일에 맞는 메인 행사 필터링
-  const filteredMainEvents = mockDataEvent.data.filter((event) =>
+  // 선택한 요일과 부스 타입에 따라 필터링된 이벤트 및 부스 데이터
+  const filteredEvents = allEvents.filter((event) =>
     event.dayofweek.includes(selectedDay)
   );
 
-  // 선택한 타입에 맞는 상설 부스 필터링
-  const filteredBooths = mockDataBooth.data.filter(
-    (booth) => booth.category === selectedType
+  const filteredBooths = allBooths.filter(
+    (booth) => booth.booth_category === selectedType
   );
+
+  // API에서 데이터 불러오기
+  useEffect(() => {
+    const fetchFestivalData = async () => {
+      try {
+        const response = await instance.get(
+          `${process.env.REACT_APP_SERVER_PORT}/booths/main/tf/`
+        );
+        const { show, booth } = response.data;
+        console.log("Event Data:", show); // 받아온 이벤트 데이터 구조 확인
+        console.log("Booth Data:", booth); // 받아온 부스 데이터 구조 확인
+        setAllEvents(show);
+        setAllBooths(booth);
+      } catch (error) {
+        console.error("데이터를 불러오는데 실패했습니다.", error);
+      }
+    };
+
+    fetchFestivalData();
+  }, []);
 
   const handleTypeSelection = (type) => {
     setSelectedType(type);
@@ -85,7 +104,7 @@ function FestivalSchedule() {
           </DaySelection>
         </Top>
         <BoothList>
-          {filteredMainEvents.map((event) => (
+          {filteredEvents.map((event) => (
             <TFEventItem key={event.id} booth={event} />
           ))}
         </BoothList>
@@ -154,7 +173,6 @@ function FestivalSchedule() {
 
 export default FestivalSchedule;
 
-// Styled Components
 const Wrapper = styled.div`
   margin: 0;
 `;
@@ -271,13 +289,13 @@ const PopupContainer = styled.div`
 
 const PopupContent = styled.div`
   background: var(--wh, #fff);
-  width: 100%; /* max-width 대신 width를 사용 */
-  padding: 30px 23px 248px 23px; /* padding 값은 유지 */
+  width: 390px;
+  padding: 30px 23px 248px 23px;
   flex-direction: column;
   align-items: flex-start;
   gap: 18px;
   flex-shrink: 0;
-  box-sizing: border-box; /* 이 부분 추가 */
+  box-sizing: border-box;
 `;
 
 const PopupTitle = styled.h2`

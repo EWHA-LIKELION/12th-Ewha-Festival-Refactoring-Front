@@ -10,7 +10,7 @@ const TFBoothItem = ({ booth }) => {
         <BoothLocation>
           {booth.booth_place}
           <br />
-          {booth.time}
+          {booth.days}
         </BoothLocation>
       </BoothInfo>
     </Booth>
