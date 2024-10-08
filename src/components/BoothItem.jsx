@@ -45,7 +45,6 @@ const BoothItem = ({ booth, onClick }) => {
         console.log("Response: ", response); // 응답 로그 확인
         if (response.data.message === "스크랩 성공") {
           setScrapCount(1); // 스크랩 성공 시 상태 업데이트
-          window.location.reload(); // 페이지 새로고침
         } else {
           alert(response.data.message);
         }
@@ -57,7 +56,6 @@ const BoothItem = ({ booth, onClick }) => {
         console.log("Response: ", response); // 응답 로그 확인
         if (response.data.message === "스크랩 삭제") {
           setScrapCount(0); // 스크랩 취소 시 상태 업데이트
-          window.location.reload(); // 페이지 새로고침
         } else {
           alert(response.data.message);
         }
