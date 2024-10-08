@@ -22,8 +22,8 @@ import FestivalIntro from "./pages/FestivalIntro.jsx";
 import BarrierFreeInfo from "./pages/BarrierFreeInfo.jsx";
 import ShowPage from "./pages/ShowPage.jsx";
 import TrashPage from "./pages/TrashPage.jsx";
-import MadeByPage from "./pages/MadeByPage.jsx";
 import SearchPage from "./pages/SearchPage.jsx";
+import MadeByPage from "./pages/MadeByPage.jsx";
 
 function App() {
   // 뷰포트 높이 계산
