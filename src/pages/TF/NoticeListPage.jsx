@@ -5,57 +5,98 @@ import instance from "../../api/axios";
 import searchicon from "../../images/searchicon.svg";
 import createicon from "../../images/createicon.svg";
 import { useNavigate } from "react-router-dom";
+import Footer from "../../components/Footer";
 
 function NoticeListPage() {
   const [notices, setNotices] = useState([]);
-  const [filteredNotices, setFilteredNotices] = useState([]);
+  const [filteredNotices, setFilteredNotices] = useState([]); // 필터링된 공지 리스트
   const [searchTerm, setSearchTerm] = useState("");
   const [activeFilter, setActiveFilter] = useState("all");
   const [currentPage, setCurrentPage] = useState(1);
   const [totalCount, setTotalCount] = useState(0);
-  const [nextPage, setNextPage] = useState(null);
+  const [pageGroup, setPageGroup] = useState(0);
   const navigate = useNavigate();
+
+  const noticesPerPage = 5;
+  const maxPageButtons = 5;
 
   const navigateToCreate = () => {
     navigate("/notice-create");
   };
 
   useEffect(() => {
-    const fetchNotices = async (page, type) => {
+    const fetchNotices = async () => {
       try {
-        const url = type
-          ? `${process.env.REACT_APP_SERVER_PORT}/notice/list/?type=${type}&page=${page}`
-          : `${process.env.REACT_APP_SERVER_PORT}/notice/list/?page=${page}`;
+        const url =
+          activeFilter === "all"
+            ? `${process.env.REACT_APP_SERVER_PORT}/notice/list/?page=${currentPage}`
+            : `${process.env.REACT_APP_SERVER_PORT}/notice/list/?type=${activeFilter}&page=${currentPage}`;
+        console.log(`Fetching notices from: ${url}`);
         const response = await instance.get(url);
-        setNotices(response.data.results);
-        setFilteredNotices(response.data.results);
+        console.log("Fetched notices:", response.data.results);
+
+        const sortedNotices = response.data.results.sort((a, b) => {
+          return new Date(b.created_at) - new Date(a.created_at);
+        });
+
+        setNotices(sortedNotices);
+        setFilteredNotices(sortedNotices); // 초기에는 모든 공지글이 필터링된 상태로 설정
         setTotalCount(response.data.count);
-        setNextPage(response.data.next);
       } catch (error) {
         console.error("Error fetching notices:", error);
       }
     };
 
-    fetchNotices(currentPage, activeFilter === "all" ? null : activeFilter); // 필터에 따라 공지 사항 불러오기
-  }, [currentPage, activeFilter]); // currentPage와 activeFilter가 변경될 때마다 호출
+    fetchNotices();
+  }, [currentPage, activeFilter]);
 
   const filterNotices = (type) => {
+    console.log(`Filtering notices by type: ${type}`);
     setActiveFilter(type);
-    if (type === "all") {
-      setFilteredNotices(notices);
-    } else {
-      setFilteredNotices(notices.filter((notice) => notice.type === type));
-    }
+    setCurrentPage(1);
+    setPageGroup(0);
   };
 
   const searchNotices = (term) => {
-    setFilteredNotices(notices.filter((notice) => notice.title.includes(term)));
+    console.log(`Searching notices with term: ${term}`);
+    setSearchTerm(term);
+
+    // 클라이언트 사이드 필터링
+    const filtered = notices.filter((notice) =>
+      notice.title.toLowerCase().includes(term.toLowerCase())
+    );
+    setFilteredNotices(filtered); // 필터링된 공지글 상태 업데이트
+    setTotalCount(filtered.length); // 필터링된 공지글의 개수 업데이트
   };
 
-  const handleNextPage = () => {
-    if (nextPage) {
-      setCurrentPage((prevPage) => prevPage + 1);
+  const handleNextPageGroup = () => {
+    if (
+      (pageGroup + 1) * maxPageButtons <
+      Math.ceil(totalCount / noticesPerPage)
+    ) {
+      setPageGroup(pageGroup + 1);
+      setCurrentPage((pageGroup + 1) * maxPageButtons + 1);
+      console.log(`Moved to next page group: ${pageGroup + 1}`);
     }
+  };
+
+  const handlePrevPageGroup = () => {
+    if (pageGroup > 0) {
+      setPageGroup(pageGroup - 1);
+      setCurrentPage((pageGroup - 1) * maxPageButtons + 1);
+      console.log(`Moved to previous page group: ${pageGroup - 1}`);
+    }
+  };
+
+  const startPage = pageGroup * maxPageButtons + 1;
+  const endPage = Math.min(
+    (pageGroup + 1) * maxPageButtons,
+    Math.ceil(totalCount / noticesPerPage)
+  );
+
+  const handlePageClick = (page) => {
+    setCurrentPage(page);
+    console.log(`Navigated to page: ${page}`);
   };
 
   return (
@@ -69,7 +110,6 @@ function NoticeListPage() {
             placeholder="공지사항 검색"
             value={searchTerm}
             onChange={(e) => {
-              setSearchTerm(e.target.value);
               searchNotices(e.target.value);
             }}
           />
@@ -96,15 +136,15 @@ function NoticeListPage() {
             행사 공지
           </FilterButton>
         </Filter>
+
         <ul>
           {filteredNotices.map((notice) => {
             const createdAtDate = new Date(notice.created_at);
-            const formattedDate = createdAtDate.toISOString().split("T")[0]; // 'YYYY-MM-DD' 형식으로 변환
+            const formattedDate = createdAtDate.toISOString().split("T")[0];
 
             return (
               <li key={notice.id}>
-                <a href={`/notice-detail/${notice.id}`}>{notice.title}</a>{" "}
-                {/* notice.pk를 notice.id로 수정 */}
+                <a href={`/notice-detail/${notice.id}`}>{notice.title}</a>
                 <div>
                   <h3>(준)축제준비위원회 {notice.author}</h3>
                   <h4>{formattedDate}</h4>
@@ -114,25 +154,87 @@ function NoticeListPage() {
           })}
         </ul>
 
-        {nextPage && <button onClick={handleNextPage}>다음 페이지</button>}
+        <Pagination>
+          {pageGroup > 0 && (
+            <ArrowButtonLeft onClick={handlePrevPageGroup}>
+              &lt;
+            </ArrowButtonLeft>
+          )}
+          {Array.from({ length: endPage - startPage + 1 }, (_, idx) => (
+            <PageButton
+              key={startPage + idx}
+              onClick={() => handlePageClick(startPage + idx)}
+              selected={currentPage === startPage + idx}
+            >
+              {startPage + idx}
+            </PageButton>
+          ))}
+          {(pageGroup + 1) * maxPageButtons <
+            Math.ceil(totalCount / noticesPerPage) && (
+            <ArrowButtonRight onClick={handleNextPageGroup}>
+              &gt;
+            </ArrowButtonRight>
+          )}
+        </Pagination>
+        <CreateContainer>
+          <div></div>
+          <Create onClick={navigateToCreate}>
+            <img src={createicon} alt="create icon" />
+          </Create>
+        </CreateContainer>
       </TopContainer>
-      <Create onClick={navigateToCreate}>
-        <img src={createicon} />
-      </Create>
+      <Footer />
     </Wrapper>
   );
 }
 
 export default NoticeListPage;
 
-const Create = styled.div`
+const Pagination = styled.div`
+  display: flex;
+  justify-content: center;
+  margin: 20px 0;
+`;
+
+const ArrowButtonLeft = styled.button`
+  background: none;
+  border: none;
+  font-size: 18px;
   cursor: pointer;
-  width: 62px;
+`;
+
+const ArrowButtonRight = styled(ArrowButtonLeft)``;
+
+const PageButton = styled.button`
+  background: ${({ selected }) =>
+    selected ? "#00F16F" : "var(--gray03, #f7f7f7)"};
+  border: 1px solid var(--gray02, #f2f2f2);
+  border-radius: 5px;
+  margin: 0 5px;
+  width: 30px;
+  height: 30px;
+  cursor: pointer;
+  font-family: Pretendard;
+  font-size: 15px;
+  font-weight: 700;
+  color: ${({ selected }) => (selected ? "#FFFFFF" : "var(--gray01, #bbb)")};
+`;
+
+const CreateContainer = styled.div`
+  display: flex;
+  width: 390px;
   height: 62px;
+  z-index: 100;
   position: fixed;
   bottom: 70px;
-  right: 28px;
+  flex-direction: row-reverse;
+`;
+
+const Create = styled.div`
+  cursor: pointer;
+  position: fixed;
   z-index: 100;
+  margin-right: 28px;
 `;
 
 const TopContainer = styled.div`
@@ -140,9 +242,11 @@ const TopContainer = styled.div`
   flex-direction: column;
   align-items: center;
   margin-top: 60px;
+  margin-bottom: 75px;
   ul {
     margin: 0;
     padding: 0;
+    list-style: none;
     li {
       width: 325px;
       height: 47px;
@@ -160,11 +264,9 @@ const TopContainer = styled.div`
         color: var(--bk01, #000);
         font-family: Pretendard;
         font-size: 16px;
-        font-style: normal;
         font-weight: 600;
-        line-height: 22px; /* 137.5% */
-        letter-spacing: -0.5px;
-        text-decoration-line: none;
+        line-height: 22px;
+        text-decoration: none;
       }
       div {
         display: flex;
@@ -173,20 +275,12 @@ const TopContainer = styled.div`
           color: var(--green01, var(--green_01, #00f16f));
           font-family: Pretendard;
           font-size: 12px;
-          font-style: normal;
-          font-weight: 400;
-          line-height: 12px; /* 100% */
-          letter-spacing: -0.5px;
           margin: 0 10px 0 0;
         }
         h4 {
           color: var(--gray05, #8e8e8e);
           font-family: Pretendard;
           font-size: 12px;
-          font-style: normal;
-          font-weight: 400;
-          line-height: 22px; /* 183.333% */
-          letter-spacing: -0.5px;
           margin: 0;
         }
       }
@@ -199,8 +293,6 @@ const Title = styled.h1`
   font-size: 24px;
   font-family: "Pretendard";
   font-weight: 700;
-  line-height: 26px;
-  word-wrap: break-word;
   margin: 0;
 `;
 
@@ -209,18 +301,21 @@ const SearchBar = styled.div`
   align-items: center;
   justify-content: space-between;
   margin-right: 25px;
+  margin-top: 30px;
   input {
     width: 338px;
     padding: 13px 17px;
-    justify-content: space-between;
-    align-items: center;
     border-radius: 30px;
     border: 1px solid var(--gray02, #f2f2f2);
     background: var(--gray03, #f7f7f7);
-    margin: 35px 0 21px 0;
+    font-family: "Pretendard";
+    font-size: 15px;
+    &::placeholder {
+      color: var(--gray01, #bbb);
+    }
   }
   img {
-    margin: 10px 0 0 -40px;
+    margin-left: -45px;
     width: 14px;
     height: 14px;
     cursor: pointer;
@@ -228,31 +323,24 @@ const SearchBar = styled.div`
 `;
 
 const Filter = styled.div`
-  margin: 0 0 23px 0;
   display: flex;
-  align-items: center;
-  gap: 15px;
+  justify-content: center;
+  margin-top: 20px;
+  margin-bottom: 23px;
 `;
 
 const FilterButton = styled.button`
-  width: 88px;
-  height: 34px;
-  padding: 7px 17px;
-  gap: 10px;
-  border-radius: 30px;
-  border: 1px solid var(--gray02, #f2f2f2);
   background: ${({ active }) =>
     active ? "#00F16F" : "var(--gray03, #f7f7f7)"};
-  color: ${({ active }) => (active ? "#FFFFFF" : "var(--gray01, #bbb)")};
-  text-align: center;
+  border: 1px solid var(--gray02, #f2f2f2);
+  border-radius: 30px;
+  padding: 10px 20px;
   font-family: Pretendard;
   font-size: 15px;
-  font-style: normal;
-  font-weight: 700;
-  line-height: 20px;
-  letter-spacing: -0.5px;
-  white-space: nowrap;
+  font-weight: 600;
+  color: ${({ active }) => (active ? "#FFFFFF" : "var(--gray01, #bbb)")};
   cursor: pointer;
+  margin-right: 10px;
 
   &:hover {
     background: #00f16f;

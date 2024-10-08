@@ -1,15 +1,16 @@
 import React, { useState, useEffect } from "react";
 import styled from "styled-components";
 import background from "../images/background.png";
-import HeaderBackVer from "../components/HeaderBackVer";
+import MainHeader from "../components/MainHeader";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import LiberEwhaLogo from "../images/LiberEwhaLogo.svg";
+import Footer from "../components/Footer";
 
 function FestivalIntro() {
   return (
     <Wrapper>
-      <HeaderBackVer style={{ zInex: 2 }} />
+      <MainHeader />
       <Container>
         <img src={LiberEwhaLogo} />
         <Title>
@@ -69,6 +70,7 @@ function FestivalIntro() {
           </Content>
         </TextBox>
       </Container>
+      <Footer />
     </Wrapper>
   );
 }
@@ -86,6 +88,7 @@ const Container = styled.div`
   display: flex;
   flex-direction: column;
   align-items: center;
+  margin-bottom: 230px;
   img {
     margin: 44px 0 46px 0;
   }
