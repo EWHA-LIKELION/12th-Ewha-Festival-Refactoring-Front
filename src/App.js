@@ -25,6 +25,9 @@ import TrashPage from "./pages/TrashPage.jsx";
 import SearchPage from "./pages/SearchPage.jsx";
 import MadeByPage from "./pages/MadeByPage.jsx";
 import FestivalSchedulePage from "./pages/FestivalSchedule.jsx";
+import UserNoticeList from "./pages/TF/UserNoticeList.jsx";
+import UserNoticeDetail from "./pages/TF/UserNoticeDetail.jsx";
+
 function App() {
   // 뷰포트 높이 계산
   function setScreenSize() {
@@ -63,6 +66,9 @@ function App() {
           <Route path="/notice-list" element={<NoticeListPage />} />
           <Route path="/notice-create" element={<NoticeCreatePage />} />
           <Route path="/notice-detail/:pk" element={<NoticeDetailPage />} />
+          <Route path="/notice" element={<UserNoticeList />} />
+          <Route path="/notice/:pk" element={<UserNoticeDetail />} />
+
           <Route path="/about" element={<FestivalIntro />} />
           <Route path="/barrier-free" element={<BarrierFreeInfo />} />
           <Route path="/trash" element={<TrashPage />} />
