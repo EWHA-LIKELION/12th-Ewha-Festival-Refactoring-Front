@@ -59,7 +59,7 @@ const Modal = () => {
             <Item
               src={modal4}
               alt="축제 일정 및 상세 부스"
-              onClick={() => navigate("/schedule")}
+              onClick={() => navigate("/festival-schedule")}
             />
             <Item
               src={modal5}

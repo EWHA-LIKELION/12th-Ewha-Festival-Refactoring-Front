@@ -24,7 +24,7 @@ import ShowPage from "./pages/ShowPage.jsx";
 import TrashPage from "./pages/TrashPage.jsx";
 import SearchPage from "./pages/SearchPage.jsx";
 import MadeByPage from "./pages/MadeByPage.jsx";
-
+import FestivalSchedulePage from "./pages/FestivalSchedule.jsx";
 function App() {
   // 뷰포트 높이 계산
   function setScreenSize() {
@@ -67,7 +67,7 @@ function App() {
           <Route path="/barrier-free" element={<BarrierFreeInfo />} />
           <Route path="/trash" element={<TrashPage />} />
           <Route path="/madeby" element={<MadeByPage />} />
-
+          <Route path="/festival-schedule" element={<FestivalSchedulePage />} />
           {/* 마이페이지 */}
           <Route path="/mypage" element={<MyPage />} />
         </Routes>
