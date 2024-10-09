@@ -22,7 +22,8 @@ const TFBoothItem = ({ booth }) => {
 export default TFBoothItem;
 
 const Booth = styled.div`
-  width: 170px;
+  width: 43.5vw;
+  max-width: 170px;
   height: 284px;
   border-radius: 15px;
   border: 1px solid var(--gray04, #c1d9cc);
@@ -39,7 +40,8 @@ const Booth = styled.div`
 `;
 
 const BoothInfo = styled.div`
-  width: 140px;
+  width: 35.9vw;
+  max-width: 140px;
   height: 122px;
   flex-shrink: 0;
   background: var(--bk02, rgba(53, 60, 56, 0.8));

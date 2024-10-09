@@ -58,6 +58,11 @@ const Container = styled.div`
     letter-spacing: -0.5px;
     margin: 0;
   }
+  img {
+    max-width: 80vw;
+    max-height: 232px;
+    object-fit: cover;
+  }
 `;
 
 const Title = styled.div`
@@ -76,7 +81,7 @@ const Title = styled.div`
 const TextBox = styled.div`
   margin-top: 19px;
   padding: 36px 35px;
-  width: 319px;
+  max-width: 319px;
   height: 456px;
   flex-shrink: 0;
   border: 1px solid var(--gray01, #bbb);
