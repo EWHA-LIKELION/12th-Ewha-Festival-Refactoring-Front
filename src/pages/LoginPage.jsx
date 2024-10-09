@@ -78,6 +78,7 @@ const LoginPage = () => {
       const KaKaoURL = `${process.env.REACT_APP_SERVER_PORT}/accounts/login/kakao/`;
       window.location.href = KaKaoURL;
       const code = new URL(window.location.href).searchParams.get("code");
+      console.log(code);
       KakaoCallback(code);
     } catch (error) {
       console.error(error);
@@ -93,6 +94,7 @@ const LoginPage = () => {
       console.log(response.data);
       const access_token = response.data.token;
       localStorage.setItem("accessToken", access_token);
+      window.location.href = `https://12th-ewha-festival-refactoring-front.vercel.app/signup`;
     } catch (error) {
       console.error(error);
       alert("카카오 토큰 반환에 실패했습니다.");
