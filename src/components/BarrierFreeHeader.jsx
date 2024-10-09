@@ -107,7 +107,7 @@ const BarrierFreeHeader = () => {
             <MenuList>
               <li onClick={() => goToPage("/booth")}>부스 목록</li>
               <li onClick={() => goToPage("/show")}>공연 목록</li>
-              <li onClick={() => goToPage("/notice-list")}>축준위 공지</li>
+              <li onClick={() => goToPage("/notice")}>축준위 공지</li>
               <li onClick={() => goToPage("/festival-schedule")}>
                 축제 일정 및 상설 부스
               </li>

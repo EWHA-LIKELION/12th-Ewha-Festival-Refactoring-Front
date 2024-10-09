@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import styled from "styled-components";
 import background from "../images/background.png";
-import MainHeader from "../components/MainHeader";
+import BarrierFreeHeader from "../components/BarrierFreeHeader";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import LiberEwhaLogo from "../images/LiberEwhaLogo.svg";
@@ -10,7 +10,7 @@ import Footer from "../components/Footer";
 function FestivalIntro() {
   return (
     <Wrapper>
-      <MainHeader />
+      <BarrierFreeHeader />
       <Container>
         <img src={LiberEwhaLogo} />
         <Title>
