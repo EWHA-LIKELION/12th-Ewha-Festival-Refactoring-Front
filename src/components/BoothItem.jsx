@@ -13,6 +13,7 @@ const BoothItem = ({ booth, onClick }) => {
     booth.is_scraped !== undefined ? booth.is_scraped : true
   );
   const navigate = useNavigate();
+  const [scrapImg, setScrapImg] = useState(false); // booth.scrap_count 값을 초기 상태로 사용
 
   // booth.scrap_count가 변경될 때마다 scrapCount 상태를 업데이트
   useEffect(() => {
@@ -75,11 +76,58 @@ const BoothItem = ({ booth, onClick }) => {
         } else {
           alert(response.data.message);
         }
+      } else if (error.response.data === "취소할 스크랩이 없습니다.") {
+        console.log(
+          "Error response data:취소할 스크랩이 없습니다.: ",
+          error.response.data
+        );
+        const response = await instance.post(`/booths/${booth.id}/scrap/`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+        console.log("Response: ", response);
       } else {
-        console.log("Error response data: ", error.response.data);
+        console.log("Error response data 이것 ", error.response.data);
+        const response = await instance.post(`/booths/${booth.id}/scrap/`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+        console.log("Response: ", response);
       }
       alert("스크랩 처리 중 오류가 발생했습니다.");
     }
+  };
+
+  const onClickScrap = () => {
+    setScrapImg((scrapAfter) => scrapBefore);
+  };
+
+  const PlusScrap = async (e) => {
+    const token = localStorage.getItem("accessToken");
+
+    try {
+      const response = await instance.post(`/booths/${booth.id}/scrap/`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      console.log("Response: ", response);
+      onClickScrap();
+      e.preventDefault();
+    } catch (error) {}
+  };
+
+  const DeleteScrap = async (e) => {
+    const token = localStorage.getItem("accessToken");
+
+    const response = await instance.delete(`/booths/${booth.id}/scrap/`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+    console.log("Response: ", response);
   };
 
   return (

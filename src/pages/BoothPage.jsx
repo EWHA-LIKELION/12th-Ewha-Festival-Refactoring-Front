@@ -41,6 +41,7 @@ const BoothPage = () => {
         const response = await instance.get(`/booths/main/`);
         setBoothData(response.data.data); // 백엔드 데이터 설정
         setLoading(false); // 로딩 완료
+        console.log(response.data);
       } catch (error) {
         console.error("Error fetching booth data:", error);
         setLoading(false); // 로딩 오류 시에도 완료로 설정
