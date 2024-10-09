@@ -117,8 +117,6 @@ const BoothItem = ({ booth, onClick }) => {
 export default BoothItem;
 
 const Booth = styled.div`
-  max-width: 170px;
-  max-height: 197px;
   background: url(<path-to-image>) lightgray 50% / cover no-repeat;
   background-size: cover;
   background-position: center;
