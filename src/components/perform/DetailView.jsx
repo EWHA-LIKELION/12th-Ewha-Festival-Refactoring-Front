@@ -18,6 +18,7 @@ import { Pagination } from "swiper/modules";
 function DetailView({ booth }) {
   const [activeTab, setActiveTab] = useState("공연 정보"); // Default active tab
   const [noticeInfo, setNoticeInfo] = useState([]);
+
   const handleTabClick = (tab) => {
     setActiveTab(tab); // Update active tab when clicked
   };

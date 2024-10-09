@@ -82,7 +82,9 @@ const BoothItem = ({ booth, onClick }) => {
   };
 
   const handleBoothClick = () => {
-    navigate(`/booth-detail/`); // 부스 상세 페이지로 이동
+    navigate("/booth-detail", {
+      state: { id: booth.id }, // boothId를 전달
+    });
   };
 
   return (
