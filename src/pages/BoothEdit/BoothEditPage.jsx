@@ -8,6 +8,8 @@ import 임시부스이미지 from "../../images/BoothDetail/임시부스이미�
 import addnoticebutton from "../../images/BoothEdit/addnoticebutton.svg";
 import addMenu from "../../images/BoothEdit/addMenu.svg";
 import MenuImage from "../../components/MenuImage";
+import unchecked from "../../images/BoothEdit/checkbefor.svg";
+import checked from "../../images/BoothEdit/checkafter.svg";
 
 const BoothEditPage = () => {
   const navigate = useNavigate();
@@ -61,14 +63,21 @@ const BoothEditPage = () => {
           `${process.env.REACT_APP_SERVER_PORT}/booths/${fetchedBoothId}/`
         );
         const fetchedBoothData = response.data.data;
-        setBoothData(fetchedBoothData);
-        setMenuDetails(fetchedBoothData.menus);
 
-        // 가져온 부스 데이터로 상태 업데이트
-        setBoothName(fetchedBoothData.name);
-        setOperatingHours(fetchedBoothData.operatingHours || "");
-        setBoothDescription(fetchedBoothData.description || "");
-        setContact(fetchedBoothData.admin_contact || "");
+        // fetchedBoothData가 유효한지 확인한 후 상태 업데이트
+        if (fetchedBoothData) {
+          setBoothData(fetchedBoothData);
+          setMenuDetails(fetchedBoothData.menus);
+          console.log(fetchedBoothData.thumbnail); // fetchedBoothData.thumbnail 사용
+
+          // 가져온 부스 데이터로 상태 업데이트
+          setBoothName(fetchedBoothData.name);
+          setOperatingHours(fetchedBoothData.operatingHours || "");
+          setBoothDescription(fetchedBoothData.description || "");
+          setContact(fetchedBoothData.admin_contact || "");
+        } else {
+          setErrorMessage("부스 데이터가 없습니다.");
+        }
 
         // 공지사항 가져오기
         const noticesResponse = await instance.get(
@@ -116,7 +125,7 @@ const BoothEditPage = () => {
     const file = event.target.files[0];
 
     if (file) {
-      const validImageTypes = ["image/jpeg", "image/png", "image/gif"]; // 허용되는 이미지 타입
+      const validImageTypes = ["image/jpeg", "image/png", "image/gif"];
       if (!validImageTypes.includes(file.type)) {
         alert("유효한 이미지 파일을 업로드해야 합니다.");
         return;
@@ -124,11 +133,13 @@ const BoothEditPage = () => {
 
       const reader = new FileReader();
       reader.onloadend = async () => {
-        setBoothImage(URL.createObjectURL(file)); // 선택한 파일의 URL로 미리보기 업데이트
+        setBoothImage(URL.createObjectURL(file));
 
-        // 이미지 업로드를 위한 FormData 생성
         const formData = new FormData();
-        formData.append("thumbnail", file); // 파일 객체 추가
+        formData.append("thumbnail", file);
+
+        // FormData에 추가된 파일 정보를 출력
+        console.log("업로드할 파일:", file.name, file.size);
 
         try {
           const accessToken = localStorage.getItem("accessToken");
@@ -138,36 +149,34 @@ const BoothEditPage = () => {
             {
               headers: {
                 Authorization: `Bearer ${accessToken}`,
-                // 'Content-Type': 'multipart/form-data' // 이 줄을 제거하세요.
+                "Content-Type": "multipart/form-data",
               },
             }
           );
 
           if (response.status === 200) {
-            const updatedThumbnail = response.data.thumbnail || file.name; // 서버 응답에서 썸네일 URL을 가져오세요.
+            const updatedThumbnail = response.data.thumbnail;
             if (updatedThumbnail) {
-              setBoothImage(updatedThumbnail); // 서버에서 반환된 썸네일 업데이트
-              console.log("업데이트된 썸네일:", updatedThumbnail); // 업데이트된 썸네일 로그
+              setBoothImage(updatedThumbnail);
               alert("이미지가 성공적으로 업데이트되었습니다.");
             } else {
               alert("썸네일 업데이트에 실패했습니다.");
             }
-            console.log(response.data.data.thumbnail);
           }
         } catch (error) {
           if (error.response) {
-            console.error("서버 오류:", error.response.data); // 서버 오류 로깅
+            console.error("서버 응답 오류:", error.response.data);
             alert(
               error.response.data.message ||
                 "이미지 업데이트 중 오류가 발생했습니다."
             );
           } else {
-            console.error("네트워크 오류:", error); // 네트워크 오류 로깅
+            console.error("이미지 업데이트 중 오류 발생:", error);
             alert("이미지 업데이트 중 오류가 발생했습니다.");
           }
         }
       };
-      reader.readAsDataURL(file); // 이미지 파일을 읽어서 즉시 미리보기
+      reader.readAsDataURL(file);
     }
   };
 
@@ -282,9 +291,7 @@ const BoothEditPage = () => {
       setLoading(true);
       const formattedDays = days
         .filter((day) => day.checked)
-        .map((day) => {
-          return `${day.date} ${day.startTime} ~ ${day.endTime}`;
-        })
+        .map((day) => `${day.date} ${day.startTime} ~ ${day.endTime}`)
         .filter((day) => day.includes("~"));
 
       const response = await instance.patch(
@@ -294,11 +301,12 @@ const BoothEditPage = () => {
           operatingHours: operatingHours,
           description: boothDescription,
           admin_contact: contact,
-          is_opened: true, // 기본값 설정
-          days: formattedDays, // 수정된 부분
-          thumbnail: boothImage.includes("/media/thumbnail/")
-            ? boothImage
-            : undefined, // 썸네일이 업데이트된 경우만 포함
+          is_opened: true,
+          days: formattedDays, // 배열을 적절한 형식으로 변경
+          thumbnail:
+            boothImage && boothImage.includes("/media/thumbnail/")
+              ? boothImage
+              : undefined,
         },
         {
           headers: {
@@ -308,13 +316,13 @@ const BoothEditPage = () => {
       );
 
       if (response.status === 200) {
-        console.log(response.data.data.days); // 저장된 운영 시간을 확인합니다.
         alert(response.data.message);
         navigate(`/booth-detail`, {
           state: { id: fetchedBoothId },
         });
       }
     } catch (error) {
+      console.error("부스 수정 중 오류 발생:", error);
       if (error.response) {
         alert(error.response.data.detail || error.response.data.message);
       } else {
@@ -346,7 +354,14 @@ const BoothEditPage = () => {
       <BoothImageWrapper>
         <TitleFontStyle>대표사진</TitleFontStyle>
         <BoothImage>
-          <img src={boothImage} alt="부스이미지" />
+          <img
+            src={
+              boothData && boothData.thumbnail // boothData가 null이 아닌지 확인
+                ? `${process.env.REACT_APP_SERVER_PORT}${boothData.thumbnail}`
+                : 임시부스이미지
+            }
+            alt="부스이미지"
+          />
           <div
             className="changeImage"
             onClick={() => document.getElementById("fileInput").click()}
@@ -371,43 +386,6 @@ const BoothEditPage = () => {
           placeholder="부스 이름을 입력하세요"
         />
       </BoothNameWrapper>
-
-      {/* 시간 설정 부분 추가 */}
-      <BoothTimeWrapper>
-        <TitleFontStyle>공연 시간 설정</TitleFontStyle>
-        <div className="row_box">
-          {days.map((day, index) => (
-            <div className="row" key={index}>
-              <input
-                type="checkbox"
-                className="checkbox"
-                checked={day.checked}
-                onChange={() => handleCheckboxChange(index)}
-              />
-              <span className="txt">{day.date}</span>
-              <input
-                className="input"
-                style={{ width: "47px" }}
-                placeholder="예) 9:00"
-                value={day.startTime}
-                onChange={(e) =>
-                  handleDayInputChange(index, "startTime", e.target.value)
-                }
-              />
-              ~
-              <input
-                className="input"
-                style={{ width: "47px" }}
-                placeholder="예) 13:00"
-                value={day.endTime}
-                onChange={(e) =>
-                  handleDayInputChange(index, "endTime", e.target.value)
-                }
-              />
-            </div>
-          ))}
-        </div>
-      </BoothTimeWrapper>
 
       {/* 공지사항 부분 추가 */}
       <NoticeWrapper>
@@ -493,6 +471,44 @@ const BoothEditPage = () => {
           )}
         </NoticeBoxWrapper>
       </NoticeWrapper>
+
+      {/* 시간 설정 부분 추가 */}
+      <BoothTimeWrapper>
+        <TitleFontStyle>부스 운영 시간</TitleFontStyle>
+        <div className="row_box">
+          {days.map((day, index) => (
+            <div className="row" key={index}>
+              <CheckboxWrapper onClick={() => handleCheckboxChange(index)}>
+                <img
+                  src={day.checked ? checked : unchecked} // 체크 상태에 따른 이미지
+                  alt={day.checked ? "checked" : "unchecked"}
+                />
+                <span className="txt">{day.date}</span>
+              </CheckboxWrapper>
+              <input
+                className="input"
+                style={{ width: "47px" }}
+                placeholder="예) 9:00"
+                value={day.startTime}
+                onChange={(e) =>
+                  handleDayInputChange(index, "startTime", e.target.value)
+                }
+              />
+              ~
+              <input
+                className="input"
+                style={{ width: "47px" }}
+                placeholder="예) 13:00"
+                value={day.endTime}
+                onChange={(e) =>
+                  handleDayInputChange(index, "endTime", e.target.value)
+                }
+              />
+            </div>
+          ))}
+        </div>
+      </BoothTimeWrapper>
+
       <BoothIntroduce>
         <TitleFontStyle>부스 소개글</TitleFontStyle>
         <textarea
@@ -601,32 +617,48 @@ const BoothNameWrapper = styled.div`
 `;
 
 const BoothTimeWrapper = styled.div`
-  margin-top: 20px;
+  margin-top: 25px;
+  width: 90%;
   .row_box {
     display: flex;
     flex-direction: column;
+    margin-top: 10px;
   }
   .row {
     display: flex;
     align-items: center;
     margin-bottom: 10px;
   }
-  .checkbox {
-    margin-right: 10px;
-  }
   .txt {
     margin-right: 10px;
+    font-family: Pretendard;
+    font-size: 13px;
   }
   .input {
     margin: 0 5px;
     padding: 5px;
     border: 1px solid #e7e7e7;
-    border-radius: 5px;
+    border-radius: 10px;
+    width: 73px;
+    padding: 11px 14px;
+    font-size: 12px;
+  }
+`;
+
+const CheckboxWrapper = styled.div`
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+  img {
+    width: 20px; /* 이미지 크기 조정 */
+    height: 20px; /* 이미지 크기 조정 */
+    margin-right: 10px;
   }
 `;
 
 const NoticeWrapper = styled.div`
   width: 350px;
+
   img {
     cursor: pointer;
   }
@@ -743,6 +775,7 @@ const Notice = styled.div`
 
 const BoothIntroduce = styled.div`
   width: 350px;
+  margin-top: 10px;
   textarea {
     width: 327.914px;
     height: 82.754px;
@@ -752,11 +785,13 @@ const BoothIntroduce = styled.div`
     font-size: 12.413px;
     font-weight: 500;
     resize: none;
+    margin-top: 20px;
   }
 `;
 
 const MenuWrapper = styled.div`
   width: 350px;
+  margin-top: 20px;
 `;
 
 const MenuBox = styled.div`
@@ -766,10 +801,12 @@ const MenuBox = styled.div`
   box-sizing: border-box;
   grid-auto-rows: 197px;
   gap: 7px;
+  margin-top: 20px;
 `;
 
 const BoothContact = styled.div`
   width: 350px;
+  margin-top: 20px;
   textarea {
     width: 327.914px;
     height: 82.754px;
@@ -779,6 +816,7 @@ const BoothContact = styled.div`
     font-size: 12.413px;
     font-weight: 500;
     resize: none;
+    margin-top: 20px;
   }
 `;
 
@@ -791,6 +829,7 @@ const SubmitButton = styled.button`
   text-align: center;
   font-size: 16px;
   font-weight: 700;
+  margin-top: 20px;
   cursor: pointer;
   &:disabled {
     background: #b2e0b2;
