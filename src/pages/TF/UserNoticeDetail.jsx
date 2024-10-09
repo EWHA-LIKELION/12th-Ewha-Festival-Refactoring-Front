@@ -81,7 +81,9 @@ const Container = styled.div`
   display: flex;
   flex-direction: column;
   align-items: center;
-  margin: 60px 20px 280px 20px;
+  margin: 60px 5vw 280px 5vw;
+  width: 90vw;
+  max-width: 350px;
   h3 {
     color: var(--bk01, #000);
     font-family: Pretendard;

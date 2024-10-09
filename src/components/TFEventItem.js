@@ -18,7 +18,8 @@ const TFEventItem = ({ booth }) => {
 export default TFEventItem;
 
 const Booth = styled.div`
-  width: 312px;
+  width: 80vw;
+  max-width: 312px;
   height: 46px;
   flex-shrink: 0;
   background: url(${BasicEvent}) lightgray 50% / cover no-repeat;

@@ -211,6 +211,7 @@ const PageButton = styled.button`
 `;
 
 const TopContainer = styled.div`
+  max-width: 390px;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -220,6 +221,7 @@ const TopContainer = styled.div`
     margin: 0;
     padding: 0;
     list-style: none;
+
     li {
       width: 325px;
       height: 47px;
