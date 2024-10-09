@@ -285,9 +285,12 @@ const PopupContainer = styled.div`
   right: 0;
   background: rgba(0, 0, 0, 0.5);
   height: 100%;
+  max-width: 390px;
+  margin: 0 auto;
   display: flex;
   justify-content: center;
   align-items: flex-end;
+  z-index: 1001;
 `;
 
 const PopupContent = styled.div`

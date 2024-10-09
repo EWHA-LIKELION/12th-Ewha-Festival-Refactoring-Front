@@ -142,11 +142,13 @@ const GlobalStyle = createGlobalStyle`
 `;
 
 const Container = styled.div`
-  position: relative;
+  position: sticky; /* sticky 위치 설정 */
+  top: 0; /* 상단에 도달하면 고정 */
+  z-index: 1000; /* 다른 요소들보다 위에 보이게 설정 */
+  background-color: white; /* 스크롤할 때 배경이 투명해지지 않도록 */
   display: flex;
   justify-content: space-between;
   padding: 40px 20px 26px;
-
   img {
     cursor: pointer;
   }
