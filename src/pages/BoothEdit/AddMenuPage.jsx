@@ -14,6 +14,7 @@ const AddMenuPage = () => {
   const [price, setPrice] = useState("");
   const [isVegan, setIsVegan] = useState("");
   const [isSoldOut, setIsSoldOut] = useState(false);
+  const baseUrl = process.env.REACT_APP_API_URL; // API URL을 환경 변수에서 가져온다고 가정
 
   useEffect(() => {
     const fetchBoothId = async () => {
@@ -41,8 +42,14 @@ const AddMenuPage = () => {
       setMenuName(menu.menu);
       setPrice(menu.price);
       setIsVegan(menu.is_vegan);
+      console.log("Menu Image:", menu.img);
+
       // 이미지 URL을 설정합니다.
-      setMenuImage(menu.img);
+      if (menu.img) {
+        setMenuImage(menu.img);
+      } else {
+        setMenuImage(null); // 기본값으로 설정
+      }
     }
   }, [location.state]);
 
@@ -61,35 +68,58 @@ const AddMenuPage = () => {
   const addMenu = async () => {
     const accessToken = localStorage.getItem("accessToken");
 
-    if (!menuName || !menuImage || !price) {
+    if (!menuName || !price) {
+      // 메뉴 이름과 가격 확인
       alert("모든 필드를 입력해야 합니다.");
       return;
     }
 
     const formData = new FormData();
     formData.append("menu", menuName);
-    formData.append("img", menuImage);
     formData.append("price", price);
     formData.append("is_vegan", isVegan === "" ? "None" : isVegan);
     formData.append("is_soldout", isSoldOut);
 
+    // 메뉴 이미지가 새로 추가된 경우에만 추가
+    if (menuImage) {
+      formData.append("img", menuImage); // menuImage가 존재할 경우만 추가
+    }
+
     try {
-      const response = await instance.patch(
-        `${process.env.REACT_APP_SERVER_PORT}/manages/${boothId}/menus/${location.state.menu.id}/`,
-        formData,
-        {
-          headers: {
-            "Content-Type": "multipart/form-data",
-            Authorization: `Bearer ${accessToken}`,
-          },
-        }
-      );
+      let response;
+
+      if (location.state && location.state.menu) {
+        // 수정하는 경우 (PATCH)
+        response = await instance.patch(
+          `${process.env.REACT_APP_SERVER_PORT}/manages/${boothId}/menus/${location.state.menu.id}/`,
+          formData,
+          {
+            headers: {
+              "Content-Type": "multipart/form-data",
+              Authorization: `Bearer ${accessToken}`,
+            },
+          }
+        );
+      } else {
+        // 새로 추가하는 경우 (POST)
+        response = await instance.post(
+          `${process.env.REACT_APP_SERVER_PORT}/manages/${boothId}/menus/`,
+          formData,
+          {
+            headers: {
+              "Content-Type": "multipart/form-data",
+              Authorization: `Bearer ${accessToken}`,
+            },
+          }
+        );
+      }
 
       if (response.status === 200) {
         alert(response.data.message);
         navigate("/booth-edit");
       }
     } catch (error) {
+      console.error("메뉴 추가/수정 실패:", error);
       if (error.response) {
         if (error.response.status === 400) {
           alert(error.response.data.message);
@@ -115,15 +145,16 @@ const AddMenuPage = () => {
       <TitleFontSytle>대표 사진</TitleFontSytle>
       <ImageContainer>
         <img
+          className="menuImage"
           src={
-            menuImage
-              ? typeof menuImage === "string"
-                ? menuImage // URL인 경우
-                : URL.createObjectURL(menuImage) // File 객체인 경우
-              : 임시메뉴이미지
+            menuImage && typeof menuImage === "object" // menuImage가 File 객체인 경우
+              ? URL.createObjectURL(menuImage) // 임시 URL 생성
+              : menuImage && typeof menuImage === "string" && menuImage !== "" // URL이 문자열이고 비어있지 않은지 확인
+              ? `${process.env.REACT_APP_SERVER_PORT}${menuImage}` // URL인 경우
+              : 임시메뉴이미지 // 기본 이미지 설정
           }
-          alt="메뉴이미지"
         />
+
         <div
           className="changeImage"
           onClick={() => document.getElementById("fileInput").click()}

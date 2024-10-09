@@ -19,6 +19,7 @@ const BoothDetailPage = () => {
   const [menuDetails, setMenuDetails] = useState([]); // 메뉴 정보를 배열로 초기화
   const [isScraped, setIsScraped] = useState(false);
   const [boothData, setBoothData] = useState(null);
+  const [notices, setNotices] = useState([]); // 공지사항 상태 추가
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
@@ -56,6 +57,7 @@ const BoothDetailPage = () => {
         setMenuDetails(response.data.data.menus); // 메뉴 정보 설정
 
         console.log(response.data.data.menus); // 응답 데이터 콘솔에 출력
+        console.log(response.data.data); // 응답 데이터 콘솔에 출력
       } catch (error) {
         setError(
           "부스 정보를 불러오는 데 실패했습니다. 오류: " + error.message
@@ -68,12 +70,42 @@ const BoothDetailPage = () => {
     fetchBoothData();
   }, []);
 
+  // 공지사항 조회를 위한 useEffect 추가
+  useEffect(() => {
+    const fetchNotices = async () => {
+      if (!fetchedBoothId) return; // 부스 ID가 없으면 종료
+
+      try {
+        const accessToken = localStorage.getItem("accessToken");
+
+        const response = await instance.get(
+          `${process.env.REACT_APP_SERVER_PORT}/manages/${fetchedBoothId}/realtime_info/`,
+          {
+            headers: {
+              Authorization: `Bearer ${accessToken}`,
+            },
+          }
+        );
+
+        console.log("noticeresponse:", response.data); // 전체 응답 데이터 출력
+        // notice 배열을 상태에 설정
+        setNotices(response.data.notice);
+      } catch (error) {
+        console.error("공지사항을 불러오는 데 실패했습니다.", error);
+      }
+    };
+
+    fetchNotices();
+  }, [fetchedBoothId]); // 부스 ID가 변경될 때마다 공지사항을 조회
+
   const clickScrap = () => {
     setIsScraped((prev) => !prev);
   };
 
   const handleEditClick = () => {
-    navigate(`/booth-edit/`, { state: { id: fetchedBoothId } });
+    navigate(`/booth-edit/`, {
+      state: { id: fetchedBoothId, notices: notices },
+    });
   };
 
   if (loading) {
@@ -130,19 +162,47 @@ const BoothDetailPage = () => {
       </Contact>
       <Notice>
         <div className="noticetitle">실시간 공지사항</div>
-        <div className="noticebox">
-          {boothData && boothData.notice ? (
-            <>
-              <div className="noticeCatagory">
-                {boothData.notice.notice_type}
+        {notices.length > 0 ? (
+          notices.map((notice, index) => (
+            <div
+              className="noticebox"
+              key={index}
+              style={{
+                border: `1px solid ${
+                  notice.notice_type === "판매공지"
+                    ? "#9747ff"
+                    : notice.notice_type === "운영공지"
+                    ? "#00F16F"
+                    : "transparent"
+                }`,
+              }} // 보더 색상 직접 적용
+            >
+              <div>
+                <div
+                  className="noticeCatagory"
+                  style={{
+                    background:
+                      notice.notice_type === "판매공지"
+                        ? "#9747ff"
+                        : notice.notice_type === "운영공지"
+                        ? "#00F16F"
+                        : "transparent",
+                    color: "white",
+                  }}
+                >
+                  {notice.notice_type} {/* notice_type 표시 */}
+                </div>
+                <div className="notice">{notice.content}</div>
+                <div className="noticetime">
+                  {new Date(notice.created_at).toLocaleString()}{" "}
+                  {/* 시간 변환 */}
+                </div>
               </div>
-              <div className="notice">{boothData.notice.content}</div>
-              <div className="noticetime">2시간전</div>
-            </>
-          ) : (
-            <div>공지사항이 없습니다.</div>
-          )}
-        </div>
+            </div>
+          ))
+        ) : (
+          <div>공지사항이 없습니다.</div>
+        )}
       </Notice>
       <MiddleWrapper>
         <div className="top">
@@ -256,6 +316,7 @@ const Notice = styled.div`
     margin-top: 25px;
     margin-bottom: 10px;
   }
+
   .noticebox {
     display: flex;
     flex-direction: column;
@@ -264,28 +325,29 @@ const Notice = styled.div`
     width: 350px;
     height: 93px;
     border-radius: 15px;
-    border: 1px solid #9747ff;
   }
+
   .noticeCatagory {
     width: 56px;
     height: 23px;
     border-radius: 5.385px;
-    background: #9747ff;
     color: white;
     font-size: 10.769px;
     font-weight: 700;
     text-align: center;
     line-height: 23px;
     margin-bottom: 15px;
-    align-self: self-start;
+    align-self: flex-start; // 수정된 정렬 방식
     margin-left: 10px;
   }
+
   .notice {
     font-size: 12px;
     font-weight: 500;
     width: 322px;
     margin-bottom: 15px;
   }
+
   .noticetime {
     color: #8e8e8e;
     font-size: 9.761px;

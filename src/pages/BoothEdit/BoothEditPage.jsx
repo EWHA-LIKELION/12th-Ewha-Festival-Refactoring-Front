@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { useLocation, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import instance from "../../api/axios";
 import styled from "styled-components";
 import BackArrow from "../../images/BoothDetail/arrow-left.svg";
@@ -11,19 +11,20 @@ import MenuImage from "../../components/MenuImage";
 
 const BoothEditPage = () => {
   const navigate = useNavigate();
+
+  // 부스 관련 상태 관리
   const [fetchedBoothId, setFetchedBoothId] = useState(null);
   const [boothImage, setBoothImage] = useState(임시부스이미지);
   const [boothName, setBoothName] = useState("");
-  const [operatingHours, setOperatingHours] = useState(""); // 운영시간 상태
-  const [boothDescription, setBoothDescription] = useState(""); // 부스 소개글 상태
-  const [contact, setContact] = useState(""); // 운영진 연락처 상태
+  const [operatingHours, setOperatingHours] = useState("");
+  const [boothDescription, setBoothDescription] = useState("");
+  const [contact, setContact] = useState("");
   const [loading, setLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
   const [boothData, setBoothData] = useState(null);
 
-  // 메뉴 관련 상태 추가
-  const [menuDetails, setMenuDetails] = useState([]); // 메뉴 상태 추가
-  const [selectedManage, setSelectedManage] = useState(""); // 판매 여부 상태
+  // 메뉴 관련 상태
+  const [menuDetails, setMenuDetails] = useState([]);
 
   // 공지사항 관련 상태
   const [notices, setNotices] = useState([]);
@@ -48,9 +49,7 @@ const BoothEditPage = () => {
         const boothIdResponse = await instance.get(
           `${process.env.REACT_APP_SERVER_PORT}/manages/main/`,
           {
-            headers: {
-              Authorization: `Bearer ${accessToken}`,
-            },
+            headers: { Authorization: `Bearer ${accessToken}` },
           }
         );
 
@@ -63,22 +62,19 @@ const BoothEditPage = () => {
         );
         const fetchedBoothData = response.data.data;
         setBoothData(fetchedBoothData);
-        setMenuDetails(fetchedBoothData.menus); // 메뉴 세부정보 설정
+        setMenuDetails(fetchedBoothData.menus);
 
         // 가져온 부스 데이터로 상태 업데이트
-        setBoothName(fetchedBoothData.name); // 가져온 데이터에 접근
-        setOperatingHours(fetchedBoothData.operatingHours || ""); // 운영 시간
-        setBoothDescription(fetchedBoothData.description || ""); // 부스 설명
-        setContact(fetchedBoothData.admin_contact || ""); // 관리자 연락처
-        setSelectedManage(fetchedBoothData.is_opened ? "운영 중" : "운영 종료"); // 운영 상태 설정
+        setBoothName(fetchedBoothData.name);
+        setOperatingHours(fetchedBoothData.operatingHours || "");
+        setBoothDescription(fetchedBoothData.description || "");
+        setContact(fetchedBoothData.admin_contact || "");
 
         // 공지사항 가져오기
         const noticesResponse = await instance.get(
           `/manages/${fetchedBoothId}/realtime_info/`,
           {
-            headers: {
-              Authorization: `Bearer ${accessToken}`,
-            },
+            headers: { Authorization: `Bearer ${accessToken}` },
           }
         );
 
@@ -88,9 +84,13 @@ const BoothEditPage = () => {
           type: noticeData[key].notice_type,
           content: noticeData[key].content,
           createdAt: noticeData[key].created_at,
+          borderColor:
+            noticeData[key].notice_type === "판매공지" ? "#9747ff" : "#00F16F",
         }));
 
         setNotices(noticesArray);
+
+        console.log("Fetched notices:", noticeData); // 여기서 공지사항 데이터 출력
       } catch (error) {
         if (error.response) {
           if (error.response.status === 401) {
@@ -119,27 +119,26 @@ const BoothEditPage = () => {
     if (file) {
       const reader = new FileReader();
       reader.onloadend = async () => {
-        setBoothImage(reader.result); // 미리보기 이미지 설정
+        setBoothImage(reader.result);
 
         // 이미지 업로드를 위한 FormData 생성
         const formData = new FormData();
-        formData.append("thumbnail", file); // 업로드할 이미지 파일 추가
+        formData.append("thumbnail", file);
 
         try {
           const accessToken = localStorage.getItem("accessToken");
           const response = await instance.patch(
-            `${process.env.REACT_APP_SERVER_PORT}/manages/${fetchedBoothId}/`, // API 엔드포인트
+            `${process.env.REACT_APP_SERVER_PORT}/manages/${fetchedBoothId}/`,
             formData,
             {
               headers: {
                 Authorization: `Bearer ${accessToken}`,
-                "Content-Type": "multipart/form-data", // 멀티파트 데이터 전송
+                "Content-Type": "multipart/form-data",
               },
             }
           );
 
           if (response.status === 200) {
-            // 서버에서 받은 업데이트된 이미지 URL을 상태에 저장
             setBoothImage(response.data.data.thumbnail);
             alert("이미지가 성공적으로 업데이트되었습니다.");
           }
@@ -176,21 +175,27 @@ const BoothEditPage = () => {
     setNewNoticeContent(event.target.value);
   };
 
-  const createNotice = async (noticeType, content) => {
+  const createNotice = async () => {
     try {
+      const accessToken = localStorage.getItem("accessToken");
+
       const response = await instance.post(
-        `/manages/${fetchedBoothId}/realtime_info/`,
+        `${process.env.REACT_APP_SERVER_PORT}/manages/${fetchedBoothId}/realtime_info/`,
         {
-          notice_type: noticeType,
-          content: content,
+          notice_type: selectedNotice === "판매" ? "판매공지" : "운영공지",
+          content: newNoticeContent,
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${accessToken}`,
+          },
         }
       );
 
       if (response.status === 200) {
         alert(response.data.message);
-        // 새로운 공지 추가 후 상태 업데이트
         const notice = {
-          id: response.data.id,
+          id: response.data.id, // 서버에서 반환된 ID 사용
           content: newNoticeContent,
           category: selectedNotice,
           timestamp: new Date().toLocaleTimeString([], {
@@ -199,7 +204,7 @@ const BoothEditPage = () => {
           }),
           borderColor: selectedNotice === "판매" ? "#9747ff" : "#00F16F",
         };
-        setNotices([...notices, notice]);
+        setNotices((prevNotices) => [...prevNotices, notice]);
       }
     } catch (error) {
       if (error.response) {
@@ -213,7 +218,7 @@ const BoothEditPage = () => {
   const handleNoticeSubmit = async (event) => {
     if (event.key === "Enter" && newNoticeContent.trim() !== "") {
       event.preventDefault();
-      await createNotice(selectedNotice === "판매" ? "행사공지" : "운영공지");
+      await createNotice();
       setNewNoticeContent("");
       setIsNoticeBoxVisible(false);
     }
@@ -227,8 +232,12 @@ const BoothEditPage = () => {
     const accessToken = localStorage.getItem("accessToken");
 
     try {
+      const numericInfoId = parseInt(infoId, 10); // infoId를 숫자로 변환
+      console.log(`Deleting notice with ID: ${numericInfoId + 1}`); // 변환된 값을 사용
       const response = await instance.delete(
-        `/manages/${fetchedBoothId}/realtime_info/${infoId}/`, // 공지사항 삭제 요청
+        `${
+          process.env.REACT_APP_SERVER_PORT
+        }/manages/${fetchedBoothId}/realtime_info/${numericInfoId + 1}/`, // 변환된 값에 1을 더함
         {
           headers: {
             Authorization: `Bearer ${accessToken}`,
@@ -238,10 +247,12 @@ const BoothEditPage = () => {
 
       if (response.status === 200) {
         alert(response.data.message);
-        // 공지사항 삭제 후 상태 업데이트
-        setNotices(notices.filter((notice) => notice.id !== infoId)); // infoId로 공지 삭제
+        setNotices((prevNotices) =>
+          prevNotices.filter((notice) => notice.id !== infoId)
+        );
       }
     } catch (error) {
+      console.error("Error deleting notice:", error); // 추가된 로그
       if (error.response) {
         alert(error.response.data.message);
       } else {
@@ -273,9 +284,9 @@ const BoothEditPage = () => {
           operatingHours: operatingHours,
           description: boothDescription,
           admin_contact: contact,
-          is_opened: selectedManage === "운영 중",
+          is_opened: true, // 기본값 설정
           days: formattedDays,
-          thumbnail: boothImage, // 업데이트된 이미지 URL 추가
+          thumbnail: boothImage,
         },
         {
           headers: {
@@ -299,18 +310,6 @@ const BoothEditPage = () => {
     } finally {
       setLoading(false);
     }
-  };
-
-  const handleDayInputChange = (index, field, value) => {
-    const newDays = [...days];
-    newDays[index][field] = value;
-    setDays(newDays);
-  };
-
-  const handleCheckboxChange = (index) => {
-    const newDays = [...days];
-    newDays[index].checked = !newDays[index].checked;
-    setDays(newDays);
   };
 
   return (
@@ -400,67 +399,35 @@ const BoothEditPage = () => {
           </NoticeBoxWrapper>
         )}
         <NoticeBoxWrapper>
-          {notices.map((notice) => (
-            <Notice
-              key={notice.id}
-              style={{ border: `1px solid ${notice.borderColor}` }}
-            >
-              <div className="noticetop">
-                <div
-                  className="selectedcatagory"
-                  style={{ backgroundColor: `${notice.borderColor}` }}
-                >
-                  {notice.category} 공지
+          {notices.length > 0 ? (
+            notices.map((notice) => (
+              <Notice
+                key={notice.id}
+                style={{ border: `1px solid ${notice.borderColor}` }}
+              >
+                <div className="noticetop">
+                  <div
+                    className="selectedcatagory"
+                    style={{ backgroundColor: `${notice.borderColor}` }}
+                  >
+                    {notice.type} 공지
+                  </div>
+                  <div
+                    className="delete"
+                    onClick={() => handleNoticeDelete(notice.id)}
+                  >
+                    삭제
+                  </div>
                 </div>
-                <div
-                  className="delete"
-                  onClick={() => handleNoticeDelete(notice.id)} // notice.id를 사용하여 삭제
-                >
-                  삭제
-                </div>
-              </div>
-              <div>{notice.content}</div>
-              <div>{notice.timestamp}</div>
-            </Notice>
-          ))}
+                <div>{notice.content}</div>
+                <div>{new Date(notice.createdAt).toLocaleString()}</div>
+              </Notice>
+            ))
+          ) : (
+            <div>공지사항이 없습니다.</div>
+          )}
         </NoticeBoxWrapper>
       </NoticeWrapper>
-      <BoothTimeWrapper>
-        <TitleFontStyle>공연 시간 설정</TitleFontStyle>
-        <div className="row_box">
-          {days.map((day, index) => (
-            <div className="row" key={index}>
-              <input
-                type="checkbox"
-                className="checkbox"
-                checked={day.checked}
-                onChange={() => handleCheckboxChange(index)}
-              />
-              <span className="txt">{day.date}</span>
-              <input
-                className="input"
-                style={{ width: "47px" }}
-                placeholder="예) 9:00"
-                value={day.startTime}
-                onChange={(e) =>
-                  handleDayInputChange(index, "startTime", e.target.value)
-                }
-              />
-              ~
-              <input
-                className="input"
-                style={{ width: "47px" }}
-                placeholder="예) 13:00"
-                value={day.endTime}
-                onChange={(e) =>
-                  handleDayInputChange(index, "endTime", e.target.value)
-                }
-              />
-            </div>
-          ))}
-        </div>
-      </BoothTimeWrapper>
-
       <BoothIntroduce>
         <TitleFontStyle>부스 소개글</TitleFontStyle>
         <textarea
@@ -470,12 +437,23 @@ const BoothEditPage = () => {
         ></textarea>
       </BoothIntroduce>
 
-      {/* 메뉴 부분 추가 */}
       <MenuWrapper>
         <TitleFontStyle>메뉴</TitleFontStyle>
         <MenuBox>
           {menuDetails.length > 0 ? (
-            menuDetails.map((menu) => <MenuImage key={menu.id} menu={menu} />)
+            menuDetails.map((menu) => (
+              <MenuImageWrapper key={menu.id}>
+                <MenuImage
+                  className="menuImage"
+                  menu={menu}
+                  style={{
+                    width: "100%", // 부모 요소에 맞춰 크기 조정
+                    height: "100%", // 부모 요소에 맞춰 크기 조정
+                    flexShrink: 0, // Flexbox에서 크기 축소 방지
+                  }}
+                />
+              </MenuImageWrapper>
+            ))
           ) : (
             <div>메뉴 정보가 없습니다.</div>
           )}
@@ -491,19 +469,6 @@ const BoothEditPage = () => {
           placeholder="운영진 연락처를 입력하세요"
         ></textarea>
       </BoothContact>
-
-      <TitleFontStyle>판매 여부</TitleFontStyle>
-      <ManageOptions>
-        {["운영 중", "운영 종료"].map((manageOption) => (
-          <Option
-            key={manageOption}
-            onClick={() => setSelectedManage(manageOption)}
-            selected={selectedManage === manageOption}
-          >
-            {manageOption}
-          </Option>
-        ))}
-      </ManageOptions>
 
       <SubmitButton onClick={handleUpdateBooth} disabled={loading}>
         {loading ? "업데이트 중..." : "작성 완료"}
@@ -580,131 +545,6 @@ const BoothNameWrapper = styled.div`
   }
 `;
 
-const BoothTimeWrapper = styled.div`
-  margin-top: 20px;
-
-  .input {
-    display: flex;
-    width: 317px;
-    padding: 11px 14px;
-    border-radius: 15px;
-    border: 1px solid #e7e7e7;
-    background: linear-gradient(334deg, #fff 71.49%, #fff 169%);
-    box-shadow: 0px 0px 9px 0px rgba(255, 255, 255, 0.25) inset;
-    font-size: 12px;
-    font-weight: 500;
-    line-height: 18px;
-    letter-spacing: -0.5px;
-
-    &::placeholder {
-      color: var(--gray01, #bbb);
-    }
-    &:focus {
-      outline: none;
-    }
-  }
-
-  .row {
-    display: flex;
-    gap: 10px;
-    align-items: center;
-  }
-
-  .row_box {
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-  }
-
-  .checkbox {
-    width: 24px;
-    height: 24px;
-    cursor: pointer;
-  }
-
-  .txt {
-    color: #000;
-    font-size: 12px;
-    font-weight: 500;
-    line-height: 20px;
-    letter-spacing: -0.5px;
-    width: 62px;
-  }
-`;
-
-const BoothIntroduce = styled.div`
-  width: 350px;
-  textarea {
-    width: 327.914px;
-    height: 82.754px;
-    padding: 11.379px 14.482px;
-    border-radius: 15.516px;
-    border: 1.034px solid #e7e7e7;
-    font-size: 12.413px;
-    font-weight: 500;
-    resize: none;
-  }
-`;
-
-const BoothContact = styled.div`
-  width: 350px;
-  textarea {
-    width: 327.914px;
-    height: 82.754px;
-    padding: 11.379px 14.482px;
-    border-radius: 15.516px;
-    border: 1.034px solid #e7e7e7;
-    font-size: 12.413px;
-    font-weight: 500;
-    resize: none;
-  }
-`;
-
-const ManageOptions = styled.div`
-  width: 100%;
-  margin-bottom: 20px;
-  display: flex;
-`;
-
-const Option = styled.div`
-  border: 1px solid #f2f2f2;
-  background: ${(props) =>
-    props.selected ? "var(--green_01, #00F16F)" : "#f7f7f7"};
-  border-radius: 30px;
-  padding: 7px 17px;
-  font-size: 15px;
-  margin-right: 8px;
-  color: ${(props) =>
-    props.selected ? "var(--wh, #FFF)" : "var(--gray01, #bbb)"};
-  font-weight: 700;
-  cursor: pointer;
-  &:hover {
-    background-color: #e0e0e0;
-  }
-`;
-
-const SubmitButton = styled.button`
-  padding: 10px 140px;
-  border-radius: 10px;
-  border: 1px solid #03d664;
-  background: #07fb77;
-  color: var(--wh, #fff);
-  text-align: center;
-  font-size: 16px;
-  font-weight: 700;
-  cursor: pointer;
-  &:disabled {
-    background: #b2e0b2; /* 비활성화 상태 스타일 */
-    cursor: not-allowed; /* 비활성화 상태 커서 */
-  }
-`;
-
-const ErrorMessage = styled.div`
-  color: red;
-  margin-top: 10px;
-  font-size: 14px;
-`;
-
 const NoticeWrapper = styled.div`
   width: 350px;
   img {
@@ -720,7 +560,6 @@ const NoticeWrapper = styled.div`
 
 const NewNoticeBox = styled.div`
   width: 322px;
-  height: 77px;
   padding: 11px 14px;
   border-radius: 15px;
   border: 1px solid #e7e7e7;
@@ -760,9 +599,25 @@ const NewNoticeBox = styled.div`
   }
 `;
 
+const NoticeBoxWrapper = styled.div`
+  width: 360px;
+  max-height: 230px;
+  overflow-y: scroll;
+  &::-webkit-scrollbar {
+    width: 3px;
+  }
+  &::-webkit-scrollbar-thumb {
+    background-color: #bbb;
+    border-radius: 10px;
+  }
+  &::-webkit-scrollbar-thumb:hover {
+    background-color: #8d8a8a;
+  }
+`;
+
 const Notice = styled.div`
   width: 322px;
-  height: 77px;
+  height: auto;
   padding: 11px 14px;
   border-radius: 15px;
   margin-top: 10px;
@@ -786,21 +641,17 @@ const Notice = styled.div`
   }
 `;
 
-const NoticeBoxWrapper = styled.div`
-  width: 360px;
-  max-height: 230px;
-  overflow-y: scroll;
-  &::-webkit-scrollbar {
-    width: 3px;
-  }
-
-  &::-webkit-scrollbar-thumb {
-    background-color: #bbb;
-    border-radius: 10px;
-  }
-
-  &::-webkit-scrollbar-thumb:hover {
-    background-color: #8d8a8a;
+const BoothIntroduce = styled.div`
+  width: 350px;
+  textarea {
+    width: 327.914px;
+    height: 82.754px;
+    padding: 11.379px 14.482px;
+    border-radius: 15.516px;
+    border: 1.034px solid #e7e7e7;
+    font-size: 12.413px;
+    font-weight: 500;
+    resize: none;
   }
 `;
 
@@ -810,9 +661,72 @@ const MenuWrapper = styled.div`
 
 const MenuBox = styled.div`
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: repeat(2, 170px); // 2열로 고정
+  grid-auto-rows: 197px; // 각 행의 높이를 고정
   place-items: center;
+
   img {
     cursor: pointer;
   }
+
+  // 그리드 항목 스타일
+  > div {
+    width: 170px; // 고정된 너비
+    height: 197px; // 고정된 높이
+    display: flex; // 플렉스 박스를 사용하여 내부 요소를 정렬
+    align-items: center; // 수직 중앙 정렬
+    justify-content: center; // 수평 중앙 정렬
+    overflow: hidden; // 내용이 넘칠 경우 숨기기
+  }
+
+  // MenuImage 안의 이미지 크기를 꽉 차게 설정
+  img {
+    width: 100%; // 부모 요소에 맞춰 크기 조정
+    height: 100%; // 부모 요소에 맞춰 크기 조정
+    object-fit: cover; // 비율 유지하며 꽉 차게 설정
+  }
+`;
+
+const BoothContact = styled.div`
+  width: 350px;
+  textarea {
+    width: 327.914px;
+    height: 82.754px;
+    padding: 11.379px 14.482px;
+    border-radius: 15.516px;
+    border: 1.034px solid #e7e7e7;
+    font-size: 12.413px;
+    font-weight: 500;
+    resize: none;
+  }
+`;
+
+const SubmitButton = styled.button`
+  padding: 10px 140px;
+  border-radius: 10px;
+  border: 1px solid #03d664;
+  background: #07fb77;
+  color: var(--wh, #fff);
+  text-align: center;
+  font-size: 16px;
+  font-weight: 700;
+  cursor: pointer;
+  &:disabled {
+    background: #b2e0b2;
+    cursor: not-allowed;
+  }
+`;
+
+const ErrorMessage = styled.div`
+  color: red;
+  margin-top: 10px;
+  font-size: 14px;
+`;
+const MenuImageWrapper = styled.div`
+  width: 170px; // 고정된 너비
+  height: 197px; // 고정된 높이
+  display: flex; // 플렉스 박스를 사용하여 내부 요소를 정렬
+  align-items: center; // 수직 중앙 정렬
+  justify-content: center; // 수평 중앙 정렬
+  overflow: hidden; // 내용이 넘칠 경우 숨기기
 `;

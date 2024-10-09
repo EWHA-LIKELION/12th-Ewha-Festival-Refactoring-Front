@@ -36,6 +36,7 @@ const MenuImage = ({ menu }) => {
       );
       console.log(response.data.message);
       setIsModalOpen(false);
+      window.location.reload(); // 페이지를 강제로 새로 고침navigate("/booth-edit"); // 현재 경로를 다시 로드
     } catch (error) {
       console.error(error.response.data.detail || "메뉴 삭제에 실패했습니다.");
     }
@@ -59,8 +60,8 @@ const MenuImage = ({ menu }) => {
         alt="Menu"
         onClick={handleImageClick} // 이미지 클릭 시 이동
       />
-      <Top>
-        <div className="menuVegan">{menu.is_vegan}</div>
+      <BoothInfo>
+        <MenuVegan>{menu.is_vegan}</MenuVegan>
         {isBoothEdit && (
           <img
             className="menuTrash"
@@ -70,21 +71,17 @@ const MenuImage = ({ menu }) => {
           />
         )}
         {isBoothEdit ? null : (
-          <ScrapWrapper>
-            <img
-              className="menuScrap"
-              src={isScraped ? scrapAfter : scrapBefore}
-              alt="Scrap"
-              onClick={clickScrap}
-            />
-            <div className="scrapCount">{menu.scrap_count}</div>
-          </ScrapWrapper>
+          <img
+            className="menuScrap"
+            src={isScraped ? scrapAfter : scrapBefore}
+            alt="Scrap"
+            onClick={clickScrap}
+          />
         )}
-      </Top>
-      <Bottom>
-        <div className="menuName">{menu.menu}</div>
-        <div className="price">{menu.price}원</div>
-      </Bottom>
+        <ScrapCount>{menu.scrap_count}</ScrapCount>
+        <MenuName>{menu.menu}</MenuName>
+        <Price>{menu.price}원</Price>
+      </BoothInfo>
       {isModalOpen && (
         <ModalOverlay>
           <ModalContent>
@@ -117,13 +114,17 @@ export default MenuImage;
 // 이하 스타일 컴포넌트는 동일
 
 const Wrapper = styled.div`
-  width: 170px;
-  height: 197px;
-  flex-shrink: 0;
+  max-width: 170px;
+  max-height: 197px;
   border-radius: 20px;
   box-shadow: 0px 0px 9px 0px rgba(255, 255, 255, 0.25) inset;
   overflow: hidden;
   position: relative;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  padding: 17px;
 
   .menuImage {
     object-fit: cover;
@@ -132,29 +133,50 @@ const Wrapper = styled.div`
     left: 0;
     width: 100%;
     height: 100%;
+    border-radius: 20px;
+  }
+
+  &::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(
+      180deg,
+      rgba(0, 0, 0, 0.4) 0%,
+      rgba(0, 0, 0, 0) 161.62%
+    );
+    border-radius: 20px;
+    z-index: 2;
+  }
+
+  & > * {
+    z-index: 3;
   }
 `;
 
-const Top = styled.div`
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
+const ScrapCount = styled.div`
+  color: var(--green_01, #00f16f);
+  text-shadow: 0px 0px 4px rgba(0, 0, 0, 0.25);
+  font-size: 12px;
+  font-style: normal;
+  font-weight: 400;
+  line-height: 20px; /* 166.667% */
+  letter-spacing: -0.5px;
   position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  padding: 8px;
-  .menuVegan {
-    width: 46px;
-    height: 20px;
-    border-radius: 10px;
-    background: rgba(0, 241, 111, 0.4);
-    color: white;
-    font-size: 11px;
-    font-style: normal;
-    font-weight: 600;
-    text-align: center;
-    line-height: 20px;
+  top: 2.8rem;
+  right: 1.6rem;
+  text-align: center;
+`;
+const BoothInfo = styled.div`
+  img {
+    position: absolute;
+    top: 1.06rem;
+    right: 0.87rem;
+    cursor: pointer;
+    z-index: 3;
   }
   .menuScrap,
   .menuTrash {
@@ -163,23 +185,35 @@ const Top = styled.div`
   }
 `;
 
-const Bottom = styled.div`
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  padding: 8px;
+const MenuVegan = styled.div`
+  width: 46px;
+  height: 20px;
+  border-radius: 10px;
+  background: rgba(0, 241, 111, 0.4);
   color: white;
-  .menuName {
-    font-size: 20px;
-    font-style: normal;
-    font-weight: 700;
-  }
-  .price {
-    font-size: 12px;
-    font-style: normal;
-    font-weight: 500;
-  }
+  font-size: 11px;
+  font-weight: 600;
+  text-align: center;
+  line-height: 20px;
+  position: absolute;
+  top: 15px;
+`;
+const MenuName = styled.div`
+  color: var(--wh01, var(--wh, #fff));
+  font-family: Pretendard;
+  font-size: 20px;
+  font-weight: 700;
+  line-height: 20px;
+  letter-spacing: -0.3px;
+`;
+
+const Price = styled.div`
+  color: var(--wh01, var(--wh, #fff));
+  font-family: Pretendard;
+  font-size: 12px;
+  font-weight: 500;
+  line-height: 20px;
+  letter-spacing: -0.5px;
 `;
 
 const ModalOverlay = styled.div`
@@ -201,39 +235,30 @@ const ModalContent = styled.div`
   text-align: center;
   width: 286px;
   height: 151px;
-  flex-shrink: 0;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: space-between;
   padding-bottom: 20px;
+
   p {
     color: #928d8d;
-    text-align: center;
-    font-family: Pretendard;
     font-size: 10px;
-    font-style: normal;
     font-weight: 400;
-    line-height: normal;
-    margin: 6px 0 6px 0;
+    margin: 6px 0;
   }
 `;
 
 const Title = styled.h2`
   margin: 0;
   width: 286px;
-  height: 52px;
-  flex-shrink: 0;
-  border-radius: 10px 10px 0px 0px;
+  border-radius: 10px 10px 0 0;
   background: var(--green04, #1ef380);
   color: var(--wh01, var(--wh, #fff));
   text-align: center;
   font-family: Pretendard;
   font-size: 18px;
-  font-style: normal;
   font-weight: 700;
-  line-height: 100%;
-  letter-spacing: -0.5px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -242,12 +267,9 @@ const Title = styled.h2`
 const Message = styled.div`
   margin-top: 10px;
   color: #000;
-  text-align: center;
   font-family: Pretendard;
   font-size: 14px;
-  font-style: normal;
   font-weight: 500;
-  line-height: normal;
 `;
 
 const ModalButtons = styled.div`
@@ -255,7 +277,6 @@ const ModalButtons = styled.div`
   display: flex;
   justify-content: space-around;
   width: 183px;
-  height: 30px;
 `;
 
 const Button = styled.div`
@@ -265,11 +286,7 @@ const Button = styled.div`
   border: 1px solid var(--gray02, #f2f2f2);
   text-align: center;
   font-family: Pretendard;
-  font-size: 12px;
-  font-style: normal;
   font-weight: 700;
-  line-height: 20px;
-  letter-spacing: -0.5px;
   width: 150px;
   height: 25px;
   margin: 6px;
@@ -281,6 +298,4 @@ const Button = styled.div`
 
 const ScrapWrapper = styled.div`
   display: flex;
-  .scrapCount {
-  }
 `;
