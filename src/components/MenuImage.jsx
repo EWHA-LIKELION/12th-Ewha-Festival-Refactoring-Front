@@ -117,8 +117,8 @@ export default MenuImage;
 // 이하 스타일 컴포넌트는 동일
 
 const Wrapper = styled.div`
-  width: 170px;
-  height: 197px;
+  max-width: 170px;
+  max-height: 197px;
   flex-shrink: 0;
   border-radius: 20px;
   box-shadow: 0px 0px 9px 0px rgba(255, 255, 255, 0.25) inset;
