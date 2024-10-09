@@ -14,7 +14,7 @@ const BoothEditPage = () => {
 
   // 부스 관련 상태 관리
   const [fetchedBoothId, setFetchedBoothId] = useState(null);
-  const [boothImage, setBoothImage] = useState(임시부스이미지);
+  const [boothImage, setBoothImage] = useState(null);
   const [boothName, setBoothName] = useState("");
   const [operatingHours, setOperatingHours] = useState("");
   const [boothDescription, setBoothDescription] = useState("");
@@ -80,7 +80,7 @@ const BoothEditPage = () => {
 
         const noticeData = noticesResponse.data.notice;
         const noticesArray = Object.keys(noticeData).map((key) => ({
-          id: key,
+          id: noticeData[key].id,
           type: noticeData[key].notice_type,
           content: noticeData[key].content,
           createdAt: noticeData[key].created_at,
@@ -89,8 +89,6 @@ const BoothEditPage = () => {
         }));
 
         setNotices(noticesArray);
-
-        console.log("Fetched notices:", noticeData); // 여기서 공지사항 데이터 출력
       } catch (error) {
         if (error.response) {
           if (error.response.status === 401) {
@@ -116,14 +114,21 @@ const BoothEditPage = () => {
 
   const handleImageChange = async (event) => {
     const file = event.target.files[0];
+
     if (file) {
+      const validImageTypes = ["image/jpeg", "image/png", "image/gif"]; // 허용되는 이미지 타입
+      if (!validImageTypes.includes(file.type)) {
+        alert("유효한 이미지 파일을 업로드해야 합니다.");
+        return;
+      }
+
       const reader = new FileReader();
       reader.onloadend = async () => {
-        setBoothImage(reader.result);
+        setBoothImage(URL.createObjectURL(file)); // 선택한 파일의 URL로 미리보기 업데이트
 
         // 이미지 업로드를 위한 FormData 생성
         const formData = new FormData();
-        formData.append("thumbnail", file);
+        formData.append("thumbnail", file); // 파일 객체 추가
 
         try {
           const accessToken = localStorage.getItem("accessToken");
@@ -133,27 +138,36 @@ const BoothEditPage = () => {
             {
               headers: {
                 Authorization: `Bearer ${accessToken}`,
-                "Content-Type": "multipart/form-data",
+                // 'Content-Type': 'multipart/form-data' // 이 줄을 제거하세요.
               },
             }
           );
 
           if (response.status === 200) {
-            setBoothImage(response.data.data.thumbnail);
-            alert("이미지가 성공적으로 업데이트되었습니다.");
+            const updatedThumbnail = response.data.thumbnail || file.name; // 서버 응답에서 썸네일 URL을 가져오세요.
+            if (updatedThumbnail) {
+              setBoothImage(updatedThumbnail); // 서버에서 반환된 썸네일 업데이트
+              console.log("업데이트된 썸네일:", updatedThumbnail); // 업데이트된 썸네일 로그
+              alert("이미지가 성공적으로 업데이트되었습니다.");
+            } else {
+              alert("썸네일 업데이트에 실패했습니다.");
+            }
+            console.log(response.data.data.thumbnail);
           }
         } catch (error) {
           if (error.response) {
+            console.error("서버 오류:", error.response.data); // 서버 오류 로깅
             alert(
               error.response.data.message ||
                 "이미지 업데이트 중 오류가 발생했습니다."
             );
           } else {
+            console.error("네트워크 오류:", error); // 네트워크 오류 로깅
             alert("이미지 업데이트 중 오류가 발생했습니다.");
           }
         }
       };
-      reader.readAsDataURL(file);
+      reader.readAsDataURL(file); // 이미지 파일을 읽어서 즉시 미리보기
     }
   };
 
@@ -197,13 +211,11 @@ const BoothEditPage = () => {
         const notice = {
           id: response.data.id, // 서버에서 반환된 ID 사용
           content: newNoticeContent,
-          category: selectedNotice,
-          timestamp: new Date().toLocaleTimeString([], {
-            hour: "2-digit",
-            minute: "2-digit",
-          }),
+          type: selectedNotice,
+          createdAt: response.data.created_at, // 서버에서 반환된 created_at 사용
           borderColor: selectedNotice === "판매" ? "#9747ff" : "#00F16F",
         };
+        window.location.reload(); // 페이지 새로고침
         setNotices((prevNotices) => [...prevNotices, notice]);
       }
     } catch (error) {
@@ -232,12 +244,8 @@ const BoothEditPage = () => {
     const accessToken = localStorage.getItem("accessToken");
 
     try {
-      const numericInfoId = parseInt(infoId, 10); // infoId를 숫자로 변환
-      console.log(`Deleting notice with ID: ${numericInfoId + 1}`); // 변환된 값을 사용
       const response = await instance.delete(
-        `${
-          process.env.REACT_APP_SERVER_PORT
-        }/manages/${fetchedBoothId}/realtime_info/${numericInfoId + 1}/`, // 변환된 값에 1을 더함
+        `${process.env.REACT_APP_SERVER_PORT}/manages/${fetchedBoothId}/realtime_info/${infoId}/`,
         {
           headers: {
             Authorization: `Bearer ${accessToken}`,
@@ -252,7 +260,7 @@ const BoothEditPage = () => {
         );
       }
     } catch (error) {
-      console.error("Error deleting notice:", error); // 추가된 로그
+      console.error("Error deleting notice:", error);
       if (error.response) {
         alert(error.response.data.message);
       } else {
@@ -274,7 +282,9 @@ const BoothEditPage = () => {
       setLoading(true);
       const formattedDays = days
         .filter((day) => day.checked)
-        .map((day) => `${day.date} ${day.startTime} ~ ${day.endTime}`)
+        .map((day) => {
+          return `${day.date} ${day.startTime} ~ ${day.endTime}`;
+        })
         .filter((day) => day.includes("~"));
 
       const response = await instance.patch(
@@ -285,8 +295,10 @@ const BoothEditPage = () => {
           description: boothDescription,
           admin_contact: contact,
           is_opened: true, // 기본값 설정
-          days: formattedDays,
-          thumbnail: boothImage,
+          days: formattedDays, // 수정된 부분
+          thumbnail: boothImage.includes("/media/thumbnail/")
+            ? boothImage
+            : undefined, // 썸네일이 업데이트된 경우만 포함
         },
         {
           headers: {
@@ -296,6 +308,7 @@ const BoothEditPage = () => {
       );
 
       if (response.status === 200) {
+        console.log(response.data.data.days); // 저장된 운영 시간을 확인합니다.
         alert(response.data.message);
         navigate(`/booth-detail`, {
           state: { id: fetchedBoothId },
@@ -310,6 +323,18 @@ const BoothEditPage = () => {
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleCheckboxChange = (index) => {
+    const updatedDays = [...days];
+    updatedDays[index].checked = !updatedDays[index].checked;
+    setDays(updatedDays);
+  };
+
+  const handleDayInputChange = (index, field, value) => {
+    const updatedDays = [...days];
+    updatedDays[index][field] = value;
+    setDays(updatedDays);
   };
 
   return (
@@ -346,6 +371,44 @@ const BoothEditPage = () => {
           placeholder="부스 이름을 입력하세요"
         />
       </BoothNameWrapper>
+
+      {/* 시간 설정 부분 추가 */}
+      <BoothTimeWrapper>
+        <TitleFontStyle>공연 시간 설정</TitleFontStyle>
+        <div className="row_box">
+          {days.map((day, index) => (
+            <div className="row" key={index}>
+              <input
+                type="checkbox"
+                className="checkbox"
+                checked={day.checked}
+                onChange={() => handleCheckboxChange(index)}
+              />
+              <span className="txt">{day.date}</span>
+              <input
+                className="input"
+                style={{ width: "47px" }}
+                placeholder="예) 9:00"
+                value={day.startTime}
+                onChange={(e) =>
+                  handleDayInputChange(index, "startTime", e.target.value)
+                }
+              />
+              ~
+              <input
+                className="input"
+                style={{ width: "47px" }}
+                placeholder="예) 13:00"
+                value={day.endTime}
+                onChange={(e) =>
+                  handleDayInputChange(index, "endTime", e.target.value)
+                }
+              />
+            </div>
+          ))}
+        </div>
+      </BoothTimeWrapper>
+
       {/* 공지사항 부분 추가 */}
       <NoticeWrapper>
         <div className="noticetitle">
@@ -410,7 +473,7 @@ const BoothEditPage = () => {
                     className="selectedcatagory"
                     style={{ backgroundColor: `${notice.borderColor}` }}
                   >
-                    {notice.type} 공지
+                    {notice.type}
                   </div>
                   <div
                     className="delete"
@@ -419,8 +482,10 @@ const BoothEditPage = () => {
                     삭제
                   </div>
                 </div>
-                <div>{notice.content}</div>
-                <div>{new Date(notice.createdAt).toLocaleString()}</div>
+                <div className="notice">{notice.content}</div>
+                <div className="noticetime">
+                  {new Date(notice.createdAt).toLocaleString()}
+                </div>
               </Notice>
             ))
           ) : (
@@ -442,17 +507,7 @@ const BoothEditPage = () => {
         <MenuBox>
           {menuDetails.length > 0 ? (
             menuDetails.map((menu) => (
-              <MenuImageWrapper key={menu.id}>
-                <MenuImage
-                  className="menuImage"
-                  menu={menu}
-                  style={{
-                    width: "100%", // 부모 요소에 맞춰 크기 조정
-                    height: "100%", // 부모 요소에 맞춰 크기 조정
-                    flexShrink: 0, // Flexbox에서 크기 축소 방지
-                  }}
-                />
-              </MenuImageWrapper>
+              <MenuImage className="menuImage" menu={menu} key={menu.id} />
             ))
           ) : (
             <div>메뉴 정보가 없습니다.</div>
@@ -545,6 +600,31 @@ const BoothNameWrapper = styled.div`
   }
 `;
 
+const BoothTimeWrapper = styled.div`
+  margin-top: 20px;
+  .row_box {
+    display: flex;
+    flex-direction: column;
+  }
+  .row {
+    display: flex;
+    align-items: center;
+    margin-bottom: 10px;
+  }
+  .checkbox {
+    margin-right: 10px;
+  }
+  .txt {
+    margin-right: 10px;
+  }
+  .input {
+    margin: 0 5px;
+    padding: 5px;
+    border: 1px solid #e7e7e7;
+    border-radius: 5px;
+  }
+`;
+
 const NoticeWrapper = styled.div`
   width: 350px;
   img {
@@ -617,7 +697,7 @@ const NoticeBoxWrapper = styled.div`
 
 const Notice = styled.div`
   width: 322px;
-  height: auto;
+  height: 71px;
   padding: 11px 14px;
   border-radius: 15px;
   margin-top: 10px;
@@ -632,12 +712,32 @@ const Notice = styled.div`
     text-decoration: underline;
   }
   .selectedcatagory {
+    width: 56px;
+    height: 23px;
     border-radius: 5.385px;
-    padding: 3.5px 7.179px;
-    width: 40px;
     color: white;
     font-size: 10.769px;
     font-weight: 700;
+    text-align: center;
+    line-height: 23px;
+    margin-bottom: 15px;
+    align-self: flex-start; // 수정된 정렬 방식
+    margin-left: 10px;
+  }
+  .notice {
+    font-size: 12px;
+    font-weight: 500;
+    width: 322px;
+    margin-bottom: 15px;
+    margin-left: 10px;
+  }
+
+  .noticetime {
+    color: #8e8e8e;
+    font-size: 9.761px;
+    font-weight: 600;
+    width: 322px;
+    text-align: right;
   }
 `;
 
@@ -660,31 +760,12 @@ const MenuWrapper = styled.div`
 `;
 
 const MenuBox = styled.div`
+  width: 100%;
   display: grid;
-  grid-template-columns: repeat(2, 170px); // 2열로 고정
-  grid-auto-rows: 197px; // 각 행의 높이를 고정
-  place-items: center;
-
-  img {
-    cursor: pointer;
-  }
-
-  // 그리드 항목 스타일
-  > div {
-    width: 170px; // 고정된 너비
-    height: 197px; // 고정된 높이
-    display: flex; // 플렉스 박스를 사용하여 내부 요소를 정렬
-    align-items: center; // 수직 중앙 정렬
-    justify-content: center; // 수평 중앙 정렬
-    overflow: hidden; // 내용이 넘칠 경우 숨기기
-  }
-
-  // MenuImage 안의 이미지 크기를 꽉 차게 설정
-  img {
-    width: 100%; // 부모 요소에 맞춰 크기 조정
-    height: 100%; // 부모 요소에 맞춰 크기 조정
-    object-fit: cover; // 비율 유지하며 꽉 차게 설정
-  }
+  grid-template-columns: repeat(auto-fill, minmax(170px, 170px));
+  box-sizing: border-box;
+  grid-auto-rows: 197px;
+  gap: 7px;
 `;
 
 const BoothContact = styled.div`
@@ -721,12 +802,4 @@ const ErrorMessage = styled.div`
   color: red;
   margin-top: 10px;
   font-size: 14px;
-`;
-const MenuImageWrapper = styled.div`
-  width: 170px; // 고정된 너비
-  height: 197px; // 고정된 높이
-  display: flex; // 플렉스 박스를 사용하여 내부 요소를 정렬
-  align-items: center; // 수직 중앙 정렬
-  justify-content: center; // 수평 중앙 정렬
-  overflow: hidden; // 내용이 넘칠 경우 숨기기
 `;

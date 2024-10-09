@@ -1,3 +1,4 @@
+// BoothPage.js
 import { useNavigate } from "react-router-dom"; // useNavigate 훅 사용
 import React, { useState, useEffect, useRef } from "react";
 import styled from "styled-components";
@@ -163,9 +164,7 @@ const BoothPage = () => {
             <BoothItem
               key={booth.id}
               booth={booth}
-              onClick={() =>
-                navigate("/booth-detail", { state: { id: booth.id } })
-              } // 부스 아이디만 전달
+              // 부스 아이디를 클릭 시 처리
             />
           ))}
         </BoothList>

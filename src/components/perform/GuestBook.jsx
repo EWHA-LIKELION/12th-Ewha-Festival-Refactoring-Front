@@ -43,6 +43,7 @@ const Wrap = styled.div`
   flex-direction: column;
   margin-top: 16px;
   gap: 10px;
+  width: 80%;
 `;
 
 const CommentInput = ({ booth }) => {
@@ -195,6 +196,7 @@ const CommentContainer = styled.div`
   background: var(--wh, #fff);
   box-shadow: 0px 0px 9px 0px rgba(255, 255, 255, 0.25) inset;
   position: relative;
+  width: 320px;
   .top {
     width: 100%;
     display: flex;

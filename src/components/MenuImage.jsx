@@ -71,14 +71,17 @@ const MenuImage = ({ menu }) => {
           />
         )}
         {isBoothEdit ? null : (
-          <img
-            className="menuScrap"
-            src={isScraped ? scrapAfter : scrapBefore}
-            alt="Scrap"
-            onClick={clickScrap}
-          />
+          <div>
+            <img
+              className="menuScrap"
+              src={isScraped ? scrapAfter : scrapBefore}
+              alt="Scrap"
+              onClick={clickScrap}
+            />
+            <ScrapCount>{menu.scrap_count}</ScrapCount>
+          </div>
         )}
-        <ScrapCount>{menu.scrap_count}</ScrapCount>
+
         <MenuName>{menu.menu}</MenuName>
         <Price>{menu.price}원</Price>
       </BoothInfo>
