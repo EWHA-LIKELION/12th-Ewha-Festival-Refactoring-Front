@@ -243,7 +243,7 @@ const Container = styled.div``;
 
 const ItemContainer = styled.div`
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(170px, 170px));
+  grid-template-columns: repeat(2, 1fr);
 
   box-sizing: border-box;
   grid-auto-rows: 197px;

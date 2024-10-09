@@ -45,7 +45,7 @@ const TFMainPage = () => {
           <img
             src={TFManage}
             alt="축준위 부스 관리하기"
-            onClick={() => handleNavigate("/editTFBooth")}
+            onClick={() => handleNavigate("/booth-detail")}
           />
         </LinkBox>
       </MainBox>

@@ -27,6 +27,7 @@ import MadeByPage from "./pages/MadeByPage.jsx";
 import FestivalSchedulePage from "./pages/FestivalSchedule.jsx";
 import UserNoticeList from "./pages/TF/UserNoticeList.jsx";
 import UserNoticeDetail from "./pages/TF/UserNoticeDetail.jsx";
+import AddMenuPage from "./pages/BoothEdit/AddMenuPage.jsx";
 
 function App() {
   // 뷰포트 높이 계산
@@ -55,6 +56,7 @@ function App() {
           <Route path="/search" element={<SearchPage />} />
           <Route path="/booth-edit" element={<BoothEditPage />} />
           <Route path="/booth-detail" element={<BoothDetailPage />} />
+          <Route path="/booth-edit/addmenu" element={<AddMenuPage />} />
 
           {/* 공연 */}
           <Route path="/show" element={<ShowPage />} />

@@ -7,7 +7,7 @@ import closeIcon from "../images/closeIcon.svg"; // X 버튼 이미지 추가
 import searchIcon from "../images/search.svg";
 import instance from "../api/axios";
 
-const MainHeader = () => {
+const BarrierFreeHeader = () => {
   const [isModalOpen, setModalOpen] = useState(false);
   const [isClosing, setIsClosing] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
@@ -129,7 +129,7 @@ const MainHeader = () => {
   );
 };
 
-export default MainHeader;
+export default BarrierFreeHeader;
 
 const GlobalStyle = createGlobalStyle`
   :root{
@@ -148,6 +148,8 @@ const Container = styled.div`
   display: flex;
   justify-content: space-between;
   padding: 40px 20px 26px;
+  background: rgba(255, 255, 255, 0.4);
+  backdrop-filter: blur(2px);
   img {
     cursor: pointer;
   }

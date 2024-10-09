@@ -7,21 +7,23 @@ import BasicBooth from "../images/basicbooth.svg"; // 기본 부스 이미지 �
 import scrapBefore from "../images/BoothDetail/scrapbefore.svg";
 import scrapAfter from "../images/BoothDetail/scrapafter.svg";
 
-const BoothItem = ({ booth, onClick }) => {
-  const [scrapCount, setScrapCount] = useState(booth.scrap_count); // booth.scrap_count 값을 초기 상태로 사용
-  const [isscraped, setIsScraped] = useState(
-    booth.is_scraped !== undefined ? booth.is_scraped : true
-  );
+const BoothItem = ({ booth }) => {
+  const [scrapCount, setScrapCount] = useState(booth.scrap_count || 0); // booth.scrap_count 값을 초기 상태로 사용
+  const [isScraped, setIsScraped] = useState(booth.is_scraped || false);
+
+  //
+
   const navigate = useNavigate();
-  const [scrapImg, setScrapImg] = useState(false); // booth.scrap_count 값을 초기 상태로 사용
 
   // booth.scrap_count가 변경될 때마다 scrapCount 상태를 업데이트
   useEffect(() => {
-    setScrapCount(booth.scrap_count); // booth.scrap_count 값이 변경될 때 scrapCount를 업데이트
-    setIsScraped(booth.is_scraped);
-  }, [booth.scrap_count, booth.is_scraped]);
+    if (booth) {
+      setScrapCount(booth.scrap_count || 0); // booth가 유효할 때만 업데이트
+      setIsScraped(booth.is_scraped || false); // booth가 유효할 때만 업데이트
+    }
+  }, [booth]);
 
-  const clickScrap = async (e) => {
+  const clickScrap = async (e, isScraped) => {
     e.stopPropagation();
     const token = localStorage.getItem("accessToken");
 
@@ -30,110 +32,74 @@ const BoothItem = ({ booth, onClick }) => {
       navigate("/login");
       return;
     }
-
+    console.log(isScraped);
+    console.log("부스 정보:", booth);
+    console.log("Sending request for booth id: ", booth.id); // booth.id 로그로 확인
     try {
-      const config = {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      };
+      let response;
+      if (isScraped) {
+        response = await instance.delete(
+          `/booths/${booth.id}/scrap/`,
 
-      console.log("Sending request for booth id: ", booth.id); // booth.id 로그로 확인
+          {
+            headers: { Authorization: `Bearer ${token}` },
+          }
+        );
+        // 스크랩 삭제 후 상태 업데이트
+        setIsScraped(false);
+        console.log(response.data);
+        console.log(booth);
 
-      if (!booth.is_scraped) {
-        const response = await instance.post(
+        // 스크랩이 삭제되었으므로 false로 설정
+      } else {
+        response = await instance.post(
           `/booths/${booth.id}/scrap/`,
           {},
-          config
+          { headers: { Authorization: `Bearer ${token}` } }
         );
-        console.log("Response: ", response); // 응답 로그 확인
-      } else {
-        const response = await instance.delete(
-          `/booths/${booth.id}/scrap/`,
+        setIsScraped(true);
+        console.log(response.data);
+        console.log(booth);
 
-          config
-        );
-        console.log("Response: ", response); // 응답 로그 확인
-
-        if (response.data.message === "스크랩 삭제") {
-          console.log("Response: ", response);
-        } else {
-          alert(response.data.message);
-        }
+        // 스크랩 추가 후 상태 업데이트
+        // 스크랩이 추가되었으므로 true로 설정
       }
+
+      alert(response.data.message);
     } catch (error) {
       console.error("Error: ", error);
-      if (error.response.data === "이미 스크랩 하셨습니다.") {
-        const response = await instance.delete(`/booths/${booth.id}/scrap/`, {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        });
-        console.log("Response: ", response); // 응답 로그 확인
+      if (error.response) {
+        console.log(error.response.data.message);
+        const already = error.response.data.message;
+        if (already === "이미 스크랩 하셨습니다.") {
+          const response = await instance.delete(
+            `/booths/${booth.id}/scrap/`,
 
-        if (response.data.message === "스크랩 삭제") {
-          console.log("Response: ", response);
-        } else {
-          alert(response.data.message);
+            {
+              headers: { Authorization: `Bearer ${token}` },
+            }
+          );
+          console.log(response.data.message);
+
+          // 스크랩 삭제 후 상태 업데이트
+
+          setIsScraped(false);
+          console.log(booth);
         }
-      } else if (error.response.data === "취소할 스크랩이 없습니다.") {
-        console.log(
-          "Error response data:취소할 스크랩이 없습니다.: ",
-          error.response.data
-        );
-        const response = await instance.post(`/booths/${booth.id}/scrap/`, {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        });
-        console.log("Response: ", response);
       } else {
-        console.log("Error response data 이것 ", error.response.data);
-        const response = await instance.post(`/booths/${booth.id}/scrap/`, {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        });
-        console.log("Response: ", response);
+        alert("스크랩 처리 중 오류가 발생했습니다.");
       }
-      alert("스크랩 처리 중 오류가 발생했습니다.");
     }
   };
 
-  const onClickScrap = () => {
-    setScrapImg((scrapAfter) => scrapBefore);
-  };
-
-  const PlusScrap = async (e) => {
-    const token = localStorage.getItem("accessToken");
-
-    try {
-      const response = await instance.post(`/booths/${booth.id}/scrap/`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
-      console.log("Response: ", response);
-      onClickScrap();
-      e.preventDefault();
-    } catch (error) {}
-  };
-
-  const DeleteScrap = async (e) => {
-    const token = localStorage.getItem("accessToken");
-
-    const response = await instance.delete(`/booths/${booth.id}/scrap/`, {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    });
-    console.log("Response: ", response);
+  const handleBoothClick = () => {
+    navigate(`/booth-detail/`); // 부스 상세 페이지로 이동
   };
 
   return (
     <Booth
       isOpened={booth.is_opened}
-      onClick={onClick}
+      onClick={handleBoothClick} // 부스 클릭 핸들러 추가
       style={{
         backgroundImage: `url(${
           booth.thumbnail
@@ -162,8 +128,6 @@ const BoothItem = ({ booth, onClick }) => {
 export default BoothItem;
 
 const Booth = styled.div`
-  max-width: 170px;
-  max-height: 197px;
   background: url(<path-to-image>) lightgray 50% / cover no-repeat;
   background-size: cover;
   background-position: center;

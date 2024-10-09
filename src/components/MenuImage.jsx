@@ -1,45 +1,52 @@
+// MenuImage.js
+// MenuImage.js
 import React, { useState } from "react";
-import { useLocation } from "react-router-dom";
 import styled from "styled-components";
-import axios from "axios"; // Axios 추가
+import axios from "axios";
+import { useLocation, useNavigate } from "react-router-dom"; // useNavigate 추가
 import BasicBooth from "../images/basicbooth.svg";
 import scrapBefore from "../images/BoothDetail/scrapbefore.svg";
 import scrapAfter from "../images/BoothDetail/scrapafter.svg";
 import trash from "../images/BoothEdit/trash.svg";
 
 const MenuImage = ({ menu }) => {
-  const [isscraped, setisccraped] = useState(false);
+  const [isScraped, setIsScraped] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const location = useLocation();
+  const navigate = useNavigate(); // useNavigate 초기화
 
   const clickScrap = () => {
-    setisccraped(!isscraped);
+    setIsScraped((prev) => !prev);
   };
 
   const handleTrashClick = () => {
-    setIsModalOpen(true); // Open the modal
+    setIsModalOpen(true);
   };
 
   const handleConfirmDelete = async () => {
     const accessToken = localStorage.getItem("accessToken");
     try {
-      // API 호출하여 메뉴 삭제
       const response = await axios.delete(
-        `/manages/${menu.pk}/menus/${menu.menu_pk}/`,
+        `${process.env.REACT_APP_SERVER_PORT}/manages/${menu.booth}/menus/${menu.id}/`,
         {
           headers: {
-            Authorization: `Bearer ${accessToken}`, // 적절한 토큰을 포함
+            Authorization: `Bearer ${accessToken}`,
           },
         }
       );
-      console.log(response.data.message); // 성공 메시지 출력
-      setIsModalOpen(false); // Close the modal after confirming
+      console.log(response.data.message);
+      setIsModalOpen(false);
+      window.location.reload(); // 페이지를 강제로 새로 고침navigate("/booth-edit"); // 현재 경로를 다시 로드
     } catch (error) {
       console.error(error.response.data.detail || "메뉴 삭제에 실패했습니다.");
     }
   };
 
-  const isEditRoute = location.pathname.includes("/booth-edit");
+  const isBoothEdit = location.pathname.includes("/booth-edit");
+
+  const handleImageClick = () => {
+    navigate(`/booth-edit/addmenu`, { state: { menu } }); // 메뉴 데이터 전달
+  };
 
   return (
     <Wrapper>
@@ -51,31 +58,30 @@ const MenuImage = ({ menu }) => {
             : BasicBooth
         }
         alt="Menu"
+        onClick={handleImageClick} // 이미지 클릭 시 이동
       />
-
-      <Top>
-        <div className="menubegan">{menu.is_vegan}</div>
-        {isEditRoute ? (
+      <BoothInfo>
+        <MenuVegan>{menu.is_vegan}</MenuVegan>
+        {isBoothEdit && (
           <img
-            className="menuscrap"
+            className="menuTrash"
             src={trash}
             alt="Trash"
             onClick={handleTrashClick}
           />
-        ) : (
+        )}
+        {isBoothEdit ? null : (
           <img
-            className="menuscrap"
-            src={isscraped ? scrapAfter : scrapBefore}
+            className="menuScrap"
+            src={isScraped ? scrapAfter : scrapBefore}
             alt="Scrap"
             onClick={clickScrap}
           />
         )}
-      </Top>
-      <Bottom>
-        <div className="menuName">{menu.menu}</div>
-        <div className="price">{menu.price}원</div>
-      </Bottom>
-
+        <ScrapCount>{menu.scrap_count}</ScrapCount>
+        <MenuName>{menu.menu}</MenuName>
+        <Price>{menu.price}원</Price>
+      </BoothInfo>
       {isModalOpen && (
         <ModalOverlay>
           <ModalContent>
@@ -105,14 +111,20 @@ const MenuImage = ({ menu }) => {
 
 export default MenuImage;
 
+// 이하 스타일 컴포넌트는 동일
+
 const Wrapper = styled.div`
   max-width: 170px;
   max-height: 197px;
-  flex-shrink: 0;
   border-radius: 20px;
   box-shadow: 0px 0px 9px 0px rgba(255, 255, 255, 0.25) inset;
   overflow: hidden;
   position: relative;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  padding: 17px;
 
   .menuImage {
     object-fit: cover;
@@ -121,53 +133,87 @@ const Wrapper = styled.div`
     left: 0;
     width: 100%;
     height: 100%;
+    border-radius: 20px;
+  }
+
+  &::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(
+      180deg,
+      rgba(0, 0, 0, 0.4) 0%,
+      rgba(0, 0, 0, 0) 161.62%
+    );
+    border-radius: 20px;
+    z-index: 2;
+  }
+
+  & > * {
+    z-index: 3;
   }
 `;
 
-const Top = styled.div`
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
+const ScrapCount = styled.div`
+  color: var(--green_01, #00f16f);
+  text-shadow: 0px 0px 4px rgba(0, 0, 0, 0.25);
+  font-size: 12px;
+  font-style: normal;
+  font-weight: 400;
+  line-height: 20px; /* 166.667% */
+  letter-spacing: -0.5px;
   position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  padding: 8px;
-  .menubegan {
-    width: 46px;
-    height: 20px;
-    border-radius: 10px;
-    background: rgba(0, 241, 111, 0.4);
-    color: white;
-    font-size: 11px;
-    font-style: normal;
-    font-weight: 600;
-    text-align: center;
-    line-height: 20px;
+  top: 2.8rem;
+  right: 1.6rem;
+  text-align: center;
+`;
+const BoothInfo = styled.div`
+  img {
+    position: absolute;
+    top: 1.06rem;
+    right: 0.87rem;
+    cursor: pointer;
+    z-index: 3;
   }
-  .menuscrap {
+  .menuScrap,
+  .menuTrash {
     cursor: pointer;
     z-index: 100;
   }
 `;
 
-const Bottom = styled.div`
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  padding: 8px;
+const MenuVegan = styled.div`
+  width: 46px;
+  height: 20px;
+  border-radius: 10px;
+  background: rgba(0, 241, 111, 0.4);
   color: white;
-  .menuName {
-    font-size: 20px;
-    font-style: normal;
-    font-weight: 700;
-  }
-  .price {
-    font-size: 12px;
-    font-style: normal;
-    font-weight: 500;
-  }
+  font-size: 11px;
+  font-weight: 600;
+  text-align: center;
+  line-height: 20px;
+  position: absolute;
+  top: 15px;
+`;
+const MenuName = styled.div`
+  color: var(--wh01, var(--wh, #fff));
+  font-family: Pretendard;
+  font-size: 20px;
+  font-weight: 700;
+  line-height: 20px;
+  letter-spacing: -0.3px;
+`;
+
+const Price = styled.div`
+  color: var(--wh01, var(--wh, #fff));
+  font-family: Pretendard;
+  font-size: 12px;
+  font-weight: 500;
+  line-height: 20px;
+  letter-spacing: -0.5px;
 `;
 
 const ModalOverlay = styled.div`
@@ -189,39 +235,30 @@ const ModalContent = styled.div`
   text-align: center;
   width: 286px;
   height: 151px;
-  flex-shrink: 0;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: space-between;
   padding-bottom: 20px;
+
   p {
     color: #928d8d;
-    text-align: center;
-    font-family: Pretendard;
     font-size: 10px;
-    font-style: normal;
     font-weight: 400;
-    line-height: normal;
-    margin: 6px 0 6px 0;
+    margin: 6px 0;
   }
 `;
 
 const Title = styled.h2`
   margin: 0;
   width: 286px;
-  height: 52px;
-  flex-shrink: 0;
-  border-radius: 10px 10px 0px 0px;
+  border-radius: 10px 10px 0 0;
   background: var(--green04, #1ef380);
   color: var(--wh01, var(--wh, #fff));
   text-align: center;
   font-family: Pretendard;
   font-size: 18px;
-  font-style: normal;
   font-weight: 700;
-  line-height: 100%;
-  letter-spacing: -0.5px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -230,12 +267,9 @@ const Title = styled.h2`
 const Message = styled.div`
   margin-top: 10px;
   color: #000;
-  text-align: center;
   font-family: Pretendard;
   font-size: 14px;
-  font-style: normal;
   font-weight: 500;
-  line-height: normal;
 `;
 
 const ModalButtons = styled.div`
@@ -243,7 +277,6 @@ const ModalButtons = styled.div`
   display: flex;
   justify-content: space-around;
   width: 183px;
-  height: 30px;
 `;
 
 const Button = styled.div`
@@ -253,11 +286,7 @@ const Button = styled.div`
   border: 1px solid var(--gray02, #f2f2f2);
   text-align: center;
   font-family: Pretendard;
-  font-size: 12px;
-  font-style: normal;
   font-weight: 700;
-  line-height: 20px;
-  letter-spacing: -0.5px;
   width: 150px;
   height: 25px;
   margin: 6px;
@@ -265,4 +294,8 @@ const Button = styled.div`
   &:hover {
     background: ${({ confirm }) => (confirm ? "#45a049" : "#e53935")};
   }
+`;
+
+const ScrapWrapper = styled.div`
+  display: flex;
 `;
