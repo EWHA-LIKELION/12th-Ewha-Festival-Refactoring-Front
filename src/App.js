@@ -5,7 +5,7 @@ import GlobalStyle from "./style/GlobalStyle";
 import "./style/normalize.css";
 
 import BoothPage from "./pages/BoothPage.jsx";
-import DetailPage from "./pages/performPages/DetailViewPage.jsx";
+import AdminDetailPage from "./pages/performPages/AdminDetailPage.jsx";
 import UserDetailPage from "./pages/performPages/UserDetailViewPage.jsx";
 import EditViewPage from "./pages/performPages/EditViewPage.jsx";
 import LoginPage from "./pages/LoginPage.jsx";
@@ -68,8 +68,9 @@ function App() {
           {/* 공연 */}
           <Route path="/show" element={<ShowPage />} />
           <Route path="/detail/admin/edit" element={<EditViewPage />} />
-          <Route path="/detail" element={<DetailPage />} />
-          <Route path="/detail/user" element={<UserDetailPage />} />
+          <Route path="/show-detail" element={<UserDetailPage />} />
+          <Route path="/detail/admin" element={<AdminDetailPage />} />
+
 
           {/* 공지 */}
           <Route path="/notice-list" element={<NoticeListPage />} />

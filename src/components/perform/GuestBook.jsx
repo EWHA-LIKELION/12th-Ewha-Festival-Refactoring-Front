@@ -3,13 +3,15 @@ import styled from "styled-components";
 import arrowUp from "../../images/arrow-up.svg";
 import instance from "../../api/axios";
 
-export default function GuestBook({ booth }) {
+export default function GuestBook({ boothId }) {
+  const [comments, setComments] = useState([]);
+
   useEffect(() => {
     const fetchData = async () => {
       try {
         const token = localStorage.getItem("accessToken");
         const response = await instance.get(
-          `${process.env.REACT_APP_SERVER_PORT}/shows/${booth.id}/guestbook`,
+          `${process.env.REACT_APP_SERVER_PORT}/shows/${boothId}/guestbook`,
           {
             headers: {
               Authorization: `Bearer ${token}`,
@@ -17,12 +19,13 @@ export default function GuestBook({ booth }) {
           }
         );
         console.log(response.data);
+        setComments(response.data.data);
       } catch (error) {
         console.error("데이터 가져오기 실패:", error);
       }
     };
     fetchData();
-  }, [booth?.id]);
+  }, [boothId]);
 
   const users = [
     { name: "", isAdmin: true },
@@ -31,10 +34,13 @@ export default function GuestBook({ booth }) {
   return (
     <Wrap>
       {/* map으로 수정하기! */}
-      <Comment user={users[0]} booth={booth} />
-      <Comment user={users[1]} booth={booth} />
-      <Comment user={users[1]} booth={booth} />
-      <CommentInput user={users[0]} booth={booth} />
+       {comments.map((comment) => (
+        <Comment user={comment.user} boothId={boothId} />
+      ))} 
+      {/*<Comment user={users[0]} boothId={boothId} />
+      <Comment user={users[1]} boothId={boothId} />
+      <Comment user={users[1]} boothId={boothId} />
+      <CommentInput user={users[0]} boothId={boothId} />*/}
     </Wrap>
   );
 }
@@ -43,10 +49,9 @@ const Wrap = styled.div`
   flex-direction: column;
   margin-top: 16px;
   gap: 10px;
-  width: 80%;
 `;
 
-const CommentInput = ({ booth }) => {
+const CommentInput = ({ boothId }) => {
   const [comment, setComment] = useState("");
 
   const handleSubmit = () => {
@@ -66,9 +71,9 @@ const CommentInput = ({ booth }) => {
     try {
       const token = localStorage.getItem("accessToken");
       const response = await instance.post(
-        `${process.env.REACT_APP_SERVER_PORT}/shows/${booth.id}/guestbook`,
+        `${process.env.REACT_APP_SERVER_PORT}/shows/${boothId}/guestbook`,
         {
-          comment,
+          content: comment,
         },
         {
           headers: {
@@ -196,7 +201,6 @@ const CommentContainer = styled.div`
   background: var(--wh, #fff);
   box-shadow: 0px 0px 9px 0px rgba(255, 255, 255, 0.25) inset;
   position: relative;
-  width: 320px;
   .top {
     width: 100%;
     display: flex;

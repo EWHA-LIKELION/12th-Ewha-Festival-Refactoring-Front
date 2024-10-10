@@ -19,6 +19,34 @@ const SearchPage = () => {
   ); // 검색어 상태 초기화
 
   useEffect(() => {
+    const fetchData = async () => {
+      const token = localStorage.getItem("accessToken");
+
+      try {
+        const headers = token ? { Authorization: `Bearer ${token}` } : {};
+        const response = await instance.get(
+          `${process.env.REACT_APP_SERVER_PORT}/main/search`,
+          {
+            params: {
+              q: searchTerm,
+            },
+            headers: headers, // 로그인 시 헤더에 토큰 추가
+          }
+        );
+
+        setBooths(response.data.booths);
+        setNotices(response.data.notices);
+      } catch (error) {
+        console.error("데이터 가져오기 중 오류:", error);
+        setBooths([]);
+        setNotices([]);
+      }
+    };
+
+    fetchData();
+  }, [searchTerm]);
+
+  useEffect(() => {
     // 검색 결과가 전달되면 상태에 저장
     if (location.state && location.state.booths) {
       setBooths(location.state.booths);
@@ -79,6 +107,40 @@ const SearchPage = () => {
     } else if (["밴드", "댄스"].includes(booth.category)) {
       // 공연일 경우
       navigate("/show-detail", { state: { id: booth.id } });
+    }
+  };
+
+  // BoothItem에서 스크랩을 클릭할 때 처리
+  const handleScrap = async (booth) => {
+    try {
+      const token = localStorage.getItem("accessToken");
+      if (!token) {
+        alert("로그인을 해야 스크랩이 가능해요.");
+        navigate("/login");
+        return;
+      }
+
+      const headers = { Authorization: `Bearer ${token}` };
+
+      if (booth.is_scraped) {
+        // 스크랩 취소 요청
+        await instance.delete(`/booths/${booth.id}/scrap/`, { headers });
+        setBooths((prevBooths) =>
+          prevBooths.map((item) =>
+            item.id === booth.id ? { ...item, is_scraped: false } : item
+          )
+        );
+      } else {
+        // 스크랩 요청
+        await instance.post(`/booths/${booth.id}/scrap/`, {}, { headers });
+        setBooths((prevBooths) =>
+          prevBooths.map((item) =>
+            item.id === booth.id ? { ...item, is_scraped: true } : item
+          )
+        );
+      }
+    } catch (error) {
+      console.error("스크랩 처리 중 오류가 발생했습니다.", error);
     }
   };
 
@@ -162,6 +224,7 @@ const SearchPage = () => {
                   key={booth.id}
                   booth={booth}
                   onClick={() => handleBoothItemClick(booth)} // 클릭 시 페이지 이동 함수 호출
+                  onScrap={() => handleScrap(booth)} // 스크랩 상태 업데이트
                 />
               ))}
             </BoothList>

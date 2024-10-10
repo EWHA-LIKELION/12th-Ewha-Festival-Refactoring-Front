@@ -1,4 +1,4 @@
-import React, { useCallback, useState } from "react";
+import React, { useCallback, useLayoutEffect, useState } from "react";
 import styled from "styled-components";
 import arrowLeft from "../../images/arrowLeft.svg";
 import checked from "../../images/checked.svg";
@@ -7,18 +7,28 @@ import unChecked from "../../images/unChecked.svg";
 import ICO_PLUS_BLACK from "../../images/ico/ico_plus_black.svg";
 import { BackButton, HeaderNav, Logo } from "./common";
 import NoticeForm from "./NoticeForm";
+import DeleteModal from "./DeleteModal"; // 모달 임포트
 import instance from "../../api/axios";
+import { useNavigate } from "react-router-dom";
 
-export default function EditView({ booth }) {
+export default function EditView({ boothId }) {
   const noticeType = {
     notice_type: "운영공지",
     content: "",
-    booth: booth + 1,
+    booth: 0,
     created_at: "",
   };
+
   const [image, setImage] = useState(mainImage);
-  const [activeButton, setActiveButton] = useState("운영 중"); // 기본 선택된 버튼
-  const [noticeList, setNoticeList] = useState([noticeType]);
+  const [activeButton, setActiveButton] = useState("운영 중");
+  const [noticeList, setNoticeList] = useState([]);
+  const [performanceName, setPerformanceName] = useState("");
+  const [operationTimes, setOperationTimes] = useState([]);
+  const [adminContact, setAdminContact] = useState("");
+  const [description, setDescription] = useState("");
+  const [isModalOpen, setIsModalOpen] = useState(false); // 모달 상태 추가
+  const [selectedNoticeId, setSelectedNoticeId] = useState(null); // 선택된 공지 ID 저장
+  const navigate = useNavigate();
 
   const handleImageChange = (event) => {
     const file = event.target.files[0];
@@ -35,18 +45,23 @@ export default function EditView({ booth }) {
     setActiveButton(status);
   };
 
-  const deleteNoticeForm = (booth) => {
-    if (noticeList.length === 1) return;
-    // 공지사항 삭제 API 호출 후 목록 조회,,? 작성하던 내용 날라감,,?
-    console.log("공지 삭제하기");
-    deleteNotice();
+  const confirmDelete = () => {
+    if (selectedNoticeId) {
+      deleteNotice(selectedNoticeId); // 모달에서 "예"를 클릭했을 때 삭제 실행
+    }
+    setIsModalOpen(false); // 모달 닫기
   };
 
-  const deleteNotice = async () => {
+  const openDeleteModal = (boothInfoId) => {
+    setSelectedNoticeId(boothInfoId); // 삭제할 공지 ID 설정
+    setIsModalOpen(true); // 모달 열기
+  };
+
+  const deleteNotice = async (boothInfoId) => {
     try {
       const token = localStorage.getItem("accessToken");
       const response = await instance.delete(
-        `${process.env.REACT_APP_SERVER_PORT}/manages/${booth.id}/realtime_info/${booth.info_id}`,
+        `${process.env.REACT_APP_SERVER_PORT}/manages/${boothId}/realtime_info/${boothInfoId}`,
         {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -54,36 +69,49 @@ export default function EditView({ booth }) {
         }
       );
       console.log(response.data);
+      if (response.status === 200) {
+        console.log("공지 삭제 성공");
+        requestNoticeList(); // 공지 목록 재조회
+      }
     } catch (error) {
       console.error("공지 삭제 실패:", error);
     }
   };
 
   const addNoticeForm = useCallback(() => {
-    console.log("공지 추가하기");
-
-    const booth = noticeList.reduce((acc, cur) => Math.max(acc, cur.booth), 0);
-
-    setNoticeList((prev) => [...prev, noticeType]);
+    if (noticeList.length && !noticeList[0].created_at) return;
+    setNoticeList((prev) => [noticeType, ...prev]);
   }, [noticeList]);
 
-  const handleNoticeContent = (index, content) => {
+  const updateNoticeContent = (index, content) => {
     setNoticeList((prev) => {
-      prev[index - 1].content = content;
+      prev[!index ? index : index - 1].content = content;
       return [...prev];
     });
   };
 
-  const handleSubmit = () => {
+  const handleSubmit = useCallback(() => {
     console.log("공지 제출하기");
-    postNotice();
-  };
+    if (!noticeList.length) {
+      console.log('공지 추가 or 공지 없이 저장 가능 -> 기획 확인');
+      return;
+    }
 
-  const postNotice = async () => {
+    const param = {
+      "notice_type": noticeList[0].notice_type,
+      "content": noticeList[0].content,
+    };
+
+    postNotice(param);
+    updateBoothDetails(); // 부스 정보 업데이트 호출
+  }, [noticeList, performanceName, adminContact, description, activeButton, operationTimes]);
+
+  const postNotice = async (param) => {
     try {
       const token = localStorage.getItem("accessToken");
       const response = await instance.post(
-        `${process.env.REACT_APP_SERVER_PORT}/manages/${booth.id}/realtime_info`,
+        `${process.env.REACT_APP_SERVER_PORT}/manages/${boothId}/realtime_info`,
+        param,
         {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -96,40 +124,87 @@ export default function EditView({ booth }) {
     }
   };
 
-  /**
-   {
-     "count": {
-     "notice_count": 3
-   },
-     "notice": {
-       "1": {
-         "notice_type": "판매공지",
-         "content": "dasdf",
-         "booth": 1,
-         "created_at": "2024-09-26T06:33:41.837058Z"
-       },
-       "2": {
-         "notice_type": "운영공지",
-         "content": "adf",
-         "booth": 1,
-         "created_at": "2024-09-26T06:33:48.225083Z"
-       },
-       "3": {
-         "notice_type": "운영공지",
-         "content": "안녕하세요",
-         "booth": 1,
-         "created_at": "2024-09-30T09:39:15.914780Z"
-       }
-     }
-   }
-  */
+  const updateBoothDetails = async () => {
+    const isOpened = activeButton === "운영 중";
+    try {
+      const token = localStorage.getItem("accessToken");
+      const response = await instance.patch(
+        `${process.env.REACT_APP_SERVER_PORT}/manages/${boothId}/`,
+        {
+          name: performanceName,
+          description: description,
+          admin_contact: adminContact,
+          is_opened: isOpened,
+          days: operationTimes,
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+      console.log("부스 수정 성공:", response.data);
+    } catch (error) {
+      console.error("부스 수정 실패:", error);
+    }
+  };
 
-  // const requestNoticeList = () => {}
+  const requestNoticeList = async () => {
+    const tempNoticeList = {
+      count: {
+        notice_count: 3,
+      },
+      notice: {
+        "1": {
+          notice_type: "판매공지",
+          content: "aaaa",
+          booth: 1,
+          created_at: "2024-09-26T06:33:41.837058Z",
+        },
+        "2": {
+          notice_type: "운영공지",
+          content: "bbbb",
+          booth: 2,
+          created_at: "2024-09-26T06:33:48.225083Z",
+        },
+        "3": {
+          notice_type: "운영공지",
+          content: "안녕하세요",
+          booth: 3,
+          created_at: "2024-09-30T09:39:15.914780Z",
+        },
+      },
+    };
+
+    try {
+      const token = localStorage.getItem("accessToken");
+      const response = await instance.get(
+        `${process.env.REACT_APP_SERVER_PORT}/manages/${boothId}/realtime_info`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+      console.log(response.data);
+      if (response.data.count.notice_count) {
+        setNoticeList(Object.values(response.data.notice)); // 기존 포맷
+      } else {
+        setNoticeList(Object.values(tempNoticeList.notice)); // 테스트용
+      }
+    } catch (error) {
+      console.error("공지 목록 조회 실패:", error);
+    }
+  };
+
+  useLayoutEffect(() => {
+    requestNoticeList();
+  }, []);
 
   return (
     <Wrap>
       <HeaderNav>
-        <BackButton>
+        <BackButton onClick={() => navigate("/detail/admin/", { state: { id: boothId } })}>
           <img src={arrowLeft} alt="back" />
         </BackButton>
         <Logo />
@@ -138,9 +213,7 @@ export default function EditView({ booth }) {
       <LabelTitle style={{ marginTop: "16px" }}>대표 사진</LabelTitle>
       <ImageWrap>
         <img src={image} alt="공연" />
-        <ChangeText
-          onClick={() => document.getElementById("fileInput").click()}
-        >
+        <ChangeText onClick={() => document.getElementById("fileInput").click()}>
           사진 교체하기
         </ChangeText>
         <input
@@ -151,28 +224,34 @@ export default function EditView({ booth }) {
           onChange={handleImageChange}
         />
       </ImageWrap>
-      <LabelTitle style={{ marginTop: "25px" }}>공연 이름</LabelTitle>
-      <input className="input" placeholder="공연명을 입력해주세요(최대 14자)" />
 
-      <div
-        style={{
-          position: "relative",
-          marginTop: "35px",
-        }}
-      >
+      {/* 공연 이름 입력 */}
+      <LabelTitle style={{ marginTop: "25px" }}>공연 이름</LabelTitle>
+      <input
+        className="input"
+        placeholder="공연명을 입력해주세요(최대 14자)"
+        value={performanceName}
+        onChange={(e) => setPerformanceName(e.target.value)}
+      />
+
+      <div style={{ position: "relative", marginTop: "35px" }}>
         <LabelTitle>실시간 공지사항</LabelTitle>
         <button className="btn4" onClick={addNoticeForm}>
           <img src={ICO_PLUS_BLACK} alt="" />
           <span>공지 추가하기</span>
         </button>
       </div>
+
       <div
+        className="notice-list"
         style={{
           display: "flex",
           flexDirection: "column",
           gap: "10px",
-          justifyContent: "center",
-          alignItems: "center",
+          height: "auto",
+          maxHeight: "260px",
+          overflowY: "auto",
+          overflowX: "hidden",
         }}
       >
         {noticeList.map((item, index) => (
@@ -182,101 +261,42 @@ export default function EditView({ booth }) {
             content={item.content}
             booth={item.booth}
             createdAt={item.created_at}
-            onDelete={deleteNoticeForm}
-            onChange={(index, content) => handleNoticeContent(index, content)}
+            onDelete={() => openDeleteModal(item.booth)} // 삭제 버튼 클릭 시 모달 열기
+            onChange={(index, content) => updateNoticeContent(index, content)}
           />
         ))}
       </div>
 
+      {/* 공연 운영시간 입력 */}
       <LabelTitle style={{ marginTop: "35px" }}>공연 운영시간</LabelTitle>
       <div className="row_box">
-        <div className="row">
-          <input type="checkbox" className="checkbox" />
-          <span className="txt">10일 수요일</span>
-          <input
-            className="input"
-            style={{ width: "47px" }}
-            placeholder="예)9:00"
-          />
-          ~
-          <input
-            className="input"
-            style={{ width: "47px" }}
-            placeholder="예)13:00"
-          />
-        </div>
-        <div className="row">
-          <input type="checkbox" className="checkbox" defaultChecked={true} />
-          <span className="txt">11일 목요일</span>
-          <input
-            className="input"
-            style={{ width: "47px" }}
-            placeholder="예)9:00"
-          />
-          ~
-          <input
-            className="input"
-            style={{ width: "47px" }}
-            placeholder="예)13:00"
-          />
-        </div>
-        <div className="row">
-          <input type="checkbox" className="checkbox" defaultChecked={true} />
-          <span className="txt">12일 금요일</span>
-          <input
-            className="input"
-            style={{ width: "47px" }}
-            placeholder="예)9:00"
-          />
-          ~
-          <input
-            className="input"
-            style={{ width: "47px" }}
-            placeholder="예)13:00"
-          />
-        </div>
+        {/* 운영시간 추가 로직 */}
       </div>
-
-      <LabelTitle style={{ marginTop: "69px" }}>공연 소개글</LabelTitle>
-      <textarea
-        rows={5}
-        className="input"
-        placeholder="공연에 대해 알리는 소개글을 작성해주세요(최대 100자)"
-      />
-
-      <LabelTitle style={{ marginTop: "69px" }}>공연 운영진 연락처</LabelTitle>
-      <textarea
-        rows={5}
-        className="input"
-        placeholder="문의를 위한 공연 운영진 연락처를 남겨주세요
-							예) 카카오톡 오픈채팅 링크"
-      />
 
       <LabelTitle style={{ marginTop: "55px" }}>운영여부</LabelTitle>
       <div className="row">
-        <button
-          className={` ${activeButton === "운영 중" ? "btn1" : "btn2"}`}
-          onClick={() => handleButtonClick("운영 중")}
-        >
+        <button className={` ${activeButton === "운영 중" ? "btn1" : "btn2"}`} onClick={() => handleButtonClick("운영 중")}>
           운영 중
         </button>
-        <button
-          className={` ${activeButton === "운영 종료" ? "btn1" : "btn2"}`}
-          onClick={() => handleButtonClick("운영 종료")}
-        >
+        <button className={` ${activeButton === "운영 종료" ? "btn1" : "btn2"}`} onClick={() => handleButtonClick("운영 종료")}>
           운영 종료
         </button>
       </div>
 
+      {/* 제출 버튼 */}
       <LabelTitle style={{ marginTop: "121px" }} className="blind">
         submit
       </LabelTitle>
       <button className="btn3" onClick={handleSubmit}>
         작성 완료
       </button>
+
+      {/* 모달창 */}
+      {isModalOpen && <DeleteModal setModal={setIsModalOpen} confirmDelete={confirmDelete} />}
     </Wrap>
   );
 }
+
 
 const Wrap = styled.div`
   button {
@@ -423,6 +443,19 @@ const Wrap = styled.div`
     align-items: center;
     gap: 2px;
   }
+
+  .notice-list::-webkit-scrollbar {
+    width: 2px;
+  }
+  
+  .notice-list::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  
+  .notice-list::-webkit-scrollbar-thumb {
+    background: #BBBBBB;
+    background-clip: padding-box;
+  }
 `;
 
 const ImageWrap = styled.div`
@@ -451,7 +484,6 @@ const ChangeText = styled.div`
   right: 0;
   height: 54px;
   display: flex;
-  height: 54px;
   justify-content: center;
   align-items: center;
   gap: 10px;
@@ -477,3 +509,4 @@ const LabelTitle = styled.h3`
   letter-spacing: -0.5px;
   margin-bottom: 8px;
 `;
+

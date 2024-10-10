@@ -42,12 +42,16 @@ const BoothPage = () => {
     const fetchBoothData = async () => {
       try {
         const token = localStorage.getItem("accessToken");
+
+        const headers = token
+          ? { Authorization: `Bearer ${token}` } // 토큰이 있을 때만 Authorization 헤더 추가
+          : {};
+
         const response = await instance.get("/booths/main/", {
-          headers: { Authorization: `Bearer ${token}` },
+          headers,
         });
         const data = response.data.data;
         console.log(data); // 응답 데이터를 콘솔에 출력
-        console.log(typeof data[0].is_scraped); // 첫 번째 부스의 is_scraped 타입 확인
         setBoothData(data); // 데이터를 상태로 설정
       } catch (error) {
         console.error("Error fetching booth data:", error);

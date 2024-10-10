@@ -11,6 +11,11 @@ import Making from "../components/Making";
 //images
 import 김가영 from "../images/Makers/김가영.svg";
 import 김지형 from "../images/Makers/김지형.svg";
+import 진규빈 from "../images/Makers/진규빈.svg";
+import 최지원 from "../images/Makers/최지원.svg";
+import 허채린 from "../images/Makers/허채린.svg";
+import 심예원 from "../images/Makers/심예원.svg";
+import 이다빈 from "../images/Makers/이다빈.svg";
 
 const MadeByPage = () => {
   return (
@@ -69,6 +74,86 @@ const MadeByPage = () => {
                   축제 일정 관련 페이지 페이지 <br />
                   축준위 부스 수정 목록 페이지 <br />
                   대동제 소개/배리어프리 페이지
+                  <br />
+                </>
+              }
+            />
+            <Making
+              major="컴공 23"
+              makingname="진규빈"
+              part="프론트엔드"
+              thumbnail={진규빈}
+              detail={
+                <>
+                  만든이들 페이지 <br />
+                  축준위 부스 수정 페이지 <br />
+                  부스/공연 관리자 수정 페이지 <br />
+                  부스 메뉴 수정 목록/상세/ <br />
+                  추가 페이지
+                  <br />
+                </>
+              }
+            />
+            <Making
+              major="컴공 22"
+              makingname="최지원"
+              part="프론트엔드"
+              thumbnail={최지원}
+              detail={
+                <>
+                  로그인/회원가입 페이지 <br />
+                  유저 인증, 카카오 소셜 로그인 <br />
+                  마이페이지 <br />
+                  주요 시설 위치 페이지 <br />
+                  사이드바
+                  <br />
+                </>
+              }
+            />
+            <Making
+              major="컴공 21"
+              makingname="허채린"
+              part="백엔드"
+              thumbnail={허채린}
+              detail={
+                <>
+                  로그인/회원가입 <br />
+                  카카오 로그인 <br />
+                  마이페이지 <br />
+                  부스 수정 페이지 <br />
+                  데이터 수합 페이지
+                  <br />
+                </>
+              }
+            />
+            <Making
+              major="독문 22"
+              makingname="심예원"
+              part="백엔드"
+              thumbnail={심예원}
+              detail={
+                <>
+                  부스 수정 페이지 <br />
+                  메뉴 수정 페이지 <br />
+                  공지 조회 페이지 <br />
+                  공지 등록/수정/삭제 <br />
+                  상설 부스 페이지
+                  <br />
+                </>
+              }
+            />
+            <Making
+              major="컴공 20"
+              makingname="이다빈"
+              part="백엔드"
+              thumbnail={이다빈}
+              detail={
+                <>
+                  메인 페이지 <br />
+                  검색 페이지 <br />
+                  부스 상세 페이지 <br />
+                  부스 스크랩 구현 <br />
+                  방명록 작성/수정/삭제
                   <br />
                 </>
               }
