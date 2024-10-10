@@ -28,6 +28,8 @@ import FestivalSchedulePage from "./pages/FestivalSchedule.jsx";
 import UserNoticeList from "./pages/TF/UserNoticeList.jsx";
 import UserNoticeDetail from "./pages/TF/UserNoticeDetail.jsx";
 import AddMenuPage from "./pages/BoothEdit/AddMenuPage.jsx";
+import KakaoSignupPage from "./pages/KakaoSignupPage.jsx";
+import KakaoCallback from "./components/KakaoCallback.jsx"; // KakaoCallback 컴포넌트 import
 
 function App() {
   // 뷰포트 높이 계산
@@ -47,6 +49,11 @@ function App() {
           {/* 로그인 */}
           <Route path="/login" element={<LoginPage />} />
           <Route path="/signup" element={<SignupPage />} />
+          <Route path="/kakaologin" element={<KakaoSignupPage />} />
+          <Route
+            path="/accounts/login/kakao/callback"
+            element={<KakaoCallback />}
+          />
 
           {/* 메인 */}
           <Route path="/" element={<DefineType />} />

@@ -32,13 +32,23 @@ const MyPageScrap = () => {
         ...booth,
         is_scraped: true,
       }));
-      const { menus, shows } = response.data;
+
+      const menusWithScrapTrue = response.data.menus.map((menu) => ({
+        ...menu,
+        is_scraped: true,
+      }));
+
+      const showsWithScrapTrue = response.data.shows.map((show) => ({
+        ...show,
+        is_scraped: true,
+      }));
+
+      console.log(response.data);
       setScrapData({
         booths: boothsWithScrapTrue,
-        menus,
-        shows,
+        menus: menusWithScrapTrue,
+        shows: showsWithScrapTrue,
       });
-      console.log(response.data);
     } catch (error) {
       console.error("데이터 가져오기 실패:", error);
     }

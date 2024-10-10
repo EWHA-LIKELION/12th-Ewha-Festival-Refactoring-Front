@@ -1,8 +1,9 @@
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import styled from "styled-components";
 import { useNavigate } from "react-router-dom";
 import instance from "../api/axios";
 import Header from "../components/Header";
+import Footer from "../components/Footer";
 import MyPageScrap from "../components/MyPageScrap";
 
 import bookMark from "../images/bookMark.svg";
@@ -10,6 +11,15 @@ import bookMark from "../images/bookMark.svg";
 const MyPage = () => {
   const navigate = useNavigate();
   const nickname = localStorage.getItem("nickname");
+  const accessToken = localStorage.getItem("accessToken");
+  useEffect(() => {
+    // 토큰이 없을 경우
+
+    if (!accessToken) {
+      alert("로그인해야 이용 가능합니다.");
+      navigate("/login/"); // 메인 페이지로 리다이렉트
+    }
+  }, [accessToken, navigate]);
 
   const handleLogout = () => {
     localStorage.removeItem("accessToken");
@@ -31,6 +41,7 @@ const MyPage = () => {
         </NameWrapper>
         <MyPageScrap />
       </Content>
+      <Footer />
     </Wrapper>
   );
 };

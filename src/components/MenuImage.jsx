@@ -1,8 +1,8 @@
 // MenuImage.js
 // MenuImage.js
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import styled from "styled-components";
-import axios from "axios";
+import instance from "../api/axios.js";
 import { useLocation, useNavigate } from "react-router-dom"; // useNavigate 추가
 import BasicBooth from "../images/basicbooth.svg";
 import scrapBefore from "../images/BoothDetail/scrapbefore.svg";
@@ -10,23 +10,28 @@ import scrapAfter from "../images/BoothDetail/scrapafter.svg";
 import trash from "../images/BoothEdit/trash.svg";
 
 const MenuImage = ({ menu }) => {
-  const [isScraped, setIsScraped] = useState(false);
+  const [isScraped, setIsScraped] = useState(menu.is_scraped || false);
+  const [scrapCount, setScrapCount] = useState(menu.scrap_count || 0);
+
   const [isModalOpen, setIsModalOpen] = useState(false);
   const location = useLocation();
   const navigate = useNavigate(); // useNavigate 초기화
-
-  const clickScrap = () => {
-    setIsScraped((prev) => !prev);
-  };
 
   const handleTrashClick = () => {
     setIsModalOpen(true);
   };
 
+  useEffect(() => {
+    if (menu) {
+      setScrapCount(menu.scrap_count || 0);
+      setIsScraped(menu.is_scraped || false);
+    }
+  }, [menu]);
+
   const handleConfirmDelete = async () => {
     const accessToken = localStorage.getItem("accessToken");
     try {
-      const response = await axios.delete(
+      const response = await instance.delete(
         `${process.env.REACT_APP_SERVER_PORT}/manages/${menu.booth}/menus/${menu.id}/`,
         {
           headers: {
@@ -46,6 +51,48 @@ const MenuImage = ({ menu }) => {
 
   const handleImageClick = () => {
     navigate(`/booth-edit/addmenu`, { state: { menu } }); // 메뉴 데이터 전달
+  };
+
+  const clickScrap = async (e) => {
+    e.stopPropagation();
+    const token = localStorage.getItem("accessToken");
+
+    if (!token) {
+      alert("로그인을 해야 스크랩이 가능해요.");
+      navigate("/login");
+      return;
+    }
+
+    try {
+      let response;
+      console.log(menu.is_scraped);
+      console.log("Booth ID:", menu.booth);
+      console.log("Menu ID:", menu.id);
+      if (isScraped) {
+        response = await instance.delete(
+          `${process.env.REACT_APP_SERVER_PORT}/manages/${menu.booth}/menus/${menu.id}/scrap/`,
+          {
+            headers: { Authorization: `Bearer ${token}` },
+          }
+        );
+        setScrapCount((prevCount) => prevCount - 1); // 스크랩 수 감소
+        setIsScraped(false); // 스크랩 상태 false로 변경
+      } else {
+        response = await instance.post(
+          `${process.env.REACT_APP_SERVER_PORT}/manages/${menu.booth}/menus/${menu.id}/scrap/`,
+          {
+            headers: { Authorization: `Bearer ${token}` },
+          }
+        );
+        setScrapCount((prevCount) => prevCount + 1); // 스크랩 수 증가
+        setIsScraped(true); // 스크랩 상태 true로 변경
+      }
+
+      alert(response.data.message);
+    } catch (error) {
+      console.error("Error: ", error);
+      alert("스크랩 처리 중 오류가 발생했습니다.");
+    }
   };
 
   return (
