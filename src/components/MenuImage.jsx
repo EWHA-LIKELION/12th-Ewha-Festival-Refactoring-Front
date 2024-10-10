@@ -1,16 +1,17 @@
 // MenuImage.js
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import styled from "styled-components";
-import axios from "axios";
-import { useLocation, useNavigate } from "react-router-dom";
+import instance from "../api/axios.js";
+import { useLocation, useNavigate } from "react-router-dom"; // useNavigate 추가
 import BasicBooth from "../images/basicbooth.svg";
 import scrapBefore from "../images/BoothDetail/scrapbefore.svg";
 import scrapAfter from "../images/BoothDetail/scrapafter.svg";
 import trash from "../images/BoothEdit/trash.svg";
 
 const MenuImage = ({ menu }) => {
-  const [isScraped, setIsScraped] = useState(menu.is_scraped || false); // 초기 스크랩 상태
-  const [scrapCount, setScrapCount] = useState(menu.scrap_count || 0); // 초기 스크랩 수
+  const [isScraped, setIsScraped] = useState(menu.is_scraped || false);
+  const [scrapCount, setScrapCount] = useState(menu.scrap_count || 0);
+
   const [isModalOpen, setIsModalOpen] = useState(false);
   const location = useLocation();
   const navigate = useNavigate();
@@ -63,10 +64,17 @@ const MenuImage = ({ menu }) => {
     setIsModalOpen(true);
   };
 
+  useEffect(() => {
+    if (menu) {
+      setScrapCount(menu.scrap_count || 0);
+      setIsScraped(menu.is_scraped || false);
+    }
+  }, [menu]);
+
   const handleConfirmDelete = async () => {
     const accessToken = localStorage.getItem("accessToken");
     try {
-      const response = await axios.delete(
+      const response = await instance.delete(
         `${process.env.REACT_APP_SERVER_PORT}/manages/${menu.booth}/menus/${menu.id}/`,
         {
           headers: {
