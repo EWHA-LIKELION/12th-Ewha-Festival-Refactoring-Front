@@ -15,7 +15,6 @@ const ShowPage = () => {
     "전체 공연에 대해 알 수 있어요 🍀"
   ); // 선택된 부스 설명
   const [boothData, setBoothData] = useState([]); // 부스 데이터를 상태로 저장
-  const [loading, setLoading] = useState(true); // 데이터 로딩 상태 관리
 
   const boothsPerPage = 10; // 한 페이지당 보여줄 부스 수
   const maxPageButtons = 5; // 한번에 보여줄 페이지 버튼의 최대 개수
@@ -37,16 +36,20 @@ const ShowPage = () => {
     // 백엔드에서 데이터를 받아오는 함수
     const fetchBoothData = async () => {
       try {
-        const response = await instance.get(`/shows/main/`); // 백엔드 API 호출
-        setBoothData(response.data.data); // 백엔드에서 받은 데이터 설정
-        setLoading(false); // 로딩 완료
+        const token = localStorage.getItem("accessToken");
+        const response = await instance.get("/shows/main/", {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        const data = response.data.data;
+        console.log(data); // 응답 데이터를 콘솔에 출력
+        console.log(typeof data[0].is_scraped); // 첫 번째 부스의 is_scraped 타입 확인
+        setBoothData(data); // 데이터를 상태로 설정
       } catch (error) {
         console.error("Error fetching booth data:", error);
-        setLoading(false); // 로딩 실패 시에도 로딩 상태를 false로
       }
     };
 
-    fetchBoothData(); // 페이지가 로드될 때 데이터 받아오기
+    fetchBoothData(); // useEffect 실행 시 데이터 받아오기
   }, [selectedDay, selectedType]); // 선택된 요일과 종류가 변경될 때마다 데이터 갱신
 
   // 선택한 요일과 카테고리에 맞는 부스를 필터링 (전체 카테고리인 경우 '밴드'와 '댄스' 모두 포함)

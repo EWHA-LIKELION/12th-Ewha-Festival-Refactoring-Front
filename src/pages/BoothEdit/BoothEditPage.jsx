@@ -278,9 +278,16 @@ const BoothEditPage = () => {
     }
   };
 
+  const handleDayInputChange = (index, field, value) => {
+    const updatedDays = [...days];
+    updatedDays[index][field] = value; // 시간 값을 업데이트
+    setDays(updatedDays); // days 상태 업데이트
+  };
+
   const handleUpdateBooth = async () => {
     const accessToken = localStorage.getItem("accessToken");
     const userType = localStorage.getItem("type");
+    console.log("Days before submission:", days);
 
     if (userType !== "tf") {
       alert("권한이 없습니다.");
@@ -289,10 +296,11 @@ const BoothEditPage = () => {
 
     try {
       setLoading(true);
+
+      // checked가 true인 날짜만 필터링
       const formattedDays = days
-        .filter((day) => day.checked)
-        .map((day) => `${day.date} ${day.startTime} ~ ${day.endTime}`)
-        .filter((day) => day.includes("~"));
+        .filter((day) => day.checked) // 체크된 요일만 필터링
+        .map((day) => day.date); // 날짜만 추출
 
       const response = await instance.patch(
         `${process.env.REACT_APP_SERVER_PORT}/manages/${fetchedBoothId}/`,
@@ -302,7 +310,7 @@ const BoothEditPage = () => {
           description: boothDescription,
           admin_contact: contact,
           is_opened: true,
-          days: formattedDays, // 배열을 적절한 형식으로 변경
+          days: formattedDays, // updated days 사용
           thumbnail:
             boothImage && boothImage.includes("/media/thumbnail/")
               ? boothImage
@@ -333,16 +341,12 @@ const BoothEditPage = () => {
     }
   };
 
+  // 여기서 'days' 입력 값이 변경될 때 상태가 업데이트되고, PATCH 요청 시 사용됨.
+
   const handleCheckboxChange = (index) => {
     const updatedDays = [...days];
     updatedDays[index].checked = !updatedDays[index].checked;
-    setDays(updatedDays);
-  };
-
-  const handleDayInputChange = (index, field, value) => {
-    const updatedDays = [...days];
-    updatedDays[index][field] = value;
-    setDays(updatedDays);
+    setDays(updatedDays); // days 상태 업데이트
   };
 
   return (

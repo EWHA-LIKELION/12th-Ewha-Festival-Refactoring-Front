@@ -7,6 +7,7 @@ import loginImg from "../images/loginImg.svg";
 import PwImg from "../images/PwImg.svg";
 import kakaoLogin from "../images/kakaoLogin.svg";
 import arrowLeft from "../images/arrowLeft.svg";
+import KakaoCallback from "../components/KakaoCallback";
 
 const LoginPage = () => {
   const navigate = useNavigate();
@@ -67,36 +68,9 @@ const LoginPage = () => {
     }
   };
 
-  const handleKakaoLogin = async () => {
+  const handleKakaoLogin = () => {
     const KaKaoURL = `${process.env.REACT_APP_SERVER_PORT}/accounts/login/kakao/`;
-    window.location.href = KaKaoURL;
-    try {
-      const response = await instance.get(
-        `${process.env.REACT_APP_SERVER_PORT}/accounts/login/kakao/`
-      );
-      console.log(response.data);
-      const KaKaoURL = `${process.env.REACT_APP_SERVER_PORT}/accounts/login/kakao/`;
-      window.location.href = KaKaoURL;
-      const code = new URL(window.location.href).searchParams.get("code");
-      KakaoCallback(code);
-    } catch (error) {
-      console.error(error);
-      alert("카카오 연결에 실패했습니다.");
-    }
-  };
-
-  const KakaoCallback = async (code) => {
-    try {
-      const response = await instance.get(
-        `${process.env.REACT_APP_SERVER_PORT}/accounts/login/kakao/callback?${code}`
-      );
-      console.log(response.data);
-      const access_token = response.data.token;
-      localStorage.setItem("accessToken", access_token);
-    } catch (error) {
-      console.error(error);
-      alert("카카오 토큰 반환에 실패했습니다.");
-    }
+    window.location.href = KaKaoURL; // 카카오 로그인 페이지로 이동
   };
 
   return (
