@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import instance from "../api/axios";
 import { useNavigate } from "react-router-dom";
 import styled from "styled-components";
-import BasicBooth from "../images/basicbooth.svg"; // 기본 부스 이미지 경로
+import BasicBooth from "../images/basicbooth.svg";
 import scrapBefore from "../images/BoothDetail/scrapbefore.svg";
 import scrapAfter from "../images/BoothDetail/scrapafter.svg";
 
@@ -34,8 +34,8 @@ const BoothItem = ({ booth }) => {
         response = await instance.delete(`/booths/${booth.id}/scrap/`, {
           headers: { Authorization: `Bearer ${token}` },
         });
-        setScrapCount((prevCount) => prevCount - 1); // 스크랩 수 감소
-        setIsScraped(false); // 스크랩 상태 false로 변경
+        setScrapCount((prevCount) => prevCount - 1);
+        setIsScraped(false);
       } else {
         response = await instance.post(
           `/booths/${booth.id}/scrap/`,
@@ -44,8 +44,8 @@ const BoothItem = ({ booth }) => {
             headers: { Authorization: `Bearer ${token}` },
           }
         );
-        setScrapCount((prevCount) => prevCount + 1); // 스크랩 수 증가
-        setIsScraped(true); // 스크랩 상태 true로 변경
+        setScrapCount((prevCount) => prevCount + 1);
+        setIsScraped(true);
       }
     } catch (error) {
       console.error("Error: ", error);
@@ -73,11 +73,11 @@ const BoothItem = ({ booth }) => {
     >
       <BoothInfo>
         <img
-          src={isScraped ? scrapAfter : scrapBefore} // 상태에 따라 아이콘 변경
+          src={isScraped ? scrapAfter : scrapBefore}
           alt="Scrap"
-          onClick={clickScrap} // 클릭 시 상태 변화
+          onClick={clickScrap}
         />
-        <ScrapCount>{scrapCount}</ScrapCount> {/* 스크랩 카운트 표시 */}
+        <ScrapCount>{scrapCount}</ScrapCount>
         {!booth.is_opened && <ClosedLabel>운영 종료</ClosedLabel>}
         <BoothName>{booth.name}</BoothName>
         <BoothLocation>
@@ -89,8 +89,6 @@ const BoothItem = ({ booth }) => {
 };
 
 export default BoothItem;
-
-// 스타일링 코드는 그대로 유지
 
 const Booth = styled.div`
   background: url(<path-to-image>) lightgray 50% / cover no-repeat;

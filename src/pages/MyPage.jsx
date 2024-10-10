@@ -13,11 +13,9 @@ const MyPage = () => {
   const nickname = localStorage.getItem("nickname");
   const accessToken = localStorage.getItem("accessToken");
   useEffect(() => {
-    // 토큰이 없을 경우
-
     if (!accessToken) {
       alert("로그인해야 이용 가능합니다.");
-      navigate("/login/"); // 메인 페이지로 리다이렉트
+      navigate("/login/");
     }
   }, [accessToken, navigate]);
 
