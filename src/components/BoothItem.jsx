@@ -55,7 +55,7 @@ const BoothItem = ({ booth }) => {
 
   const handleBoothClick = () => {
     navigate("/booth-detail", {
-      state: { id: booth.id },
+      state: { id: booth.id, data: booth },
     });
   };
 
