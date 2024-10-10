@@ -27,7 +27,7 @@ const MainScrap = () => {
           Authorization: `Bearer ${token}`,
         },
       });
-      // booths, menus, shows 데이터의 is_scraped 값을 강제로 true로 설정
+
       const boothsWithScrapTrue = response.data.booths.map((booth) => ({
         ...booth,
         is_scraped: true,
