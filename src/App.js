@@ -22,8 +22,14 @@ import FestivalIntro from "./pages/FestivalIntro.jsx";
 import BarrierFreeInfo from "./pages/BarrierFreeInfo.jsx";
 import ShowPage from "./pages/ShowPage.jsx";
 import TrashPage from "./pages/TrashPage.jsx";
-import MadeByPage from "./pages/MadeByPage.jsx";
 import SearchPage from "./pages/SearchPage.jsx";
+import MadeByPage from "./pages/MadeByPage.jsx";
+import FestivalSchedulePage from "./pages/FestivalSchedule.jsx";
+import UserNoticeList from "./pages/TF/UserNoticeList.jsx";
+import UserNoticeDetail from "./pages/TF/UserNoticeDetail.jsx";
+import AddMenuPage from "./pages/BoothEdit/AddMenuPage.jsx";
+import KakaoSignupPage from "./pages/KakaoSignupPage.jsx";
+import KakaoCallback from "./components/KakaoCallback.jsx"; // KakaoCallback 컴포넌트 import
 
 function App() {
   // 뷰포트 높이 계산
@@ -43,6 +49,11 @@ function App() {
           {/* 로그인 */}
           <Route path="/login" element={<LoginPage />} />
           <Route path="/signup" element={<SignupPage />} />
+          <Route path="/kakaologin" element={<KakaoSignupPage />} />
+          <Route
+            path="/accounts/login/kakao/callback"
+            element={<KakaoCallback />}
+          />
 
           {/* 메인 */}
           <Route path="/" element={<DefineType />} />
@@ -52,6 +63,7 @@ function App() {
           <Route path="/search" element={<SearchPage />} />
           <Route path="/booth-edit" element={<BoothEditPage />} />
           <Route path="/booth-detail" element={<BoothDetailPage />} />
+          <Route path="/booth-edit/addmenu" element={<AddMenuPage />} />
 
           {/* 공연 */}
           <Route path="/show" element={<ShowPage />} />
@@ -63,12 +75,15 @@ function App() {
           {/* 공지 */}
           <Route path="/notice-list" element={<NoticeListPage />} />
           <Route path="/notice-create" element={<NoticeCreatePage />} />
-          <Route path="/notice-detail" element={<NoticeDetailPage />} />
+          <Route path="/notice-detail/:pk" element={<NoticeDetailPage />} />
+          <Route path="/notice" element={<UserNoticeList />} />
+          <Route path="/notice/:pk" element={<UserNoticeDetail />} />
+
           <Route path="/about" element={<FestivalIntro />} />
           <Route path="/barrier-free" element={<BarrierFreeInfo />} />
           <Route path="/trash" element={<TrashPage />} />
           <Route path="/madeby" element={<MadeByPage />} />
-
+          <Route path="/festival-schedule" element={<FestivalSchedulePage />} />
           {/* 마이페이지 */}
           <Route path="/mypage" element={<MyPage />} />
         </Routes>

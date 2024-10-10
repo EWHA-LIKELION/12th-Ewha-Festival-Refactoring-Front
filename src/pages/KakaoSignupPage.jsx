@@ -4,30 +4,16 @@ import { useNavigate } from "react-router-dom";
 import instance from "../api/axios";
 import SignupModal from "../components/SignupModal";
 
-import loginImg from "../images/loginImg.svg";
-import PwImg from "../images/PwImg.svg";
 import nickImg from "../images/nickImg.svg";
-import check from "../images/check.svg";
-import checkGreen from "../images/checkGreen.svg";
+
 import arrowLeft from "../images/arrowLeft.svg";
-import whitelogo from "../images/whitelogo.svg";
 
 const KakaoSignupPage = () => {
   const navigate = useNavigate();
 
-  const [ID, setID] = useState();
-  const [PW, setPW] = useState();
-  const [PWconfirm, setPWConfirm] = useState();
   const [name, setName] = useState("");
-  const [error, setError] = useState(null);
-  const [idsame, setIdsame] = useState(false);
 
-  const pwInputRef = useRef(null);
-  const idInputRef = useRef(null);
   const nameInputRef = useRef(null);
-  const PwconfirmInputRef = useRef(null);
-
-  const isSame = PW !== "" && PWconfirm !== "" && PW === PWconfirm;
 
   const goSignup = async () => {
     if (!name) {
@@ -61,7 +47,7 @@ const KakaoSignupPage = () => {
     <Wrapper>
       {modal ? <SignupModal setModal={setModal} goSignup={goSignup} /> : null}
       <Header>
-        <img src={arrowLeft} onClick={() => navigate("/login")} />
+        <img src={arrowLeft} onClick={() => navigate("/")} />
       </Header>
 
       <Content>

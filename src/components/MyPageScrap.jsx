@@ -16,7 +16,7 @@ const MyPageScrap = () => {
   const categories = ["부스", "메뉴", "공연"];
   const optionRefs = useRef([]);
   const navigate = useNavigate();
-  const [currentPage, setCurrentPage] = useState(1); // 현재 페이지
+  const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 8;
   const [highlightStyle, setHighlightStyle] = useState({});
 
@@ -32,27 +32,35 @@ const MyPageScrap = () => {
         ...booth,
         is_scraped: true,
       }));
-      const { menus, shows } = response.data;
+
+      const menusWithScrapTrue = response.data.menus.map((menu) => ({
+        ...menu,
+        is_scraped: true,
+      }));
+
+      const showsWithScrapTrue = response.data.shows.map((show) => ({
+        ...show,
+        is_scraped: true,
+      }));
+
+      console.log(response.data);
       setScrapData({
         booths: boothsWithScrapTrue,
-        menus,
-        shows,
+        menus: menusWithScrapTrue,
+        shows: showsWithScrapTrue,
       });
-      console.log(response.data);
     } catch (error) {
       console.error("데이터 가져오기 실패:", error);
     }
   };
 
-  // 처음 데이터 가져오기
   useEffect(() => {
     fetchData();
   }, []);
 
-  // is_scraped 값이 변경될 때마다 데이터 재가져오기
   useEffect(() => {
-    const interval = setInterval(fetchData, 5000); // 5초마다 데이터 가져오기
-    return () => clearInterval(interval); // 컴포넌트 언마운트 시 interval 클리어
+    const interval = setInterval(fetchData, 5000);
+    return () => clearInterval(interval);
   }, []);
 
   useEffect(() => {
@@ -78,22 +86,19 @@ const MyPageScrap = () => {
         : "shows"
     ];
 
-  const boothsPerPage = 10; // 한 페이지당 보여줄 부스 수
-  const maxPageButtons = 5; // 한번에 보여줄 페이지 버튼의 최대 개수
-  const [pageGroup, setPageGroup] = useState(0); // 페이지 그룹 상태
+  const boothsPerPage = 10;
+  const maxPageButtons = 5;
+  const [pageGroup, setPageGroup] = useState(0);
 
-  // 전체 페이지 수 계산
   const totalPages = Math.ceil(filteredData.length / boothsPerPage);
 
-  // 페이지네이션 계산
   const indexOfLastBooth = currentPage * boothsPerPage;
   const indexOfFirstBooth = indexOfLastBooth - boothsPerPage;
   const currentBooths = filteredData.slice(indexOfFirstBooth, indexOfLastBooth);
-  // 페이지네이션에서 표시할 페이지 번호 그룹 계산
+
   const startPage = pageGroup * maxPageButtons + 1;
   const endPage = Math.min((pageGroup + 1) * maxPageButtons, totalPages);
 
-  // 화살표 클릭 시 페이지 그룹 이동
   const handleNextPageGroup = () => {
     if ((pageGroup + 1) * maxPageButtons < totalPages) {
       setPageGroup(pageGroup + 1);
@@ -243,7 +248,7 @@ const Container = styled.div``;
 
 const ItemContainer = styled.div`
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(170px, 170px));
+  grid-template-columns: repeat(2, 1fr);
 
   box-sizing: border-box;
   grid-auto-rows: 197px;

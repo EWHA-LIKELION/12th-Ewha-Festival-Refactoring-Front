@@ -1,24 +1,22 @@
 import React, { useState, useEffect } from "react";
 import instance from "../api/axios";
 import { useNavigate } from "react-router-dom";
-
 import styled from "styled-components";
-import BasicBooth from "../images/basicbooth.svg"; // 기본 부스 이미지 경로
+import BasicBooth from "../images/basicbooth.svg";
 import scrapBefore from "../images/BoothDetail/scrapbefore.svg";
 import scrapAfter from "../images/BoothDetail/scrapafter.svg";
 
-const BoothItem = ({ booth, onClick }) => {
-  const [scrapCount, setScrapCount] = useState(booth.scrap_count); // booth.scrap_count 값을 초기 상태로 사용
-  const [isscraped, setIsScraped] = useState(
-    booth.is_scraped !== undefined ? booth.is_scraped : true
-  );
+const BoothItem = ({ booth }) => {
+  const [scrapCount, setScrapCount] = useState(booth.scrap_count || 0);
+  const [isScraped, setIsScraped] = useState(booth.is_scraped || false);
   const navigate = useNavigate();
 
-  // booth.scrap_count가 변경될 때마다 scrapCount 상태를 업데이트
   useEffect(() => {
-    setScrapCount(booth.scrap_count); // booth.scrap_count 값이 변경될 때 scrapCount를 업데이트
-    setIsScraped(booth.is_scraped);
-  }, [booth.scrap_count, booth.is_scraped]);
+    if (booth) {
+      setScrapCount(booth.scrap_count || 0);
+      setIsScraped(booth.is_scraped || false);
+    }
+  }, [booth]);
 
   const clickScrap = async (e) => {
     e.stopPropagation();
@@ -31,66 +29,40 @@ const BoothItem = ({ booth, onClick }) => {
     }
 
     try {
-      const config = {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      };
-
-      console.log("Sending request for booth id: ", booth.id); // booth.id 로그로 확인
-
-      if (!booth.is_scraped) {
-        const response = await instance.post(
+      let response;
+      if (isScraped) {
+        response = await instance.delete(`/booths/${booth.id}/scrap/`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        setScrapCount((prevCount) => prevCount - 1);
+        setIsScraped(false);
+      } else {
+        response = await instance.post(
           `/booths/${booth.id}/scrap/`,
           {},
-          config
+          {
+            headers: { Authorization: `Bearer ${token}` },
+          }
         );
-        console.log("Response: ", response); // 응답 로그 확인
-      } else {
-        const response = await instance.delete(
-          `/booths/${booth.id}/scrap/`,
-          config
-        );
-        console.log("Response: ", response); // 응답 로그 확인
-
-        if (response.data.message === "스크랩 삭제") {
-          console.log("Response: ", response);
-        } else {
-          alert(response.data.message);
-        }
+        setScrapCount((prevCount) => prevCount + 1);
+        setIsScraped(true);
       }
     } catch (error) {
       console.error("Error: ", error);
-      if (error.response.data === "이미 스크랩 하셨습니다.") {
-        const response = await instance.delete(`/booths/${booth.id}/scrap/`, {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        });
-        console.log("Response: ", response); // 응답 로그 확인
-
-        if (response.data.message === "스크랩 삭제") {
-          console.log("Response: ", response);
-        } else {
-          alert(response.data.message);
-        }
-      } else {
-        console.log("Error response data: ", error.response.data);
-      }
       alert("스크랩 처리 중 오류가 발생했습니다.");
     }
   };
 
   const handleBoothClick = () => {
     navigate("/booth-detail", {
-      state: { id: booth.id }, // boothId를 전달
+      state: { id: booth.id, data: booth },
     });
   };
 
   return (
     <Booth
       isOpened={booth.is_opened}
-      onClick={handleBoothClick} // 부스 클릭 핸들러 추가
+      onClick={handleBoothClick}
       style={{
         backgroundImage: `url(${
           booth.thumbnail
@@ -101,11 +73,11 @@ const BoothItem = ({ booth, onClick }) => {
     >
       <BoothInfo>
         <img
-          src={booth.is_scraped ? scrapAfter : scrapBefore}
+          src={isScraped ? scrapAfter : scrapBefore}
           alt="Scrap"
           onClick={clickScrap}
         />
-        <ScrapCount>{booth.scrap_count}</ScrapCount>
+        <ScrapCount>{scrapCount}</ScrapCount>
         {!booth.is_opened && <ClosedLabel>운영 종료</ClosedLabel>}
         <BoothName>{booth.name}</BoothName>
         <BoothLocation>
@@ -175,7 +147,7 @@ const ScrapCount = styled.div`
   letter-spacing: -0.5px;
   position: absolute;
   top: 2.8rem;
-  right: 1.6rem;
+  right: 1.5rem;
   text-align: center;
 `;
 
