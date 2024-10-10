@@ -57,7 +57,12 @@ const BoothDetailPage = () => {
 
         // 부스 상세 정보 조회
         const response = await instance.get(
-          `${process.env.REACT_APP_SERVER_PORT}/booths/${boothId}/`
+          `${process.env.REACT_APP_SERVER_PORT}/booths/${boothId}/`,
+          {
+            headers: {
+              Authorization: `Bearer ${accessToken}`,
+            },
+          }
         );
 
         setBoothData(response.data.data);
