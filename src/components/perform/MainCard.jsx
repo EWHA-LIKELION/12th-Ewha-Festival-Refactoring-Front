@@ -1,14 +1,42 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import styled from "styled-components";
-function MainCard({ img, isText = false }) {
+import instance from "../../api/axios";
+
+function MainCard({ img, isText = false, boothId }) {
+  const [performData, setPerformData] = useState(null);
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    // 데이터 가져오기
+    const fetchPerformInfo = async () => {
+      try {
+        console.log("Fetching data for boothId:", boothId); // boothId 로그 확인
+        const response = await instance.get(`/shows/${boothId}/`);
+        setPerformData(response.data.data);
+      } catch (err) {
+        console.error("Error fetching data:", err); // 에러 메시지 출력
+        setError("공연 정보를 불러오는 데 실패했습니다.");
+      }
+    };
+
+    fetchPerformInfo();
+  }, [boothId]);
+
+  if (error) {
+    return <div>{error}</div>;
+  }
+
+  if (!performData) {
+    return <div>로딩 중...</div>; // 로딩 중 메시지 추가
+  }
+
   return (
     <Wrap>
       <img src={img} alt="공연" />
-      {/*백 연결할 때 수정하기, 화면 퍼블리싱만 먼저*/}
-      {isText && (
+      {isText && performData && (
         <div className="description">
-          <h2>공연명입니다</h2>
-          <p>학문관광장 · 밴드</p>
+          <h2>{performData.name}</h2>
+          <p>{performData.booth_place} · {performData.category}</p>
         </div>
       )}
     </Wrap>

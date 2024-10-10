@@ -14,8 +14,11 @@ import { Swiper, SwiperSlide } from "swiper/react";
 import "swiper/css";
 import "swiper/css/pagination";
 import { Pagination } from "swiper/modules";
+import {useNavigate} from "react-router-dom";
 
-function UserDetailView({ booth }) {
+function UserDetailView({ boothId }) {
+  const navigate = useNavigate();
+
   const [activeTab, setActiveTab] = useState("공연 정보"); // Default active tab
   const [noticeInfo, setNoticeInfo] = useState([]);
   const handleTabClick = (tab) => {
@@ -27,7 +30,7 @@ function UserDetailView({ booth }) {
       try {
         const token = localStorage.getItem("accessToken");
         const response = await instance.get(
-          `${process.env.REACT_APP_SERVER_PORT}/manages/${booth.id}/realtime_info`,
+          `${process.env.REACT_APP_SERVER_PORT}/manages/${boothId}/realtime_info`,
           {
             headers: {
               Authorization: `Bearer ${token}`,
@@ -35,13 +38,13 @@ function UserDetailView({ booth }) {
           }
         );
         console.log(response.data);
-        // setNoticeInfo(response.data); 추후 booth.id 받아오면 주석 해제
+        setNoticeInfo(response.data.notice);
       } catch (error) {
         console.error("데이터 가져오기 실패:", error);
       }
     };
     fetchData();
-  }, [booth?.id]);
+  }, [boothId]);
 
   return (
     <Wrap>
@@ -62,21 +65,21 @@ function UserDetailView({ booth }) {
           <Logo />
         </HeaderNav>
       )}
-      <MainCard img={mainImage} isText />
-      <InteractionPanel />
+<MainCard img={mainImage} isText boothId={boothId} />      
+<InteractionPanel />
       <h3 className="title">실시간 공지사항</h3>
       <Swiper pagination={true} modules={[Pagination]} className="mySwiper">
         <SwiperSlide>
           <NoticeInfo />
         </SwiperSlide>
-        {/* <SwiperSlide>
+         <SwiperSlide>
           <NoticeInfo />
-        </SwiperSlide> */}
-        {/* {noticeInfo.map((notice) => (
+        </SwiperSlide> 
+         {noticeInfo.map((notice) => (
           <SwiperSlide>
             <NoticeInfo notice={notice} />
           </SwiperSlide>
-        ))} */}
+        ))} 
         {/* 추후 공지사항 받아오면 주석 해제 하면 스와이퍼 생김 */}
       </Swiper>
       <Taps>
@@ -93,7 +96,12 @@ function UserDetailView({ booth }) {
           방명록
         </ResetButton>
       </Taps>
-      {activeTab == "공연 정보" ? <PerformInfo /> : <GuestBook />}
+      {activeTab == "공연 정보" ? (
+        <PerformInfo boothId={boothId} />
+            ) : (
+        <GuestBook boothId={boothId} />
+      )}
+      
     </Wrap>
   );
 }
@@ -105,6 +113,7 @@ const Wrap = styled.div`
     cursor: pointer;
   }
   padding-inline: 20px;
+  position: relative;
 `;
 
 const Taps = styled.div`
@@ -131,3 +140,5 @@ const ResetButton = styled.button`
   height: 23px;
   border-bottom: ${(props) => (props.isActive ? "2px solid #000" : "none")};
 `;
+
+

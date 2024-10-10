@@ -39,7 +39,7 @@ const BoothMainPage = () => {
           <img
             src={showManage}
             alt="내 공연 관리하기"
-            onClick={() => handleNavigate("/editShow")}
+            onClick={() => handleNavigate("/detial/admin")}
           />
         </LinkBox>
       </MainBox>
