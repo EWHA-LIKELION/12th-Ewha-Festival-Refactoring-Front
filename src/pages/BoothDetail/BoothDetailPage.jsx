@@ -61,8 +61,8 @@ const BoothDetailPage = () => {
 
         setBoothData(response.data.data);
         setMenuDetails(response.data.data.menus);
-        setIsScraped(response.data.data.is_scraped); // 스크랩 상태 설정
-        setScrapCount(response.data.data.scrap_count); // 스크랩 수 설정
+        setIsScraped(response.data.data.is_scraped);
+        setScrapCount(response.data.data.scrap_count);
       } catch (error) {
         setError(
           "부스 정보를 불러오는 데 실패했습니다. 오류: " + error.message
@@ -118,7 +118,8 @@ const BoothDetailPage = () => {
     fetchNotices();
   }, [fetchedBoothId]);
 
-  const clickScrap = async () => {
+  const clickScrap = async (e) => {
+    e.stopPropagation();
     const token = localStorage.getItem("accessToken");
     if (!token) {
       alert("로그인을 해야 스크랩이 가능해요.");
@@ -132,8 +133,10 @@ const BoothDetailPage = () => {
         response = await instance.delete(`/booths/${fetchedBoothId}/scrap/`, {
           headers: { Authorization: `Bearer ${token}` },
         });
-        setScrapCount((prevCount) => prevCount - 1);
-        setIsScraped(false);
+        if (response.status === 200) {
+          setScrapCount((prevCount) => prevCount - 1);
+          setIsScraped(false);
+        }
       } else {
         response = await instance.post(
           `/booths/${fetchedBoothId}/scrap/`,
@@ -142,8 +145,10 @@ const BoothDetailPage = () => {
             headers: { Authorization: `Bearer ${token}` },
           }
         );
-        setScrapCount((prevCount) => prevCount + 1);
-        setIsScraped(true);
+        if (response.status === 201) {
+          setScrapCount((prevCount) => prevCount + 1);
+          setIsScraped(true);
+        }
       }
     } catch (error) {
       console.error("Error: ", error);
