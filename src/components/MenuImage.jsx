@@ -31,14 +31,14 @@ const MenuImage = ({ menu }) => {
 
       if (isScraped) {
         // 스크랩 제거 요청
-        response = await axios.delete(url, {
+        response = await instance.delete(url, {
           headers: { Authorization: `Bearer ${token}` },
         });
         setScrapCount((prevCount) => Math.max(prevCount - 1, 0)); // 스크랩 수 감소, 최소 0
         setIsScraped(false); // 스크랩 상태 false로 변경
       } else {
         // 스크랩 추가 요청
-        response = await axios.post(
+        response = await instance.post(
           url,
           {},
           {
