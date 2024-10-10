@@ -25,6 +25,8 @@ const BoothPage = () => {
   const [highlightStyle, setHighlightStyle] = useState({});
   const dayRefs = useRef([]); // 요일 버튼의 ref 저장
 
+  console.log(boothData);
+
   // 요일 선택에 따른 애니메이션 효과 적용
   useEffect(() => {
     const currentIndex = ["수", "목", "금"].indexOf(selectedDay);

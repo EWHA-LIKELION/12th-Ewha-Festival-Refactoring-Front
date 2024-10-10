@@ -21,32 +21,26 @@ import "slick-carousel/slick/slick-theme.css";
 
 const BoothDetailPage = () => {
   const navigate = useNavigate();
-  const location = useLocation(); // location을 사용하여 부스 ID를 가져옴
-  const boothIdFromProps = location.state?.id; // 부스 ID를 props에서 가져옴
+  const location = useLocation();
+  const boothIdFromProps = location.state?.id;
   const [fetchedBoothId, setFetchedBoothId] = useState(null);
-  const [menuDetails, setMenuDetails] = useState([]); // 메뉴 정보를 배열로 초기화
+  const [menuDetails, setMenuDetails] = useState([]);
   const [isScraped, setIsScraped] = useState(false);
+  const [scrapCount, setScrapCount] = useState(0);
   const [boothData, setBoothData] = useState(null);
-  const [notices, setNotices] = useState([]); // 공지사항 상태 추가
+  const [notices, setNotices] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [activeTab, setActiveTab] = useState("부스정보"); // Default active tab
+  const [activeTab, setActiveTab] = useState("부스정보");
   const boothType = localStorage.getItem("type");
 
   useEffect(() => {
-    console.log("Location state:", location.state);
-    console.log("Received Booth ID:", boothIdFromProps); // 부스 ID 확인
     const fetchBoothData = async () => {
       try {
         setLoading(true);
         const accessToken = localStorage.getItem("accessToken");
 
-        // 로컬스토리지에서 type을 가져옴
-
-        // type이 'general'인 경우 props에서 boothId를 가져옴
-
         let boothId;
-
         if (boothType === "general") {
           boothId = boothIdFromProps;
         } else {
@@ -55,7 +49,7 @@ const BoothDetailPage = () => {
 
         setFetchedBoothId(boothId);
 
-        // 부스 상세 정보 조회
+        // Fetch booth details
         const response = await instance.get(
           `${process.env.REACT_APP_SERVER_PORT}/booths/${boothId}/`,
           {
@@ -66,11 +60,9 @@ const BoothDetailPage = () => {
         );
 
         setBoothData(response.data.data);
-        setMenuDetails(response.data.data.menus); // 메뉴 정보 설정
-
-        console.log(response.data.data.menus); // 응답 데이터 콘솔에 출력
-        console.log(response.data.data); // 응답 데이터 콘솔에 출력
-        console.log(response);
+        setMenuDetails(response.data.data.menus);
+        setIsScraped(response.data.data.is_scraped); // 스크랩 상태 설정
+        setScrapCount(response.data.data.scrap_count); // 스크랩 수 설정
       } catch (error) {
         setError(
           "부스 정보를 불러오는 데 실패했습니다. 오류: " + error.message
@@ -83,7 +75,6 @@ const BoothDetailPage = () => {
     fetchBoothData();
   }, [boothIdFromProps]);
 
-  // 부스 ID를 가져오는 함수
   const getBoothId = async (accessToken) => {
     const boothIdResponse = await instance.get(
       `${process.env.REACT_APP_SERVER_PORT}/manages/main/`,
@@ -103,36 +94,61 @@ const BoothDetailPage = () => {
     return fetchedBoothId;
   };
 
-  // 공지사항 조회를 위한 useEffect 추가
+  const fetchNotices = async () => {
+    if (!fetchedBoothId) return;
+
+    try {
+      const accessToken = localStorage.getItem("accessToken");
+      const response = await instance.get(
+        `${process.env.REACT_APP_SERVER_PORT}/manages/${fetchedBoothId}/realtime_info/`,
+        {
+          headers: {
+            Authorization: `Bearer ${accessToken}`,
+          },
+        }
+      );
+
+      setNotices(response.data.notice);
+    } catch (error) {
+      console.error("공지사항을 불러오는 데 실패했습니다.", error);
+    }
+  };
+
   useEffect(() => {
-    const fetchNotices = async () => {
-      if (!fetchedBoothId) return; // 부스 ID가 없으면 종료
+    fetchNotices();
+  }, [fetchedBoothId]);
 
-      try {
-        const accessToken = localStorage.getItem("accessToken");
+  const clickScrap = async () => {
+    const token = localStorage.getItem("accessToken");
+    if (!token) {
+      alert("로그인을 해야 스크랩이 가능해요.");
+      navigate("/login");
+      return;
+    }
 
-        const response = await instance.get(
-          `${process.env.REACT_APP_SERVER_PORT}/manages/${fetchedBoothId}/realtime_info/`,
+    try {
+      let response;
+      if (isScraped) {
+        response = await instance.delete(`/booths/${fetchedBoothId}/scrap/`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        setScrapCount((prevCount) => prevCount - 1);
+        setIsScraped(false);
+      } else {
+        response = await instance.post(
+          `/booths/${fetchedBoothId}/scrap/`,
+          {},
           {
-            headers: {
-              Authorization: `Bearer ${accessToken}`,
-            },
+            headers: { Authorization: `Bearer ${token}` },
           }
         );
-
-        console.log("noticeresponse:", response.data); // 전체 응답 데이터 출력
-        // notice 배열을 상태에 설정
-        setNotices(response.data.notice);
-      } catch (error) {
-        console.error("공지사항을 불러오는 데 실패했습니다.", error);
+        setScrapCount((prevCount) => prevCount + 1);
+        setIsScraped(true);
       }
-    };
-
-    fetchNotices();
-  }, [fetchedBoothId]); // 부스 ID가 변경될 때마다 공지사항을 조회
-
-  const clickScrap = () => {
-    setIsScraped((prev) => !prev);
+    } catch (error) {
+      console.error("Error: ", error);
+      alert("스크랩 처리 중 오류가 발생했습니다.");
+    }
   };
 
   const handleEditClick = () => {
@@ -142,7 +158,7 @@ const BoothDetailPage = () => {
   };
 
   const handleTabClick = (tab) => {
-    setActiveTab(tab); // 탭 클릭 시 활성화 상태 변경
+    setActiveTab(tab);
   };
 
   if (loading) {
@@ -154,24 +170,31 @@ const BoothDetailPage = () => {
   }
 
   const settings = {
-    dots: true, // 슬라이드 아래 점 표시
+    dots: true,
     infinite: true,
     speed: 500,
     slidesToShow: 1,
     slidesToScroll: 1,
-    centerMode: false, // 중앙 정렬 모드 비활성화
-    centerPadding: "0px", // 중앙 정렬 시 여백 제거
+    centerMode: false,
+    centerPadding: "0px",
   };
 
   const handleBack = () => {
-    navigate(-1); // 이전 페이지로 이동
+    navigate(-1);
   };
+
+  const handleContactClick = () => {
+    if (boothData && boothData.admin_contact) {
+      window.open(boothData.admin_contact, "_blank");
+    } else {
+      alert("연락처 정보가 없습니다.");
+    }
+  };
+
   return (
     <Wrapper>
       <Header>
         <img src={BackArrow} onClick={handleBack} alt="뒤로가기" />
-
-        {/* type이 'general'인 경우 logo를 사용하고 그 외의 경우 EditButton을 사용 */}
         <img
           src={boothType === "general" ? logo : EditButton}
           alt="편집 버튼"
@@ -201,12 +224,11 @@ const BoothDetailPage = () => {
         )}
       </div>
       <Contact>
-        <img src={ContactButton} alt="Contact" />
+        <img src={ContactButton} alt="Contact" onClick={handleContactClick} />{" "}
+        {/* 클릭 이벤트 추가 */}
         <div className="scrap">
           <span>
-            {boothData
-              ? `${boothData.scrap_count}명이 스크랩했어요`
-              : "Loading..."}
+            {boothData ? `${scrapCount}명이 스크랩했어요` : "Loading..."}
           </span>
           <img
             src={isScraped ? scrapAfter : scrapBefore}
@@ -216,24 +238,24 @@ const BoothDetailPage = () => {
         </div>
       </Contact>
       <Notice>
-        <div className="noticetitle" style={{ marginBottom: 70 }}>
+        <div
+          className="noticetitle"
+          style={{ marginBottom: 20, marginLeft: 20 }}
+        >
           실시간 공지사항
         </div>
         {notices.length > 0 ? (
           <Slider {...settings}>
             {notices.map((notice, index) => {
-              let noticeClass = "기타공지"; // 기본 클래스 설정
+              let noticeClass = "기타공지";
               if (notice.notice_type === "판매공지") {
-                noticeClass = "판매공지"; // 판매공지 클래스 설정
+                noticeClass = "판매공지";
               } else if (notice.notice_type === "운영공지") {
-                noticeClass = "운영공지"; // 운영공지 클래스 설정
+                noticeClass = "운영공지";
               }
 
               return (
-                <div
-                  className={`noticebox ${noticeClass}`} // 동적으로 클래스 추가
-                  key={index}
-                >
+                <div className={`noticebox ${noticeClass}`} key={index}>
                   <div>
                     <div
                       className="noticeCatagory"
@@ -247,12 +269,11 @@ const BoothDetailPage = () => {
                         color: "white",
                       }}
                     >
-                      {notice.notice_type} {/* notice_type 표시 */}
+                      {notice.notice_type}
                     </div>
                     <div className="notice">{notice.content}</div>
                     <div className="noticetime">
-                      {new Date(notice.created_at).toLocaleString()}{" "}
-                      {/* 시간 변환 */}
+                      {new Date(notice.created_at).toLocaleString()}
                     </div>
                   </div>
                 </div>
@@ -260,7 +281,7 @@ const BoothDetailPage = () => {
             })}
           </Slider>
         ) : (
-          <div style={{ textAlign: "center", marginBottom: 40 }}>
+          <div style={{ textAlign: "center", marginBottom: 40, marginTop: 50 }}>
             공지사항이 없습니다.
           </div>
         )}
@@ -390,17 +411,17 @@ const Contact = styled.div`
 
 const Notice = styled.div`
   padding-top: 10px;
-  width: 100%; /* 전체 너비 사용 */
+  width: 100%;
   margin-bottom: 20px;
   .noticetitle {
     font-size: 16px;
     font-weight: 700;
     margin-top: 25px;
-    margin-bottom: 10px;
   }
 
   .slick-slider {
-    width: 90%; /* 슬라이더 전체 너비 설정 */
+    width: 90%;
+    margin-left: 20px;
   }
 
   .slick-slide {
@@ -413,23 +434,25 @@ const Notice = styled.div`
     justify-content: center;
     align-items: center;
     height: 93px;
-    border-radius: 15px;
     margin: 6px;
-    padding: 10px; /* 필요한 패딩 설정 */
+    padding: 10px;
     margin-top: 20px;
+    border: none;
   }
 
   .판매공지 {
-    border: 1px solid #9747ff; /* 판매공지 보더 색상 */
+    border-top: 1px solid #9747ff;
+    border-bottom: 1px solid #9747ff;
     width: 350px;
   }
 
   .운영공지 {
-    border: 1px solid #00f16f; /* 운영공지 보더 색상 */
+    border-top: 1px solid #00f16f;
+    border-bottom: 1px solid #00f16f;
   }
 
   .기타공지 {
-    border: 1px solid transparent; /* 기타 공지 보더 색상 */
+    border: 1px solid transparent;
   }
 
   .noticeCatagory {

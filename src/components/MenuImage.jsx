@@ -31,6 +31,9 @@ const MenuImage = ({ menu }) => {
     try {
       let response;
       if (isScraped) {
+
+      
+
         response = await instance.delete(
           `/manages/${menu.booth}/menus/${menu.id}/scrap/`,
           {
@@ -44,6 +47,7 @@ const MenuImage = ({ menu }) => {
       } else {
         response = await instance.post(
           `/manages/${menu.booth}/menus/${menu.id}/scrap/`,
+
           {},
           {
             headers: { Authorization: `Bearer ${token}` },
