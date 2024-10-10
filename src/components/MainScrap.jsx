@@ -42,7 +42,6 @@ const MainScrap = () => {
         ...show,
         is_scraped: true,
       }));
-      console.log(response.data);
       setScrapData({
         booths: boothsWithScrapTrue,
         menus: menusWithScrapTrue,

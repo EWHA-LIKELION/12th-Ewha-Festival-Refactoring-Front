@@ -47,8 +47,6 @@ const BoothItem = ({ booth }) => {
         setScrapCount((prevCount) => prevCount + 1); // 스크랩 수 증가
         setIsScraped(true); // 스크랩 상태 true로 변경
       }
-
-      alert(response.data.message);
     } catch (error) {
       console.error("Error: ", error);
       alert("스크랩 처리 중 오류가 발생했습니다.");
