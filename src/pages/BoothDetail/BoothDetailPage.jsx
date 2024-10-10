@@ -216,10 +216,12 @@ const BoothDetailPage = () => {
         </div>
       </Contact>
       <Notice>
-        <div className="noticetitle">실시간 공지사항</div>
-        <Slider {...settings}>
-          {notices.length > 0 ? (
-            notices.map((notice, index) => {
+        <div className="noticetitle" style={{ marginBottom: 70 }}>
+          실시간 공지사항
+        </div>
+        {notices.length > 0 ? (
+          <Slider {...settings}>
+            {notices.map((notice, index) => {
               let noticeClass = "기타공지"; // 기본 클래스 설정
               if (notice.notice_type === "판매공지") {
                 noticeClass = "판매공지"; // 판매공지 클래스 설정
@@ -255,12 +257,15 @@ const BoothDetailPage = () => {
                   </div>
                 </div>
               );
-            })
-          ) : (
-            <div>공지사항이 없습니다.</div>
-          )}
-        </Slider>
+            })}
+          </Slider>
+        ) : (
+          <div style={{ textAlign: "center", marginBottom: 40 }}>
+            공지사항이 없습니다.
+          </div>
+        )}
       </Notice>
+
       <MiddleWrapper>
         <div className="top">
           <TabButton
@@ -384,7 +389,9 @@ const Contact = styled.div`
 `;
 
 const Notice = styled.div`
+  padding-top: 10px;
   width: 100%; /* 전체 너비 사용 */
+  margin-bottom: 20px;
   .noticetitle {
     font-size: 16px;
     font-weight: 700;
@@ -409,6 +416,7 @@ const Notice = styled.div`
     border-radius: 15px;
     margin: 6px;
     padding: 10px; /* 필요한 패딩 설정 */
+    margin-top: 20px;
   }
 
   .판매공지 {
