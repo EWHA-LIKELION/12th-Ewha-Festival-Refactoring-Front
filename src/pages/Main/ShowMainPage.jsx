@@ -39,7 +39,7 @@ const BoothMainPage = () => {
           <img
             src={showManage}
             alt="내 공연 관리하기"
-            onClick={() => handleNavigate("/detial/admin")}
+            onClick={() => handleNavigate("/detail/admin/edit")}
           />
         </LinkBox>
       </MainBox>
@@ -115,6 +115,10 @@ const P = styled.p`
 const LinkBox = styled.div`
   display: flex;
   padding: 0.8rem;
+
+  img {
+    cursor: pointer;
+  }
 `;
 
 const Logout = styled.div`

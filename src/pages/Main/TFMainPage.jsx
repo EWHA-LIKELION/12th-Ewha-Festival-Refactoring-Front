@@ -122,6 +122,10 @@ const LinkBox = styled.div`
   display: flex;
   justify-content: space-between;
   padding: 0.8rem;
+
+  img {
+    cursor: pointer;
+  }
 `;
 
 const Logout = styled.div`
