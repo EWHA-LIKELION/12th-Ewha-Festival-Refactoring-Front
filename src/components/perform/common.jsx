@@ -1,6 +1,8 @@
 import styled from "styled-components";
 import logoimg from "../../images/logo.svg";
 import { Link } from "react-router-dom";
+import { useNavigate } from 'react-router-dom';
+
 export const HeaderNav = styled.nav`
 	width: 350px;
 	height: 57px;
@@ -27,6 +29,24 @@ export const EditButton = styled.button`
 	line-height: 20px; /* 133.333% */
 	letter-spacing: -0.5px;
 `;
+
+// 리액트 컴포넌트에서 스타일링된 버튼을 사용
+const EditButtonComponent = ({ boothId }) => {
+  const navigate = useNavigate();
+
+  return (
+    <EditButton
+      id='showModifyBtn'
+      onClick={() => {
+        navigate("/detail/admin/edit", { state: { id: boothId } });
+      }}
+    >
+      Edit
+    </EditButton>
+  );
+};
+
+export default EditButtonComponent;
 
 export const ResetButton = styled.button`
 	background-color: #0000;
